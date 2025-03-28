@@ -6,6 +6,15 @@ export default function middleware(req: NextRequest) {
   if (req.nextUrl.pathname === '/') {
     return NextResponse.redirect(new URL('/loyalty', req.url));
   }
+
+  if (req.nextUrl.pathname === '/loyalty-admin') {
+    const token = req.cookies.get('token')?.value;
+
+    if (!token) {
+      return NextResponse.redirect(new URL('/signin', req.url));
+    }
+  }
+
   const excludedPaths = [
     '/landing',
     '/campaign/signup',
@@ -39,5 +48,11 @@ export default function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard', '/staff/:path*', '/campaign/:path*'],
+  matcher: [
+    '/',
+    '/loyalty-admin',
+    '/dashboard',
+    '/staff/:path*',
+    '/campaign/:path*',
+  ],
 };

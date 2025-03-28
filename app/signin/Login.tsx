@@ -28,6 +28,7 @@ const Login = () => {
       setError(errorMsg);
     } else if (isSuccess) {
       document.cookie = `token=${data.accessToken}; max-age=86400; path=/; secure;`;
+      localStorage.setItem('username', data.name);
       router.push('/loyalty-admin');
     }
   }, [respError, isError, isSuccess, data, router]);

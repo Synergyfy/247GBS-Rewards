@@ -24,6 +24,7 @@ interface signupCustomerType {
 
 export interface authDataType {
   accessToken: string;
+  name: string;
 }
 
 export interface authCustomerType extends authType {
