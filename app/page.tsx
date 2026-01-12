@@ -1,16 +1,28 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React from 'react';
+import Navbar from '@/components/landing/Navbar';
+import Hero from '@/components/landing/Hero';
+import Features from '@/components/landing/Features';
+import HowItWorks from '@/components/landing/HowItWorks';
+import Stats from '@/components/landing/Stats';
+import CTA from '@/components/landing/CTA';
+import Footer from '@/components/landing/Footer';
 
-const Page: React.FC = () => {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.push('/landing');
-  }, [router]);
-
-  return <div>Redirecting...</div>;
+const Page = () => {
+  return (
+    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 selection:text-blue-900">
+      <Navbar />
+      <main>
+        <Hero />
+        <Stats />
+        <Features />
+        <HowItWorks />
+        <CTA />
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
 export default Page;
