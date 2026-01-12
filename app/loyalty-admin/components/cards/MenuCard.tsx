@@ -10,6 +10,7 @@ interface MenuCardProps {
   description: string;
   path: string;
 }
+
 const MenuCard: React.FC<MenuCardProps> = ({
   icon,
   title,
@@ -19,18 +20,30 @@ const MenuCard: React.FC<MenuCardProps> = ({
   const router = useRouter();
 
   const handleClick = () => {
-    console.log('clicked', path);
     router.push(path);
   };
 
   return (
     <div
-      className="border rounded-3xl h-[20rem] w-[23rem] flex flex-col items-center justify-center cursor-pointer bg-gray-100 hover:bg-blue-500 hover:shadow-md hover:scale-105 transition-all duration-300 ease-in-out px-2"
+      className="group bg-white border border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer shadow-sm hover:shadow-lg hover:border-blue-500 transition-all duration-300 transform hover:-translate-y-1 h-full"
       onClick={handleClick}
     >
-      <Image src={icon} width={300} height={300} alt="icon" loading="lazy" />
-      <h3 className="font-medium text-3xl">{title}</h3>
-      <p className="text-lg">{description}</p>
+      <div className="mb-4 relative w-24 h-24 sm:w-32 sm:h-32 transition-transform duration-300 group-hover:scale-110">
+        <Image
+          src={icon}
+          alt={title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          style={{ objectFit: 'contain' }}
+          loading="lazy"
+        />
+      </div>
+      <h3 className="font-bold text-xl sm:text-2xl text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+        {title}
+      </h3>
+      <p className="text-gray-600 text-sm sm:text-base">
+        {description}
+      </p>
     </div>
   );
 };

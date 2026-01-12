@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import MenuCard from './components/cards/MenuCard';
 import businessIcon from '@/public/loyalty/Icons/businessIcon.png';
@@ -31,10 +33,11 @@ const menuItems = [
     icon: campaignIcon,
   },
 ];
+
 const Page = () => {
   return (
-    <div className="my-5">
-      <section className="flex items-center justify-center gap-10 mt-20 flex-wrap w-[60%] mx-auto">
+    <div className="py-10">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto px-4">
         {menuItems.map((item, i) => {
           return (
             <MenuCard

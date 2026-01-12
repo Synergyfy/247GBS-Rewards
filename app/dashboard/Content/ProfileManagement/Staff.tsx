@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { HiUserGroup } from 'react-icons/hi2';
 import {
   MdDelete,
@@ -87,6 +87,7 @@ const Staff = () => {
     setEmail('');
     setPassword('');
     setSelectedBusiness('');
+    setAvatar(null);
   };
 
   const handleOpenModal = () => {
@@ -94,14 +95,15 @@ const Staff = () => {
     setTimeout(() => {
       setLoading(false);
       setIsOpen(true);
-    }, 1500);
+    }, 500);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     clearForm();
     setEditMode(false);
     setIsOpen(false);
-  };
+    setErrorMsg('');
+  }, []);
 
   useEffect(() => {
     if (isSuccess) {
@@ -116,14 +118,14 @@ const Staff = () => {
       const errMsg = errorData.response.data.error;
       setErrorMsg(errMsg);
     }
-  }, [isSuccess, refetch, isError, error]);
+  }, [isSuccess, refetch, isError, error, handleCloseModal]);
 
   useEffect(() => {
     if (updateSuccess) {
       refetch();
       handleCloseModal();
     }
-  }, [updateSuccess, refetch]);
+  }, [updateSuccess, refetch, handleCloseModal]);
 
   useEffect(() => {
     if (deleteSuccess) {
@@ -202,9 +204,10 @@ const Staff = () => {
       item => item.id === id
     );
     if (staff) {
-      const { name, email } = staff;
+      const { name, email, businessId } = staff;
       setName(name);
       setEmail(email);
+      setSelectedBusiness(businessId || '');
 
       setEditMode(true);
       setIsOpen(true);
@@ -214,42 +217,32 @@ const Staff = () => {
   };
 
   return (
-    <section>
-      <div
-        className="bg-red-600 w-[3rem] h-[3rem] rounded-full flex items-center justify-center absolute bottom-28 right-10"
-        onClick={() => setIsOpen(true)}
-      >
-        <GoPlus className="text-white" />
-      </div>
+    <div className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
       {staffData && staffData.length < 1 && (
-        <div className="px-24">
-          <div className="px-24">
-            <HiUserGroup className="w-40 h-40 text-[#2D3DFF]" />
-            <p className="text-2xl">
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-blue-50 p-6 rounded-full mb-6">
+                <HiUserGroup className="w-20 h-20 text-blue-600" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Staff Members Found</h2>
+            <p className="text-gray-500 max-w-md mb-8">
               A Staff member can give customers loyalty points and redeem
               rewards. Staff members belong to one or more businesses.
             </p>
-          </div>
-          <div className="px-24 flex justify-end items-center">
-            <p
-              className="text-[#2D3DFF] font-bold text-xl cursor-pointer"
-              onClick={handleOpenModal}
-            >
-              Create a Staff Member
-            </p>
-            <span>
-              <MdKeyboardArrowRight
-                className="text-[#2D3DFF] w-12 h-12 font-extrabold cursor-pointer"
+
+           <button
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
                 onClick={handleOpenModal}
-              />
-            </span>
-          </div>
+              >
+                <GoPlus className="text-xl"/>
+                Create a Staff Member
+              </button>
 
           {loading && (
-            <div className="flex items-center text-center text-xl mt-10">
+            <div className="flex items-center justify-center mt-6">
               <Bars
-                height="80"
-                width="80"
+                height="40"
+                width="40"
                 color="#2D3DFF"
                 ariaLabel="bars-loading"
               />
@@ -261,281 +254,326 @@ const Staff = () => {
       <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50"
+        className="relative z-50"
       >
-        {fetchSuccess && fetchData.length > 0 && (
-          <Dialog.Panel className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-y-auto">
-            <div className="flex justify-between items-center border-b p-6 pb-4">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+        {fetchSuccess && fetchData && (
+          <Dialog.Panel className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center border-b px-6 py-4">
               <div>
-                <h2 className="text-2xl font-bold">Create Staff Member</h2>
-                <p className="text-gray-600">
-                  Create a staff members for your business
+                <h2 className="text-xl font-bold text-gray-900">{editMode ? 'Edit Staff Member' : 'Create Staff Member'}</h2>
+                <p className="text-gray-500 text-sm mt-1">
+                   {editMode ? 'Update staff member details.' : 'Add a new staff member to your business.'}
                 </p>
               </div>
-              <button onClick={handleCloseModal} className="text-2xl font-bold">
-                X
+              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100">
+                <FaTimes size={20} />
               </button>
             </div>
-            <div className="mt-4 px-6">
+
+            <div className="flex-1 overflow-y-auto px-6 py-4">
               {errorMsg && (
-                <p className="text-red-600 text-lg my-3">{errorMsg}</p>
-              )}
-              <div className="mb-4">
-                <label className=" mb-1 flex items-center gap-2">
-                  Business (required)
-                  <ToolTip content="Select the business you're creating this staff member for" />
-                </label>
-                <select
-                  className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
-                  onChange={e => setSelectedBusiness(e.target.value)}
-                >
-                  <option>Select a business</option>
-                  {fetchData.map(item => {
-                    return (
-                      <option value={item.id} key={item.id}>
-                        {item.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              {/* Name Input */}
-              <label className=" mb-1 flex items-center gap-2">
-                Staff name (required)
-                <ToolTip content="Staff member fullname" />
-              </label>
-              <input
-                type="text"
-                placeholder="Enter the staff's full name"
-                className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none mb-4"
-                value={name}
-                onChange={e => setName(e.target.value)}
-              />
-
-              {/* Email Input */}
-              <label className=" mb-1 flex items-center gap-2">
-                Staff Email (required)
-                <ToolTip content="Staff memeber email address" />
-              </label>
-              <input
-                type="email"
-                placeholder="Staff member's email address"
-                className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none mb-4"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-              />
-
-              {/* Password Input */}
-              <label className=" mb-1 flex items-center gap-2">
-                Staff password (required)
-                <ToolTip content="Password so staff member can access their account" />
-              </label>
-              <div className="relative mb-4">
-                <input
-                  type={passwordVisible ? 'text' : 'password'}
-                  placeholder="Password (required)"
-                  className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
-                <span
-                  className="absolute right-3 top-2 cursor-pointer text-gray-500"
-                  onClick={togglePasswordVisibility}
-                >
-                  {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-                </span>
-              </div>
-
-              {/* Avatar Preview */}
-              {avatar && (
-                <div className="relative flex justify-center mt-4">
-                  <Image
-                    src={avatar}
-                    alt="Avatar Preview"
-                    width={100}
-                    height={100}
-                    className="w-24 h-24 rounded-full border border-gray-300"
-                  />
-                  <button
-                    onClick={handleRemoveAvatar}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                  >
-                    <FaTimes size={16} />
-                  </button>
+                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
+                   <p>{errorMsg}</p>
                 </div>
               )}
 
-              {/* Avatar Upload */}
-              <div className="mb-4">
-                <label className="block text-gray-700">Avatar</label>
-                <div className="relative flex items-center border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none p-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="avatarInput"
-                  />
-                  <label
-                    htmlFor="avatarInput"
-                    className="cursor-pointer flex items-center"
-                  >
-                    <FaUserCircle className="text-gray-500 mr-2" size={24} />
-                    <span className="text-gray-500">Upload Avatar</span>
-                  </label>
+              <div className="space-y-4">
+                  <div>
+                    <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                        Business (required)
+                        <ToolTip content="Select the business you're creating this staff member for" />
+                    </label>
+                    <select
+                    className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                    onChange={e => setSelectedBusiness(e.target.value)}
+                    value={selectedBusiness}
+                    >
+                    <option value="">Select a business</option>
+                    {fetchData.map(item => {
+                        return (
+                        <option value={item.id} key={item.id}>
+                            {item.name}
+                        </option>
+                        );
+                    })}
+                    </select>
+                </div>
+
+                {/* Name Input */}
+                <div>
+                    <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                        Staff name (required)
+                        <ToolTip content="Enter the full name of the staff member." />
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="e.g. John Doe"
+                        className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                    />
+                </div>
+
+                {/* Email Input */}
+                <div>
+                     <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                        Staff Email (required)
+                        <ToolTip content="The email address used for login and notifications." />
+                    </label>
+                    <input
+                        type="email"
+                        placeholder="e.g. john@example.com"
+                        className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                    />
+                </div>
+
+                {/* Password Input */}
+                <div>
+                     <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                        Staff password (required)
+                        <ToolTip content="Secure password for the staff member's account access." />
+                    </label>
+                    <div className="relative">
+                        <input
+                        type={passwordVisible ? 'text' : 'password'}
+                        placeholder="Enter password"
+                        className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors pr-10"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        />
+                        <span
+                        className="absolute right-3 top-3.5 cursor-pointer text-gray-400 hover:text-gray-600"
+                        onClick={togglePasswordVisibility}
+                        >
+                        {passwordVisible ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Avatar Preview */}
+                <div className="flex flex-col items-center justify-center pt-2">
+                    {avatar ? (
+                        <div className="relative">
+                        <Image
+                            src={avatar}
+                            alt="Avatar Preview"
+                            width={100}
+                            height={100}
+                            className="w-24 h-24 rounded-full border-4 border-gray-100 shadow-sm object-cover"
+                        />
+                        <button
+                            onClick={handleRemoveAvatar}
+                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors"
+                        >
+                            <FaTimes size={12} />
+                        </button>
+                        </div>
+                    ) : (
+                         <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300 text-gray-400">
+                             <FaUserCircle size={48} />
+                         </div>
+                    )}
+                </div>
+
+                {/* Avatar Upload */}
+                <div>
+                    <label className="mb-2 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                         Avatar
+                         <ToolTip content="Upload a profile picture for the staff member." />
+                    </label>
+                    <div className="relative">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="avatarInput"
+                    />
+                    <label
+                        htmlFor="avatarInput"
+                        className="flex items-center justify-center w-full p-3 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                        <FaUserCircle className="text-gray-500 mr-2" size={20} />
+                        <span className="text-gray-600 font-medium text-sm">Upload Avatar</span>
+                    </label>
+                    </div>
                 </div>
               </div>
             </div>
 
-            {!editMode ? (
-              <div className="flex justify-end border-t border-gray-300 mt-14 p-6 pt-4">
-                <button
-                  className="px-4 py-2 bg-transparent font-semibold text-[#2D3DFF] rounded"
-                  onClick={handleSubmit}
-                  disabled={isPending}
-                >
-                  {isPending ? 'CREATING...' : 'CREATE'}
-                </button>
-                <button
-                  className="px-4 py-2 mr-2 bg-transparent font-semibold rounded"
-                  onClick={handleCloseModal}
-                  disabled={isPending}
-                >
-                  CLOSE
-                </button>
-              </div>
-            ) : (
-              <div className="flex justify-end border-t border-gray-300 mt-14 p-6 pt-4">
-                <button
-                  className="px-4 py-2 bg-transparent font-semibold text-[#2D3DFF] rounded"
-                  onClick={processUpdate}
-                  disabled={updatePending}
-                >
-                  {!updatePending ? 'Save Changes' : 'Saving...'}
-                </button>
-                <button
-                  className="px-4 py-2 mr-2 bg-transparent font-semibold rounded"
-                  onClick={handleCloseModal}
-                  disabled={updatePending}
-                >
-                  CLOSE
-                </button>
-              </div>
-            )}
+            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+                 <button
+                    className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    onClick={handleCloseModal}
+                    disabled={isPending || updatePending}
+                  >
+                    Cancel
+                  </button>
+                {!editMode ? (
+                   <button
+                   className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
+                   onClick={handleSubmit}
+                   disabled={isPending}
+                 >
+                   {isPending ? 'Creating...' : 'Create Staff'}
+                 </button>
+                ) : (
+                    <button
+                    className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
+                    onClick={processUpdate}
+                    disabled={updatePending}
+                  >
+                    {updatePending ? 'Saving...' : 'Save Changes'}
+                  </button>
+                )}
+            </div>
           </Dialog.Panel>
         )}
 
-        {fetchSuccess && fetchData.length === 0 && (
-          <p>Create a business before creating a staff</p>
+        {fetchSuccess && (!fetchData || fetchData.length === 0) && (
+             <Dialog.Panel className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 text-center">
+                 <h3 className="text-lg font-bold text-gray-900 mb-2">No Business Found</h3>
+                 <p className="text-gray-600 mb-6">Please create a business before adding staff members.</p>
+                 <button
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                    Close
+                 </button>
+             </Dialog.Panel>
         )}
       </Dialog>
 
       {staffData && staffData.length > 0 && (
-        <Table className="text-lg">
-          <TableCaption>Your Staffs</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>E-mail</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {!isLoading &&
-              staffData.map((item, i) => {
-                const { email, name, id } = item;
-                return (
-                  <TableRow key={i}>
-                    <TableCell className="font-medium">{name}</TableCell>
-                    <TableCell>{email}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-2 text-gray-600">
-                        <span onClick={() => handleEdit(id ?? '')}>
-                          <IoPencil />
-                        </span>
-                        <CNDialog
-                          open={openDeleteModal}
-                          onOpenChange={() => handleOpenDeleteModal(id ?? '')}
-                        >
-                          <DialogTrigger>
-                            <MdDelete />
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>
-                                Are you absolutely sure?
-                              </DialogTitle>
-                              <DialogDescription>
-                                This action will delete this staff.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                              <Button
-                                type="button"
-                                variant={'outline'}
-                                onClick={() => setOpenDeleteModal(false)}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                type="button"
-                                variant={'destructive'}
-                                onClick={handleDelete}
-                                disabled={deletePending}
-                              >
-                                {deletePending ? 'Deleting...' : 'Confirm'}
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </CNDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+         <div className="overflow-x-auto">
+            <Table className="text-base">
+            <TableCaption>A list of your staff members.</TableCaption>
+            <TableHeader>
+                <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>E-mail</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {!isLoading &&
+                staffData.map((item, i) => {
+                    const { email, name, id } = item;
+                    return (
+                    <TableRow key={i}>
+                        <TableCell className="font-medium">{name}</TableCell>
+                        <TableCell>{email}</TableCell>
+                        <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-3">
+                            <button
+                                onClick={() => handleEdit(id ?? '')}
+                                className="text-gray-500 hover:text-blue-600 transition-colors p-1"
+                                title="Edit"
+                            >
+                            <IoPencil size={18}/>
+                            </button>
+                            <CNDialog
+                            open={openDeleteModal}
+                            onOpenChange={() => handleOpenDeleteModal(id ?? '')}
+                            >
+                            <DialogTrigger asChild>
+                                <button className="text-gray-500 hover:text-red-600 transition-colors p-1" title="Delete">
+                                    <MdDelete size={20} />
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                <DialogTitle>
+                                    Delete Staff Member?
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Are you sure you want to delete this staff member? This action cannot be undone.
+                                </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant={'outline'}
+                                    onClick={() => setOpenDeleteModal(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={'destructive'}
+                                    onClick={handleDelete}
+                                    disabled={deletePending}
+                                >
+                                    {deletePending ? 'Deleting...' : 'Delete'}
+                                </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                            </CNDialog>
+                        </div>
+                        </TableCell>
+                    </TableRow>
+                    );
+                })}
 
-            {isLoading && <p>Loading...</p>}
-          </TableBody>
-        </Table>
+                {isLoading && <TableRow><TableCell colSpan={3} className="text-center py-8">Loading...</TableCell></TableRow>}
+            </TableBody>
+            </Table>
+        </div>
+      )}
+
+       {staffData && staffData.length > 0 && (
+          <button
+            className="fixed bottom-8 right-8 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 hover:scale-105 transition-all z-40"
+            onClick={() => setIsOpen(true)}
+            title="Add New Staff"
+        >
+            <GoPlus size={28} />
+        </button>
       )}
 
       <CNDialog
         open={openStepModal}
         onOpenChange={() => setOpenStepModal(!openStepModal)}
       >
-        <DialogContent className="w-[20rem]">
-          <DialogHeader>
-            <DialogTitle>Step two completed</DialogTitle>
-            <DialogDescription className="mt-3 text-lg text-gray-800">
-              <p className="flex items-center gap-1">
-                Create a business{' '}
-                <IoCheckmarkDoneSharp className="text-darkGreen" />
-              </p>
-              <p className="flex items-center gap-1">
-                Create a staff{' '}
-                <IoCheckmarkDoneSharp className="text-darkGreen" />
-              </p>
-              <p className="flex items-center gap-1">
-                Create a reward <MdOutlineCancel className="text-red-700" />
-              </p>
-              <p className="flex items-center gap-1">
-                Create a campaign <MdOutlineCancel className="text-red-700" />
-              </p>
+        <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+            <DialogTitle>Progress Status</DialogTitle>
+            <DialogDescription className="mt-3 text-lg text-gray-800 space-y-2">
+              <div className="flex items-center justify-between p-2 bg-green-50 rounded-md">
+                <span>Create a business</span>
+                <IoCheckmarkDoneSharp className="text-green-600 text-xl" />
+              </div>
+              <div className="flex items-center justify-between p-2 bg-green-50 rounded-md">
+                 <span>Create a staff</span>
+                 <IoCheckmarkDoneSharp className="text-green-600 text-xl" />
+              </div>
+              <div className="flex items-center justify-between p-2">
+                 <span>Create a reward</span>
+                 <MdOutlineCancel className="text-gray-300 text-xl" />
+              </div>
+              <div className="flex items-center justify-between p-2">
+                 <span>Create a campaign</span>
+                 <MdOutlineCancel className="text-gray-300 text-xl" />
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               type="button"
-              variant={'outline'}
+              variant={'default'}
               onClick={() => setOpenStepModal(false)}
             >
-              close
+              Continue
             </Button>
           </DialogFooter>
         </DialogContent>
       </CNDialog>
-    </section>
+    </div>
   );
 };
 

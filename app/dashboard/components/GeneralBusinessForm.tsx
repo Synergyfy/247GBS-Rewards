@@ -30,15 +30,15 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
     dispatch(addGeneral({ [name]: value }));
   };
   return (
-    <div>
+    <div className="space-y-6">
       {/* Industry Field */}
-      <div className="mt-6">
-        <label className=" mb-1 flex items-center gap-2">
+      <div>
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700">
           Industry (required)
-          <ToolTip content="What industry is your business in." />
+          <ToolTip content="Select the industry that best describes your business." />
         </label>
         <select
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           name="industry"
           value={industry}
           onChange={handleInputChange}
@@ -93,15 +93,14 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
       </div>
 
       {/* Business Name Field */}
-      <div className="mt-6">
-        <label className="block text-gray-700 mb-1"></label>
-        <label className=" mb-1 flex items-center gap-2">
+      <div>
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700">
           Business Name (required)
-          <ToolTip content="What is the name of your business" />
+          <ToolTip content="Enter the official name of your business as you want it to appear." />
         </label>
         <input
-          placeholder="Business Name (required)"
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          placeholder="e.g. Acme Corp"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           name="name"
           value={name}
           onChange={handleInputChange}
@@ -109,26 +108,29 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
       </div>
 
       {/* Logo Upload Field */}
-      <div className="mt-6">
-        <label className="flex items-center cursor-pointer w-full p-2 border-b-2 border-[#838383]">
-          <IoMdAttach className="mr-2 text-gray-500" />
-          Upload Business Logo
-          <input type="file" className="hidden" onChange={handleLogoUpload} />
+      <div>
+        <label className="mb-2 flex items-center gap-2 font-medium text-gray-700">
+            Business Logo
+            <ToolTip content="Upload your business logo. Recommended size: 500x500px." />
+        </label>
+        <label className="flex items-center justify-center cursor-pointer w-full p-4 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 hover:bg-gray-50 transition-all">
+          <IoMdAttach className="mr-2 text-gray-500 text-xl" />
+          <span className="text-gray-600">Click to upload logo</span>
+          <input type="file" className="hidden" onChange={handleLogoUpload} accept="image/*"/>
         </label>
         {logoPreview && (
-          <div className="relative w-20 h-20 border rounded mt-2">
+          <div className="relative w-32 h-32 border rounded-lg mt-4 shadow-sm overflow-hidden">
             <Image
               src={logoPreview}
               alt="Logo Preview"
-              width={100}
-              height={100}
-              className="w-full h-full object-cover rounded-md border"
+              fill
+              style={{ objectFit: 'cover' }}
             />
             <button
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors"
               onClick={removeLogo}
             >
-              <FaTimes size={16} />
+              <FaTimes size={12} />
             </button>
           </div>
         )}

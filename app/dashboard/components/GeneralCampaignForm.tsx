@@ -24,22 +24,21 @@ const GeneralForm: React.FC = () => {
     <div className="space-y-6">
       <p className="text-gray-600">
         This section is where you provide the general information of your
-        campaign.{' '}
+        campaign.
       </p>
       {/* Business dropdown */}
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Business (required)
-          <ToolTip content="Staff member fullname" />
+          <ToolTip content="Select the business this campaign belongs to." />
         </label>
         <select
           name="businessId"
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           value={businessId}
           onChange={handleInputChange}
         >
           <option value="">Select Business</option>
-          {/* Add your options here */}
           {data &&
             data?.map((item, i) => (
               <option value={item.id} key={i}>
@@ -49,14 +48,14 @@ const GeneralForm: React.FC = () => {
         </select>
       </div>
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Campaign name (required)
-          <ToolTip content="Enter the campaign's name" />
+          <ToolTip content="Enter a unique name for your campaign." />
         </label>
         <input
           type="text"
-          placeholder="Campaign Name"
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          placeholder="e.g. Summer Sale 2024"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           name="name"
           value={name}
           onChange={handleInputChange}
@@ -64,14 +63,14 @@ const GeneralForm: React.FC = () => {
       </div>
       {/* Points for sign-up */}
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Signup Point
-          <ToolTip content="This is the amount of points customers receive for signing up" />
+          <ToolTip content="This is the amount of points customers receive instantly for signing up." />
         </label>
         <input
           type="number"
-          placeholder="Points Customer receive for signing up (required)"
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          placeholder="0"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           name="signupPoints"
           value={signupPoints}
           onChange={handleInputChange}
@@ -79,11 +78,14 @@ const GeneralForm: React.FC = () => {
       </div>
       {/* Custom Domain */}
       <div>
-        {/* <label className="block text-gray-700 mb-1">Custom domain</label> */}
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+            Custom domain
+             <ToolTip content="Enter a custom domain for your campaign website (optional)." />
+         </label>
         <input
           type="text"
-          placeholder="Custom domain"
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          placeholder="e.g. campaign.yourbusiness.com"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           name="customDomain"
           value={customDomain}
           onChange={handleInputChange}

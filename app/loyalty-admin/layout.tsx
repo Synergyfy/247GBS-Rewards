@@ -1,9 +1,6 @@
 'use client';
 
-import { Inter } from 'next/font/google';
 import NavBar from './components/NavBar';
-
-const inter = Inter({ variable: '--font-inter', subsets: ['latin'] });
 
 export default function RootLayout({
   children,
@@ -11,21 +8,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <style>{`
-          :root {
-            --font-inter: ${inter.variable};
-          }
-        `}</style>
-        <body className={`${inter.variable} antialiased`}>
-          <div className="w-screen h-screen overflow-x-hidden overflow-y-auto">
-            <NavBar />
-            {children}
-          </div>
-        </body>
-      </head>
-      {/* ✅ Moved outside */}
-    </html>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <NavBar />
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {children}
+      </main>
+    </div>
   );
 }

@@ -18,24 +18,27 @@ const DateRangeForm: React.FC<DateRangeFormProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <p className="text-lg text-grey-600">
-        The date range spcifies how long this reward is valid for
+      <p className="text-gray-600">
+        The date range specifies how long this reward is valid for.
       </p>
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Active From (required)
           <ToolTip content="When is the starting date for this reward?" />
         </label>
-        <DateTimePicker date={activeFrom} setDate={setActiveFrom} />
+        <div className="border border-gray-300 rounded-md p-1 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
+            <DateTimePicker date={activeFrom} setDate={setActiveFrom} />
+        </div>
       </div>
 
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Expires (required)
           <ToolTip content="At what date and time will this reward stop being valid?" />
         </label>
-        <label className="block mb-1"></label>
-        <DateTimePicker date={expires} setDate={setExpires} />
+        <div className="border border-gray-300 rounded-md p-1 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
+            <DateTimePicker date={expires} setDate={setExpires} />
+        </div>
       </div>
     </div>
   );

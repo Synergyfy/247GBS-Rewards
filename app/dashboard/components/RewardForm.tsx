@@ -37,21 +37,27 @@ const RewardForm: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <p className="text-gray-600">Select the rewards that will be available for customers in this campaign.</p>
       {/* Rewards dropdown */}
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Rewards (required)
-          <ToolTip content="Select a reward for this campaign" />
+          <ToolTip content="Select one or more rewards to attach to this campaign." />
         </label>
-        <label className="block text-gray-700 mb-1"></label>
 
-        {data && (
+        {data ? (
           <MultiSelect
             options={reformRewardType(data)}
             selectedOptions={selectedOptions}
             setSelectedOptions={setSelectedOptions}
-            text="Select rewards for this campaign"
+            text="Select rewards..."
           />
+        ) : (
+            <p className="text-sm text-gray-500 italic">Loading rewards...</p>
+        )}
+
+        {data && data.length === 0 && (
+            <p className="text-sm text-red-500 mt-2">No rewards found. Please create a reward first.</p>
         )}
       </div>
     </div>
