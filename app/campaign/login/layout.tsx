@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import '../components/login.css';
 
 export const metadata: Metadata = {
   title: 'Campaign page Login',

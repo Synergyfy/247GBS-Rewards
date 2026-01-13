@@ -13,13 +13,20 @@ const HomeSection: React.FC<{
   );
   return (
     <section
-      className="min-h-[16rem] flex flex-col justify-center space-y-4 sm:pl-[4rem]"
-      style={{ backgroundColor: secondaryBg, color: secondaryText }}
+      className="relative py-20 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center text-center overflow-hidden"
+      style={{ backgroundColor: secondaryBg || '#f3f4f6', color: secondaryText || '#111827' }}
     >
-      <div className="flex flex-col justify-center space-y-3 sm:w-[40%] px-2 md:px-0">
-        <h2 className="text-2xl sm:text-4xl">{headerText || homeText}</h2>
-        <p className="sm:text-xl">{description || homeTitle}</p>
+      <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight leading-tight">
+          {headerText || homeTitle || 'Welcome'}
+        </h2>
+        <p className="text-lg sm:text-xl opacity-90 max-w-2xl mx-auto leading-relaxed">
+          {description || homeText}
+        </p>
       </div>
+
+      {/* Decorative background element if needed */}
+      <div className="absolute inset-0 bg-black/5 pointer-events-none" />
     </section>
   );
 };

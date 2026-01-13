@@ -4,7 +4,7 @@ import { errorType, useAuthCustomer } from '@/services/hooks/auth/hook';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import { IoEye, IoEyeOff } from 'react-icons/io5';
+import { IoEye, IoEyeOff, IoMailOutline, IoLockClosedOutline } from 'react-icons/io5';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -32,7 +32,8 @@ const LoginForm = () => {
 
   const router = useRouter();
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     setError('');
     if (!email || !password) {
       setError('Enter email and password');
@@ -58,72 +59,79 @@ const LoginForm = () => {
   }, [respError, isError, isSuccess, data, router, campaignCode]);
 
   return (
-    <form className="form">
-      <div className="flex-column">
-        <label>Email </label>
-      </div>
-      <div className="inputForm">
-        <svg
-          height="20"
-          viewBox="0 0 32 32"
-          width="20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g id="Layer_3" data-name="Layer 3">
-            <path d="m30.853 13.87a15 15 0 0 0 -29.729 4.082 15.1 15.1 0 0 0 12.876 12.918 15.6 15.6 0 0 0 2.016.13 14.85 14.85 0 0 0 7.715-2.145 1 1 0 1 0 -1.031-1.711 13.007 13.007 0 1 1 5.458-6.529 2.149 2.149 0 0 1 -4.158-.759v-10.856a1 1 0 0 0 -2 0v1.726a8 8 0 1 0 .2 10.325 4.135 4.135 0 0 0 7.83.274 15.2 15.2 0 0 0 .823-7.455zm-14.853 8.13a6 6 0 1 1 6-6 6.006 6.006 0 0 1 -6 6z"></path>
-          </g>
-        </svg>
-        <input
-          type="text"
-          className="input"
-          placeholder="Enter your Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
+    <form className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md mx-auto space-y-6" onSubmit={handleSubmit}>
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
+        <p className="text-gray-500 text-sm mt-2">Sign in to your campaign account</p>
       </div>
 
-      <div className="flex-column">
-        <label>Password </label>
-      </div>
-      <div className="inputForm">
-        <svg
-          height="20"
-          viewBox="-64 0 512 512"
-          width="20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="m336 512h-288c-26.453125 0-48-21.523438-48-48v-224c0-26.476562 21.546875-48 48-48h288c26.453125 0 48 21.523438 48 48v224c0 26.476562-21.546875 48-48 48zm-288-288c-8.8125 0-16 7.167969-16 16v224c0 8.832031 7.1875 16 16 16h288c8.8125 0 16-7.167969 16-16v-224c0-8.832031-7.1875-16-16-16zm0 0"></path>
-          <path d="m304 224c-8.832031 0-16-7.167969-16-16v-80c0-52.929688-43.070312-96-96-96s-96 43.070312-96 96v80c0 8.832031-7.167969 16-16 16s-16-7.167969-16-16v-80c0-70.59375 57.40625-128 128-128s128 57.40625 128 128v80c0 8.832031-7.167969 16-16 16zm0 0"></path>
-        </svg>
-        <input
-          type={visiblePassword ? 'text' : 'password'}
-          className="input"
-          placeholder="Enter your Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
-        <div onClick={() => setVisiblePassword(!visiblePassword)}>
-          {!visiblePassword ? <IoEye /> : <IoEyeOff />}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700 block">Email</label>
+          <div className="relative flex items-center">
+            <IoMailOutline className="absolute left-3 text-gray-400 text-xl" />
+            <input
+              type="text"
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+              placeholder="Enter your Email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700 block">Password</label>
+          <div className="relative flex items-center">
+            <IoLockClosedOutline className="absolute left-3 text-gray-400 text-xl" />
+            <input
+              type={visiblePassword ? 'text' : 'password'}
+              className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
+              placeholder="Enter your Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+            <div
+              className="absolute right-3 cursor-pointer text-gray-400 hover:text-gray-600 p-1"
+              onClick={() => setVisiblePassword(!visiblePassword)}
+            >
+              {!visiblePassword ? <IoEye size={20} /> : <IoEyeOff size={20} />}
+            </div>
+          </div>
         </div>
       </div>
 
-      {error && <p className="text-red-600 text-lg">{error}</p>}
-
-      <div className="flex-row">
-        <div>
-          <input type="checkbox" />
-          <label>Remember me </label>
+      {error && (
+        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
+          {error}
         </div>
-        <span className="span">Forgot password?</span>
+      )}
+
+      <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="remember"
+            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label htmlFor="remember" className="text-gray-600 cursor-pointer">Remember me</label>
+        </div>
+        <span className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer">Forgot password?</span>
       </div>
-      <button className="button-submit" type="button" onClick={handleSubmit}>
-        {isPending ? 'Loading...' : 'Sign In'}
+
+      <button
+        className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-gray-900/20 disabled:opacity-70 disabled:cursor-not-allowed"
+        type="submit"
+        disabled={isPending}
+      >
+        {isPending ? 'Signing In...' : 'Sign In'}
       </button>
-      <p className="p">
-        {"Don't have an account? "}
-        <span className="span">
-          <Link href={'/campaign/signup'}>Sign Up</Link>
-        </span>
+
+      <p className="text-center text-sm text-gray-600 mt-6">
+        Don&apos;t have an account?{' '}
+        <Link href={'/campaign/signup'} className="text-blue-600 hover:text-blue-700 font-semibold hover:underline">
+          Sign Up
+        </Link>
       </p>
     </form>
   );
