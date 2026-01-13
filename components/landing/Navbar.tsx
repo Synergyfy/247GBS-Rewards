@@ -9,15 +9,15 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 top-0 left-0 right-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex-shrink-0 flex items-center gap-2">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">L</span>
+              <span className="text-white font-bold text-xl">2</span>
             </div>
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-              LoyaltyPro
+              247GBS Loyalty
             </span>
           </div>
 
@@ -56,7 +56,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-b border-gray-100 overflow-hidden"
+            className="md:hidden bg-white border-b border-gray-100 overflow-hidden absolute top-20 left-0 w-full shadow-xl"
           >
             <div className="px-4 pt-2 pb-6 space-y-2">
               <a href="#features" className="block px-3 py-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium" onClick={() => setIsOpen(false)}>Features</a>

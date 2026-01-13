@@ -12,9 +12,9 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">L</span>
+                  <span className="text-white font-bold text-lg">2</span>
                 </div>
-              <span className="text-xl font-bold text-white">LoyaltyPro</span>
+              <span className="text-xl font-bold text-white">247GBS Loyalty</span>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">
               Building stronger relationships between businesses and customers through innovative loyalty solutions.
@@ -59,7 +59,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} LoyaltyPro. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} 247GBS Loyalty. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>

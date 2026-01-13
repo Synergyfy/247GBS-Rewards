@@ -12,9 +12,9 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">P</span>
+                  <span className="text-white font-bold text-lg">2</span>
                 </div>
-              <span className="text-xl font-bold text-gray-900">PerkPoints</span>
+              <span className="text-xl font-bold text-gray-900">247GBS Loyalty</span>
             </div>
             <p className="text-sm leading-relaxed mb-6">
               Your gateway to exclusive rewards and experiences. Join the community today.
@@ -47,14 +47,14 @@ const Footer = () => {
           <div>
             <h3 className="text-gray-900 font-semibold mb-4">Contact</h3>
             <ul className="space-y-2 text-sm">
-              <li>support@perkpoints.com</li>
-              <li>1-800-PERK-PTS</li>
+              <li>support@247gbs.com</li>
+              <li>1-800-247GBS</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-200 mt-12 pt-8 text-center text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} PerkPoints. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} 247GBS Loyalty. All rights reserved.</p>
         </div>
       </div>
     </footer>
