@@ -22,15 +22,15 @@ export default function RootLayout({
             --font-inter: ${inter.variable};
           }
         `}</style>
-        <body className={`${inter.variable} antialiased`}>
-          <Provider store={store}>
-            <QueryProvider>
-              {children}
-              <Toaster />
-            </QueryProvider>
-          </Provider>
-        </body>
       </head>
+      <body className={`${inter.variable} antialiased`}>
+        <Provider store={store}>
+          <QueryProvider>
+            {children}
+            <Toaster />
+          </QueryProvider>
+        </Provider>
+      </body>
       {/* ✅ Moved outside */}
     </html>
   );
