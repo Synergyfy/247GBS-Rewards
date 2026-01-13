@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { IoMdBusiness } from 'react-icons/io';
 import {
   MdDelete,
-  MdKeyboardArrowRight,
   MdOutlineCancel,
 } from 'react-icons/md';
 import { Dialog } from '@headlessui/react';
@@ -49,6 +48,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { FaTimes } from 'react-icons/fa';
 
 const Businesses = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,21 +75,6 @@ const Businesses = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openStepModal, setOpenStepModal] = useState<boolean>(false);
 
-  const clearBusinessStore = () => {
-    dispatch(resetGeneral());
-    dispatch(resetContact());
-    dispatch(resetLinks());
-    dispatch(resetSocial());
-  };
-
-  const handleOpenModal = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setIsOpen(true);
-    }, 1500);
-  };
-
   const { businessContact, businessGeneral, businessLinks, businessSocials } =
     useSelector((state: RootState) => state);
 
@@ -111,6 +96,20 @@ const Businesses = () => {
     mutate: updateMutate,
   } = useUpdateBusiness();
 
+  const clearBusinessStore = useCallback(() => {
+    dispatch(resetGeneral());
+    dispatch(resetContact());
+    dispatch(resetLinks());
+    dispatch(resetSocial());
+  }, [dispatch]);
+
+  const handleDialogClose = useCallback(() => {
+    clearBusinessStore();
+    setIsOpen(false);
+    setEditMode(false);
+    setErrorMsg('');
+  }, [clearBusinessStore]);
+
   useEffect(() => {
     if (isSuccess) {
       refetch();
@@ -127,7 +126,7 @@ const Businesses = () => {
       const errMsg = errorData.response.data.error;
       setErrorMsg(errMsg);
     }
-  }, [isSuccess, refetch, isError, error]);
+  }, [isSuccess, refetch, isError, error, clearBusinessStore, handleDialogClose]);
 
   useEffect(() => {
     if (deleteIsSuccess) {
@@ -142,7 +141,7 @@ const Businesses = () => {
       refetch();
       handleDialogClose();
     }
-  }, [updateSuccess, refetch]);
+  }, [updateSuccess, refetch, handleDialogClose]);
 
   const handleOpenDeleteModal = (id: string) => {
     if (!openDeleteModal) {
@@ -151,13 +150,21 @@ const Businesses = () => {
     }
   };
 
+  const handleOpenModal = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setIsOpen(true);
+    }, 500);
+  };
+
   const handleSubmit = () => {
     const { industry, name } = businessGeneral;
     const { phoneNumber, email, city, postalCode, state, street } =
       businessContact;
     if (!industry || !name) {
       setActiveTab('GENERAL');
-      setErrorMsg('Please fill in busienss name and industry');
+      setErrorMsg('Please fill in business name and industry');
     } else if (
       !phoneNumber ||
       !email ||
@@ -180,12 +187,6 @@ const Businesses = () => {
 
       mutate(business);
     }
-  };
-
-  const handleDialogClose = () => {
-    clearBusinessStore();
-    setIsOpen(false);
-    setEditMode(false);
   };
 
   const handleDelete = () => {
@@ -251,37 +252,32 @@ const Businesses = () => {
   };
 
   return (
-    <section>
+    <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
       {!fetchData ||
         (fetchData?.length < 1 && (
-          <div className="p-24">
-            <div className="px-24">
-              <IoMdBusiness className="w-40 h-40 text-[#2D3DFF]" />
-              <p className="text-2xl">
-                A Business is an entity to which you can link staff members and
-                loyalty campaigns. Let&apos;s start by setting up a Business
-              </p>
-            </div>
-            <div className="px-24 flex justify-end items-center">
-              <p
-                className="text-[#2D3DFF] font-bold text-xl cursor-pointer"
-                onClick={handleOpenModal}
-              >
-                Create a Business
-              </p>
-              <span>
-                <MdKeyboardArrowRight
-                  className="text-[#2D3DFF] w-12 h-12 font-extrabold cursor-pointer"
-                  onClick={handleOpenModal}
-                />
-              </span>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-blue-50 p-6 rounded-full mb-6">
+                 <IoMdBusiness className="w-20 h-20 text-blue-600" />
             </div>
 
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Business Found</h2>
+            <p className="text-gray-500 max-w-md mb-8">
+                A Business is an entity to which you can link staff members and loyalty campaigns. Let&apos;s start by setting up a Business.
+            </p>
+
+            <button
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                onClick={handleOpenModal}
+              >
+                <GoPlus className="text-xl"/>
+                Create a Business
+              </button>
+
             {loading && (
-              <div className="flex items-center text-center text-xl mt-10">
+              <div className="flex items-center justify-center mt-6">
                 <Bars
-                  height="80"
-                  width="80"
+                  height="40"
+                  width="40"
                   color="#2D3DFF"
                   ariaLabel="bars-loading"
                 />
@@ -293,101 +289,105 @@ const Businesses = () => {
       <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50"
+        className="relative z-50"
       >
-        <Dialog.Panel className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-y-auto">
-          <div className="flex justify-between items-center border-b p-6 pb-4">
-            <div>
-              <h2 className="text-2xl font-bold">Create Business</h2>
-              <p className="text-gray-600 text-sm w-[90%]">
-                Create a business here so you can have access to options like
-                linking staff members and loyalty campaigns
-              </p>
-            </div>
-            <button onClick={handleDialogClose} className="text-2xl font-bold">
-              X
-            </button>
-          </div>
-          <div className="mt-4">
-            <div className="flex border-b border-gray-300 mb-10">
-              {tabs.map(tab => (
-                <div
-                  key={tab}
-                  className={`px-4 py-2 cursor-pointer font-semibold ${
-                    activeTab === tab
-                      ? 'text-[#2D3DFF] border-b-4 border-[#2D3DFF]'
-                      : 'text-gray-500'
-                  }`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+             <Dialog.Panel className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center border-b px-6 py-4">
+                    <div>
+                    <h2 className="text-xl font-bold text-gray-900">{editMode ? 'Edit Business' : 'Create Business'}</h2>
+                    <p className="text-gray-500 text-sm mt-1">
+                        {editMode ? 'Update your business details.' : 'Set up your business profile to get started.'}
+                    </p>
+                    </div>
+                    <button onClick={handleDialogClose} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100">
+                     <FaTimes size={20} />
+                    </button>
                 </div>
-              ))}
-            </div>
-            <div className="mt-2 px-6">
-              {errorMsg && (
-                <p className="text-red-600 text-lg my-3">{errorMsg}</p>
-              )}
-              {activeTab === 'GENERAL' && (
-                <GeneralForm
-                  logoPreview={logoPreview}
-                  handleLogoUpload={handleLogoUpload}
-                  removeLogo={removeLogo}
-                />
-              )}
-              {activeTab === 'CONTACT' && <ContactForm />}
-              {activeTab === 'SOCIAL' && <SocialForm />}
-              {activeTab === 'LINKS' && <LinksForm />}
+
+          <div className="flex-1 overflow-y-auto">
+             <div className="px-6 py-4">
+                 {/* Tabs */}
+                 <div className="flex border-b border-gray-200 mb-6 space-x-4">
+                    {tabs.map(tab => (
+                        <button
+                        key={tab}
+                        className={`pb-2 px-1 text-sm font-medium transition-colors border-b-2 ${
+                            activeTab === tab
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                        onClick={() => setActiveTab(tab)}
+                        >
+                        {tab}
+                        </button>
+                    ))}
+                </div>
+
+                {errorMsg && (
+                    <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
+                        <p>{errorMsg}</p>
+                    </div>
+                )}
+
+                <div className="mt-2">
+                {activeTab === 'GENERAL' && (
+                    <GeneralForm
+                    logoPreview={logoPreview}
+                    handleLogoUpload={handleLogoUpload}
+                    removeLogo={removeLogo}
+                    />
+                )}
+                {activeTab === 'CONTACT' && <ContactForm />}
+                {activeTab === 'SOCIAL' && <SocialForm />}
+                {activeTab === 'LINKS' && <LinksForm />}
+                </div>
             </div>
           </div>
-          {!editMode ? (
-            <div className="flex justify-end border-t border-gray-300 mt-20 p-6 pt-4">
-              <button
-                className="px-4 py-2 bg-transparent font-semibold text-[#2D3DFF] rounded"
-                onClick={handleSubmit}
-                disabled={isPending}
-              >
-                {isPending ? 'CREATING...' : 'CREATE'}
-              </button>
-              <button
-                className="px-4 py-2 mr-2 bg-transparent font-semibold rounded"
+
+          <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+             <button
+                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 onClick={handleDialogClose}
-                disabled={isPending}
+                disabled={isPending || updatePending}
               >
-                CLOSE
+                Cancel
               </button>
-            </div>
-          ) : (
-            <div className="flex justify-end border-t border-gray-300 mt-20 p-6 pt-4">
-              <button
-                className="px-4 py-2 bg-transparent font-semibold text-[#2D3DFF] rounded"
+             {!editMode ? (
+                 <button
+                 className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
+                 onClick={handleSubmit}
+                 disabled={isPending}
+               >
+                 {isPending ? 'Creating...' : 'Create Business'}
+               </button>
+             ): (
+                <button
+                className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
                 onClick={processUpdate}
                 disabled={updatePending}
               >
                 {updatePending ? 'Saving...' : 'Save Changes'}
               </button>
-              <button
-                className="px-4 py-2 mr-2 bg-transparent font-semibold rounded"
-                onClick={handleDialogClose}
-                disabled={updatePending}
-              >
-                CLOSE
-              </button>
-            </div>
-          )}
+             )}
+          </div>
         </Dialog.Panel>
+        </div>
       </Dialog>
 
       {fetchData && fetchData.length > 0 && (
-        <Table className="text-lg">
-          <TableCaption>Your Businesses</TableCaption>
+        <div className="overflow-x-auto">
+        <Table className="text-base">
+          <TableCaption>A list of your registered businesses.</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>Business</TableHead>
+              <TableHead>Business Name</TableHead>
               <TableHead>E-mail</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -399,27 +399,33 @@ const Businesses = () => {
                   <TableRow key={i}>
                     <TableCell className="font-medium">{name}</TableCell>
                     <TableCell>{email}</TableCell>
-                    <TableCell className="text-base">{`${street} ${city} ${state}`}</TableCell>
+                    <TableCell>{`${street}, ${city}, ${state}`}</TableCell>
                     <TableCell>{phoneNumber}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-2 text-gray-600">
-                        <span onClick={() => handleEdit(id)}>
-                          <IoPencil />
-                        </span>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                            onClick={() => handleEdit(id)}
+                            className="text-gray-500 hover:text-blue-600 transition-colors p-1"
+                            title="Edit"
+                        >
+                          <IoPencil size={18}/>
+                        </button>
                         <CNDialog
                           open={openDeleteModal}
                           onOpenChange={() => handleOpenDeleteModal(id ?? '')}
                         >
-                          <DialogTrigger>
-                            <MdDelete />
+                          <DialogTrigger asChild>
+                             <button className="text-gray-500 hover:text-red-600 transition-colors p-1" title="Delete">
+                                <MdDelete size={20} />
+                             </button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
                               <DialogTitle>
-                                Are you absolutely sure?
+                                Delete Business?
                               </DialogTitle>
                               <DialogDescription>
-                                This action will delete this business.
+                                Are you sure you want to delete this business? This action cannot be undone.
                               </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
@@ -436,7 +442,7 @@ const Businesses = () => {
                                 onClick={handleDelete}
                                 disabled={deletePending}
                               >
-                                {deletePending ? 'Deleting...' : 'Confirm'}
+                                {deletePending ? 'Deleting...' : 'Delete'}
                               </Button>
                             </DialogFooter>
                           </DialogContent>
@@ -447,48 +453,55 @@ const Businesses = () => {
                 );
               })}
 
-            {isLoading && <p>Loading...</p>}
+            {isLoading && <TableRow><TableCell colSpan={5} className="text-center py-8">Loading...</TableCell></TableRow>}
           </TableBody>
         </Table>
+        </div>
       )}
 
-      <div
-        className="bg-red-600 w-[3rem] h-[3rem] rounded-full flex items-center justify-center absolute bottom-28 right-10"
-        onClick={() => setIsOpen(true)}
-      >
-        <GoPlus className="text-white" />
-      </div>
+      {fetchData && fetchData.length > 0 && (
+          <button
+            className="fixed bottom-8 right-8 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 hover:scale-105 transition-all z-40"
+            onClick={() => setIsOpen(true)}
+            title="Add New Business"
+        >
+            <GoPlus size={28} />
+        </button>
+      )}
 
       <CNDialog
         open={openStepModal}
         onOpenChange={() => setOpenStepModal(!openStepModal)}
       >
-        <DialogContent className="w-[20rem]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Step one completed</DialogTitle>
-            <DialogDescription className="mt-3 text-lg text-gray-800">
-              <p className="flex items-center gap-1">
-                Create a business{' '}
-                <IoCheckmarkDoneSharp className="text-darkGreen" />
-              </p>
-              <p className="flex items-center gap-1">
-                Create a staff <MdOutlineCancel className="text-red-700" />
-              </p>
-              <p className="flex items-center gap-1">
-                Create a reward <MdOutlineCancel className="text-red-700" />
-              </p>
-              <p className="flex items-center gap-1">
-                Create a campaign <MdOutlineCancel className="text-red-700" />
-              </p>
+            <DialogTitle>Progress Status</DialogTitle>
+            <DialogDescription className="mt-3 text-lg text-gray-800 space-y-2">
+              <div className="flex items-center justify-between p-2 bg-green-50 rounded-md">
+                <span>Create a business</span>
+                <IoCheckmarkDoneSharp className="text-green-600 text-xl" />
+              </div>
+              <div className="flex items-center justify-between p-2">
+                 <span>Create a staff</span>
+                 <MdOutlineCancel className="text-gray-300 text-xl" />
+              </div>
+              <div className="flex items-center justify-between p-2">
+                 <span>Create a reward</span>
+                 <MdOutlineCancel className="text-gray-300 text-xl" />
+              </div>
+              <div className="flex items-center justify-between p-2">
+                 <span>Create a campaign</span>
+                 <MdOutlineCancel className="text-gray-300 text-xl" />
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               type="button"
-              variant={'outline'}
+              variant={'default'}
               onClick={() => setOpenStepModal(false)}
             >
-              close
+              Continue
             </Button>
           </DialogFooter>
         </DialogContent>

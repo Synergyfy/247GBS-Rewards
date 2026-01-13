@@ -24,12 +24,12 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <p>
-        Enter the title, points code and other informations concering your
+      <p className="text-gray-600">
+        Enter the title, points cost and other information concerning your
         rewards here.
       </p>
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Title (required)
           <ToolTip content="This represents the title or name of the reward" />
         </label>
@@ -38,11 +38,11 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
           placeholder="Enter title"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
         />
       </div>
       <div>
-        <label className=" mb-1 flex items-center gap-2">
+         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Points Cost (required)
           <ToolTip content="This represents the amount of points it will cost a customer to redeem this reward" />
         </label>
@@ -51,18 +51,18 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
           placeholder="Enter points cost"
           value={pointsCost ?? ''}
           onChange={e => setPointsCost(e.target.value)}
-          className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
         />
       </div>
-      <div className="flex items-center gap-2">
-        <div className="w-[30%]">
-          <label className="mb-1 flex items-center gap-2">
-            currency
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="w-full sm:w-1/3">
+           <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+            Currency
             <ToolTip content="This is the currency this reward will be operated in" />
           </label>
           <select
             name="currency"
-            className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+            className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
             value={currency}
             onChange={e => setCurrency(e.target.value)}
           >
@@ -115,18 +115,17 @@ const GeneralForm: React.FC<GeneralFormProps> = ({
             <option value="₽">AMX (₽)</option>
           </select>
         </div>
-        <div className="w-[calc(70%)]">
-          <label className=" mb-1 flex items-center gap-2">
+        <div className="w-full sm:w-2/3">
+           <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
             Reward Value (required)
             <ToolTip content="This is the value customer will get once they have enough point to redeem the reward" />
           </label>
-          <label className="block mb-1"></label>
           <input
             type="text"
             placeholder="Enter reward value"
             value={rewardValue}
             onChange={e => setRewardValue(e.target.value)}
-            className="block w-full p-2 border-b-2 border-[#838383] focus:border-[#2D3DFF] outline-none"
+            className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
           />
         </div>
       </div>
