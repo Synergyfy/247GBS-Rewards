@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 // import { getCookieValue } from './services/getCookieValue';
 
-export default function middleware(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   if (req.nextUrl.pathname === '/') {
     return NextResponse.redirect(new URL('/loyalty', req.url));
   }
