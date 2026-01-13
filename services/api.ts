@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3005/';
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mcom-backend.vercel.app/' || 'http://localhost:3005/';
 
 const api = axios.create({
   baseURL,
