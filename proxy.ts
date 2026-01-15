@@ -3,9 +3,7 @@ import { NextRequest } from 'next/server';
 // import { getCookieValue } from './services/getCookieValue';
 
 export default function proxy(req: NextRequest) {
-  if (req.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/loyalty', req.url));
-  }
+  // Root page now serves the main landing page directly (no redirect)
 
   if (req.nextUrl.pathname === '/loyalty-admin') {
     const token = req.cookies.get('token')?.value;
@@ -49,7 +47,6 @@ export default function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/',
     '/loyalty-admin',
     '/dashboard',
     '/staff/:path*',
