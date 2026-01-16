@@ -1,13 +1,10 @@
 'use client';
 
-import { Inter } from 'next/font/google';
 import './globals.css';
 import QueryProvider from '@/services/Provider';
 import { Provider } from 'react-redux';
 import { store } from '@/store/store';
 import { Toaster } from '@/components/ui/sonner';
-
-const inter = Inter({ variable: '--font-inter', subsets: ['latin'] });
 
 export default function RootLayout({
   children,
@@ -19,11 +16,11 @@ export default function RootLayout({
       <head>
         <style>{`
           :root {
-            --font-inter: ${inter.variable};
+            --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           }
         `}</style>
       </head>
-      <body className={`${inter.variable} antialiased`}>
+      <body className="antialiased" style={{ fontFamily: 'var(--font-inter)' }}>
         <Provider store={store}>
           <QueryProvider>
             {children}
@@ -31,7 +28,6 @@ export default function RootLayout({
           </QueryProvider>
         </Provider>
       </body>
-      {/* ✅ Moved outside */}
     </html>
   );
 }

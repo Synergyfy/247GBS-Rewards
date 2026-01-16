@@ -40,6 +40,7 @@ export interface StaffType {
   name: string;
   email: string;
   password: string;
+  avatar?: string;
   isActive: boolean;
 }
 

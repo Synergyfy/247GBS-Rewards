@@ -221,14 +221,27 @@ const Hero = () => {
                       <svg className="absolute inset-x-4 bottom-4 w-[calc(100%-32px)] h-3/4 z-10 overflow-visible">
                         <motion.path
                           d="M 0 100 Q 10 40, 20 60 T 40 20 T 60 80 T 80 40 T 100 10"
+                          animate={{
+                            d: [
+                              "M 0 100 Q 10 40, 20 60 T 40 20 T 60 80 T 80 40 T 100 10",
+                              "M 0 85 Q 20 20, 30 50 T 50 10 T 70 70 T 90 30 T 100 45",
+                              "M 0 70 Q 15 60, 25 35 T 45 75 T 65 25 T 85 55 T 100 5",
+                              "M 0 100 Q 10 40, 20 60 T 40 20 T 60 80 T 80 40 T 100 10"
+                            ]
+                          }}
+                          transition={{
+                            duration: 12,
+                            repeat: Infinity,
+                            ease: "linear"
+                          }}
                           fill="none"
                           stroke="url(#gradient-line)"
                           strokeWidth="3"
                           strokeLinecap="round"
                           initial={{ pathLength: 0, opacity: 0 }}
-                          animate={{ pathLength: 1, opacity: 1 }}
-                          transition={{ duration: 2, delay: 2, ease: "easeInOut" }}
-                          style={{ filter: 'drop-shadow(0 0 8px rgba(249, 115, 22, 0.5))' }}
+                          whileInView={{ pathLength: 1, opacity: 1 }}
+                          viewport={{ once: true }}
+                          style={{ filter: 'drop-shadow(0 0 12px rgba(249, 115, 22, 0.6))' }}
                         />
                         <defs>
                           <linearGradient id="gradient-line" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -244,8 +257,22 @@ const Hero = () => {
                           <div key={i} className="flex-1 relative group/bar">
                             <motion.div
                               initial={{ height: 0 }}
-                              animate={{ height: `${height}%` }}
-                              transition={{ delay: 1.6 + i * 0.05, duration: 0.8, ease: "circOut" }}
+                              whileInView={{ height: `${height}%` }}
+                              viewport={{ once: true }}
+                              animate={{
+                                height: [
+                                  `${height}%`,
+                                  `${Math.min(100, height + 5)}%`,
+                                  `${Math.max(10, height - 5)}%`,
+                                  `${height}%`
+                                ]
+                              }}
+                              transition={{
+                                duration: 4 + i * 0.2,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                                delay: 1.6 + i * 0.05
+                              }}
                               className="w-full bg-gradient-to-t from-orange-600 to-amber-400 rounded-t-sm shadow-[0_0_15px_rgba(249,115,22,0.2)] group-hover/bar:brightness-125 transition-all"
                             />
                             {/* Bar glow on hover */}

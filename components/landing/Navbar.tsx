@@ -38,28 +38,26 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden md:flex items-center space-x-1">
-            {['Features', 'How it Works', 'Pricing'].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(' ', '-')}`}
-                className={`px-4 py-2 rounded-full font-medium transition-all ${scrolled
-                  ? 'text-slate-600 hover:text-orange-600 hover:bg-orange-50'
-                  : 'text-slate-200 hover:text-white hover:bg-white/10'
-                  }`}
-              >
-                {item}
-              </a>
-            ))}
-            <div className="flex items-center gap-3 ml-4 pl-4 border-l border-slate-200/20">
+            <Link
+              href="/feature"
+              className={`px-4 py-2 rounded-full font-medium transition-all ${scrolled
+                ? 'text-slate-600 hover:text-orange-600 hover:bg-orange-50'
+                : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+            >
+              Features
+            </Link>
+            <a
+              href="#campaign"
+              className={`px-4 py-2 rounded-full font-medium transition-all ${scrolled
+                ? 'text-slate-600 hover:text-orange-600 hover:bg-orange-50'
+                : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
+            >
+              Campaign
+            </a>
+            <div className="flex items-center gap-3 ml-6">
               <Link href="/signin">
-                <button className={`px-4 py-2 rounded-full font-medium transition-all ${scrolled
-                  ? 'text-slate-700 hover:text-orange-600'
-                  : 'text-white hover:bg-white/10'
-                  }`}>
-                  Sign In
-                </button>
-              </Link>
-              <Link href="/signup">
                 <button className="group px-6 py-2.5 rounded-full font-bold bg-orange-600 text-white shadow-lg shadow-orange-600/20 hover:bg-orange-700 hover:shadow-orange-600/30 transition-all flex items-center gap-2">
                   <Sparkles className="w-4 h-4 fill-white" />
                   Get Started
@@ -87,21 +85,22 @@ const Navbar = () => {
             className="md:hidden bg-white border-b border-slate-100 overflow-hidden absolute top-20 left-0 w-full shadow-xl"
           >
             <div className="px-4 pt-2 pb-6 space-y-1">
-              {['Features', 'How it Works', 'Pricing'].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(' ', '-')}`}
-                  className="block px-4 py-3 text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item}
-                </a>
-              ))}
-              <div className="border-t border-slate-100 my-3 pt-3 space-y-2">
-                <Link href="/signin" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl font-medium">
-                  Sign In
-                </Link>
-                <Link href="/signup" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-center bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-600/20">
+              <Link
+                href="/feature"
+                className="block px-4 py-3 text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Features
+              </Link>
+              <a
+                href="#campaign"
+                className="block px-4 py-3 text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Campaign
+              </a>
+              <div className="border-t border-slate-100 my-3 pt-3">
+                <Link href="/signin" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-center bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-600/20">
                   Get Started
                 </Link>
               </div>
