@@ -10,7 +10,7 @@ const stats = [
     label: "Business Tools",
     description: "CRM, Sales, Marketing & More",
     icon: TrendingUp,
-    color: "bg-orange-600"
+    color: "bg-blue-600"
   },
   {
     value: "10K+",
@@ -24,7 +24,7 @@ const stats = [
     label: "Rewards Given",
     description: "Cashback & Points",
     icon: Award,
-    color: "bg-orange-600"
+    color: "bg-blue-600"
   },
   {
     value: "24/7",
@@ -50,8 +50,8 @@ const Stats = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 bg-orange-50 px-4 py-2 rounded-full mb-4">
-            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 bg-blue-50 px-4 py-2 rounded-full mb-4">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Trusted by Thousands
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
@@ -72,7 +72,7 @@ const Stats = () => {
               className="group relative"
             >
               {/* Card */}
-              <div className="relative bg-white rounded-2xl p-8 shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:shadow-orange-500/10 group-hover:border-orange-200">
+              <div className="relative bg-white rounded-2xl p-8 shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-500/10 group-hover:border-blue-200">
                 {/* Border accent */}
                 <div className={`absolute top-0 left-0 right-0 h-1 ${stat.color}`} />
 

@@ -81,118 +81,145 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen p-6 bg-gray-100">
-      <div className="grid grid-rows-3 grid-cols-3 gap-4 max-w-4xl w-full overflow-hidden shadow-lg bg-white rounded-lg">
-        <div className="row-span-3 flex items-center justify-center relative w-full h-full">
+    <div className="min-h-screen w-full flex bg-white text-slate-900 overflow-hidden relative selection:bg-blue-500/10">
+      {/* Visual Side (Left) */}
+      <div className="hidden lg:block w-1/2 relative overflow-hidden bg-slate-50">
+        <div className="absolute inset-0 z-0 opacity-10">
           <Image
             src="/Login/signupbg.png"
-            alt="Signup Background"
+            alt="Dashboard"
             layout="fill"
             objectFit="cover"
+            priority
+            className="scale-105"
           />
         </div>
-        <div className="flex flex-col col-span-2 row-span-3 w-full">
-          <div className="flex justify-between items-center py-4 px-6 border-b">
-            <Link
-              href="/landing"
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <span className="text-lg">
-                <SlArrowLeft />
-              </span>
-              <span className="text-sm">Return Home</span>
-            </Link>
-            <Link href="/signin" className="text-sm cursor-pointer">
-              Already a Member?{' '}
-              <span className="text-sm font-semibold underline">
-                LOG IN NOW
-              </span>
+
+        {/* Ambient Gradients */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-200/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-blue-100/30 rounded-full blur-[100px] pointer-events-none" />
+
+        {/* Content on visual side */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full p-20 text-center">
+          <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-600/30 mb-8 -rotate-3 transition-transform hover:rotate-0">
+            <span className="text-white font-black text-4xl">G</span>
+          </div>
+          <h2 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">
+            Start Your Journey <br /> With 247GBS
+          </h2>
+          <p className="text-xl text-slate-600 font-medium max-w-md">
+            The all-in-one system designed to grow your business automatically.
+          </p>
+        </div>
+      </div>
+
+      {/* SignUp Form Side (Right) */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-8 sm:px-12 lg:px-24 relative z-20 bg-white overflow-y-auto py-20">
+        <div className="w-full max-w-md space-y-8 relative">
+          {/* Back Button */}
+          <Link
+            href="/"
+            className="absolute -top-16 left-0 inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors text-sm font-bold group"
+          >
+            <SlArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+
+          {/* Login Link */}
+          <div className="absolute -top-16 right-0 text-sm font-medium text-slate-600">
+            Already a member?{' '}
+            <Link href="/signin" className="text-blue-600 font-bold hover:underline">
+              LOG IN NOW
             </Link>
           </div>
-          <div className="p-6 text-center rounded-lg">
-            <h2 className="text-2xl font-bold text-left mb-4">
-              Create Account
-            </h2>
-            <div className="border border-gray-400 px-6 py-4 rounded-lg">
-              <button className="w-full flex items-center justify-center gap-2 bg-[#0C82EE] text-white py-2 rounded-full mb-4">
-                <FaFacebook /> Sign up with Facebook
+
+          {/* Header */}
+          <div className="space-y-2 text-center lg:text-left">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900">
+              Create <span className="text-blue-600">Account</span>
+            </h1>
+            <p className="text-slate-600 text-lg font-medium">
+              Join the growth engine today.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {/* Social Buttons */}
+            <div className="grid grid-cols-2 gap-4">
+              <button className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-all font-bold text-sm">
+                <FcGoogle size={20} /> Google
               </button>
-              <button className="w-full flex items-center justify-center border border-black gap-2 bg-white text-black py-2 rounded-full mb-4">
-                <FcGoogle /> Sign up with Google
+              <button className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#1877F2] text-white hover:bg-[#166fe5] transition-all font-bold text-sm">
+                <FaFacebook size={18} /> Facebook
               </button>
-              <div className="relative my-4 flex items-center">
-                <div className="w-full border-b"></div>
-                <span className="px-4 bg-white">OR</span>
-                <div className="w-full border-b"></div>
-              </div>
-              <h3 className="text-lg font-semibold mb-4">Sign up with Email</h3>
-              <form onSubmit={handleSubmit}>
-                {(
-                  [
-                    'fullName',
-                    'email',
-                    'phoneNumber',
-                    'location',
-                    'referralCode',
-                  ] as Array<keyof FormData>
-                ).map((field, index) => (
-                  <div key={index} className="mb-4">
-                    <input
-                      type={field === 'email' ? 'email' : 'text'}
-                      name={field}
-                      placeholder={
-                        field === 'referralCode'
-                          ? 'Referral Code (Optional)'
-                          : `${field.replace(/([A-Z])/g, ' $1')}*`
-                      }
-                      value={formData[field]}
-                      onChange={handleChange}
-                      className={`w-full border p-2 rounded-lg ${
-                        errors[field] ? 'border-red-500' : 'border-gray-600'
-                      }`}
-                    />
-                    {errors[field] && (
-                      <p className="text-red-500 text-sm mt-1 text-start">
-                        {errors[field]}
-                      </p>
-                    )}
-                  </div>
-                ))}
-                {apiError && (
-                  <p className="text-lg text-red-600 text-start">{apiError}</p>
-                )}
-                <div className="flex items-center mb-4">
-                  <input type="checkbox" className="mr-2" />
-                  <label>
-                    I agree to the{' '}
-                    <span className="underline">Terms of Service</span> and{' '}
-                    <span className="underline">Privacy Policy</span>
-                  </label>
+            </div>
+
+            <div className="relative flex items-center">
+              <div className="w-full border-b border-slate-100"></div>
+              <span className="px-4 bg-white text-slate-400 text-xs font-bold tracking-widest uppercase">Or</span>
+              <div className="w-full border-b border-slate-100"></div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {apiError && (
+                <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-bold">
+                  {apiError}
                 </div>
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-2 rounded-full"
-                  disabled={isPending}
-                >
-                  {isPending ? 'Loading...' : 'Proceed'}
-                </button>
-              </form>
-              <p className="text-center mt-4">
-                Already a member?
-                <Link href="/signin" className="underline cursor-pointer">
-                  {' '}
-                  Login
-                </Link>
-              </p>
-            </div>
+              )}
+
+              {(
+                [
+                  'fullName',
+                  'email',
+                  'phoneNumber',
+                  'location',
+                  'referralCode',
+                ] as Array<keyof FormData>
+              ).map((field) => (
+                <div key={field}>
+                  <input
+                    type={field === 'email' ? 'email' : 'text'}
+                    name={field}
+                    placeholder={
+                      field === 'referralCode'
+                        ? 'Referral Code (Optional)'
+                        : `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}*`
+                    }
+                    value={formData[field]}
+                    onChange={handleChange}
+                    className={`w-full bg-slate-50 border rounded-2xl px-6 py-4 text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all ${errors[field] ? 'border-red-500' : 'border-slate-200 focus:border-blue-500/50'
+                      }`}
+                  />
+                  {errors[field] && (
+                    <p className="text-red-500 text-xs mt-1 font-bold ml-2">
+                      {errors[field]}
+                    </p>
+                  )}
+                </div>
+              ))}
+
+              <div className="flex items-start gap-3 py-2">
+                <input type="checkbox" id="terms" className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20" required />
+                <label htmlFor="terms" className="text-sm text-slate-600 font-medium">
+                  I agree to the <span className="text-blue-600 font-bold hover:underline cursor-pointer">Terms of Service</span> and <span className="text-blue-600 font-bold hover:underline cursor-pointer">Privacy Policy</span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isPending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 transition-all disabled:opacity-50 text-lg"
+              >
+                {isPending ? 'Processing...' : 'Create Account'}
+              </button>
+            </form>
           </div>
-          <div className="flex justify-between items-center p-6 text-sm border-t">
-            <span>&copy; 2021 - 2022 FoxHub Inc. All Rights Reserved</span>
-            <div className="flex items-center gap-2">
-              <span className="cursor-pointer">❓</span>
-              <span className="cursor-pointer">Need help?</span>
-            </div>
-          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="mt-12 text-center w-full text-xs text-slate-400 font-bold uppercase tracking-widest">
+          &copy; 2026 247GBS Inc. All rights reserved.
         </div>
       </div>
     </div>

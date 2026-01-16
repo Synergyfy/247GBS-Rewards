@@ -48,7 +48,7 @@ const HowItWorks = () => {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-orange-600 font-bold tracking-widest text-sm uppercase"
+            className="text-blue-600 font-bold tracking-widest text-sm uppercase"
           >
             Our Simple Process
           </motion.span>
@@ -84,19 +84,19 @@ const HowItWorks = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-orange-600/30 transition-all group pt-12"
+                className="relative bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-600/30 transition-all group pt-12"
               >
                 {/* Step Marker */}
-                <div className="absolute -top-6 left-8 lg:left-1/2 lg:-translate-x-1/2 w-12 h-12 bg-orange-600 border-4 border-white text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg shadow-orange-600/20 z-10 transition-transform group-hover:scale-110">
+                <div className="absolute -top-6 left-8 lg:left-1/2 lg:-translate-x-1/2 w-12 h-12 bg-blue-600 border-4 border-white text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg shadow-blue-600/20 z-10 transition-transform group-hover:scale-110">
                   {index + 1}
                 </div>
 
                 {/* Icon */}
-                <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-orange-50 transition-colors">
-                  <step.icon className="w-7 h-7 text-orange-600" />
+                <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-50 transition-colors">
+                  <step.icon className="w-7 h-7 text-blue-600" />
                 </div>
 
-                <h3 className="text-2xl font-bold text-slate-900 mb-4 transition-colors group-hover:text-orange-600">
+                <h3 className="text-2xl font-bold text-slate-900 mb-4 transition-colors group-hover:text-blue-600">
                   {step.title}
                 </h3>
                 <p className="text-slate-600 font-medium leading-relaxed mb-6">
@@ -106,7 +106,7 @@ const HowItWorks = () => {
                 <ul className="space-y-3">
                   {step.benefits.map((benefit, bIdx) => (
                     <li key={bIdx} className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                      <CheckCircle2 className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
                       {benefit}
                     </li>
                   ))}
@@ -123,7 +123,7 @@ const HowItWorks = () => {
           className="mt-20 text-center"
         >
           <Link href="/signup">
-            <button className="px-10 py-5 bg-orange-600 text-white rounded-full font-extrabold text-xl shadow-2xl shadow-orange-600/30 hover:bg-orange-700 hover:scale-105 transition-all flex items-center gap-3 mx-auto">
+            <button className="px-10 py-5 bg-blue-600 text-white rounded-full font-extrabold text-xl shadow-2xl shadow-blue-600/30 hover:bg-blue-700 hover:scale-105 transition-all flex items-center gap-3 mx-auto">
               Start Your Journey Today
               <ArrowRight className="w-6 h-6" />
             </button>
