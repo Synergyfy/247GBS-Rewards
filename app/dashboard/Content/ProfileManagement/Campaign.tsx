@@ -186,6 +186,31 @@ const Campaign: React.FC = () => {
     });
   };
 
+  const isLastTab = activeTab === tabs[tabs.length - 1];
+  const isFirstTab = activeTab === tabs[0];
+
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+      setErrorMsg(null);
+    } else {
+      if (editMode) {
+        processUpdate();
+      } else {
+        handleSubmit();
+      }
+    }
+  };
+
+  const handleBack = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+      setErrorMsg(null);
+    }
+  };
+
   return (
     <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
       {fetchData && fetchData?.length < 1 && (
@@ -249,8 +274,8 @@ const Campaign: React.FC = () => {
                     <button
                       key={tab}
                       className={`pb-2 px-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === tab
-                          ? 'border-blue-600 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-blue-600 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                         }`}
                       onClick={() => setActiveTab(tab)}
                     >
@@ -274,31 +299,38 @@ const Campaign: React.FC = () => {
               </div>
             </div>
 
-            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+            <div className="border-t border-gray-200 px-6 py-4 flex justify-between items-center bg-gray-50 rounded-b-xl">
               <button
-                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
                 onClick={handleClose}
                 disabled={isPending || updatePending}
               >
                 Cancel
               </button>
-              {!editMode ? (
+              <div className="flex gap-3">
+                {!isFirstTab && (
+                  <button
+                    className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                    onClick={handleBack}
+                    disabled={isPending || updatePending}
+                  >
+                    Back
+                  </button>
+                )}
                 <button
-                  className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                  onClick={handleSubmit}
-                  disabled={isPending}
+                  className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 min-w-[140px]"
+                  onClick={handleNext}
+                  disabled={isPending || updatePending}
                 >
-                  {isPending ? 'Creating...' : 'Create Campaign'}
+                  {!isLastTab ? (
+                    'Next'
+                  ) : editMode ? (
+                    updatePending ? 'Updating...' : 'Update Campaign'
+                  ) : (
+                    isPending ? 'Creating...' : 'Create Campaign'
+                  )}
                 </button>
-              ) : (
-                <button
-                  className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                  onClick={processUpdate}
-                  disabled={updatePending}
-                >
-                  {updatePending ? 'Updating...' : 'Update Campaign'}
-                </button>
-              )}
+              </div>
             </div>
           </Dialog.Panel>
         </div>

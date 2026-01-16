@@ -114,7 +114,7 @@ const StaffModal = ({
                                     <label className="block text-sm font-medium text-slate-700">Full Name</label>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-orange-500 transition-colors" />
+                                            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-blue-500 transition-colors" />
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p>Enter the staff member's legal full name.</p>
@@ -124,7 +124,7 @@ const StaffModal = ({
                                 <input
                                     type="text"
                                     placeholder="e.g. John Doe"
-                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 />
@@ -135,7 +135,7 @@ const StaffModal = ({
                                     <label className="block text-sm font-medium text-slate-700">Email Address</label>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-orange-500 transition-colors" />
+                                            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-blue-500 transition-colors" />
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p>This email will be used for login access.</p>
@@ -145,7 +145,7 @@ const StaffModal = ({
                                 <input
                                     type="email"
                                     placeholder="john@example.com"
-                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 />
@@ -157,7 +157,7 @@ const StaffModal = ({
                                         <label className="block text-sm font-medium text-slate-700">Password</label>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-orange-500 transition-colors" />
+                                                <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-blue-500 transition-colors" />
                                             </TooltipTrigger>
                                             <TooltipContent>
                                                 <p>Set a secure temporary password for the staff member.</p>
@@ -167,7 +167,7 @@ const StaffModal = ({
                                     <input
                                         type="password"
                                         placeholder="••••••••"
-                                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     />
@@ -179,7 +179,7 @@ const StaffModal = ({
                                     <span className="text-sm font-medium text-slate-700">Account Status</span>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-orange-500 transition-colors" />
+                                            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-blue-500 transition-colors" />
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p>Toggle to admit or revoke system access.</p>
@@ -187,7 +187,7 @@ const StaffModal = ({
                                     </Tooltip>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                    <div className={`w-10 h-6 rounded-full p-1 cursor-pointer transition-colors ${formData.isActive ? 'bg-orange-600' : 'bg-slate-300'}`} onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}>
+                                    <div className={`w-10 h-6 rounded-full p-1 cursor-pointer transition-colors ${formData.isActive ? 'bg-blue-600' : 'bg-slate-300'}`} onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}>
                                         <div className={`w-4 h-4 rounded-full bg-white transition-transform ${formData.isActive ? 'translate-x-4' : 'translate-x-0'}`} />
                                     </div>
                                     <span className="text-sm font-medium text-slate-600">
@@ -209,7 +209,7 @@ const StaffModal = ({
                     <button
                         onClick={() => onSubmit(formData)}
                         disabled={isLoading}
-                        className="px-5 py-2.5 rounded-xl bg-orange-600 text-white font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-700 hover:shadow-orange-600/30 transition-all flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-blue-600/30 transition-all flex items-center gap-2"
                     >
                         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                         {initialData ? 'Update StaffMember' : 'Create StaffMember'}
@@ -278,7 +278,7 @@ const Staff = () => {
                 </div>
                 <button
                     onClick={() => { setEditingStaff(undefined); setIsModalOpen(true); }}
-                    className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-orange-600/20 transition-all flex items-center gap-2 transform active:scale-95"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all flex items-center gap-2 transform active:scale-95"
                 >
                     <Plus className="w-5 h-5" />
                     Add New Staff
@@ -288,7 +288,7 @@ const Staff = () => {
             {/* Stats/Filter Bar */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div className="p-4 rounded-2xl bg-orange-50 text-orange-600">
+                    <div className="p-4 rounded-2xl bg-blue-50 text-blue-600">
                         <Users className="w-6 h-6" />
                     </div>
                     <div>
@@ -314,7 +314,7 @@ const Staff = () => {
             {/* Staff Grid */}
             {isLoading ? (
                 <div className="flex justify-center py-20">
-                    <Loader2 className="w-10 h-10 animate-spin text-orange-600" />
+                    <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -326,7 +326,7 @@ const Staff = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ delay: index * 0.05 }}
-                                className="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:border-orange-100 transition-all duration-300 relative overflow-hidden"
+                                className="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 relative overflow-hidden"
                             >
                                 <div className={`absolute top-0 left-0 w-full h-1 ${staff.isActive ? 'bg-gradient-to-r from-green-400 to-green-600' : 'bg-slate-200'}`} />
 
@@ -337,7 +337,7 @@ const Staff = () => {
                                                 {staff.avatar ? (
                                                     <Image src={staff.avatar} alt={staff.name} width={56} height={56} className="object-cover w-full h-full" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-orange-50 text-orange-600 font-bold text-xl">
+                                                    <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-600 font-bold text-xl">
                                                         {staff.name.charAt(0).toUpperCase()}
                                                     </div>
                                                 )}
@@ -345,7 +345,7 @@ const Staff = () => {
                                             <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${staff.isActive ? 'bg-green-500' : 'bg-slate-300'}`} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-slate-900 group-hover:text-orange-600 transition-colors">{staff.name}</h3>
+                                            <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{staff.name}</h3>
                                             <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mt-0.5">
                                                 <Shield className="w-3 h-3" />
                                                 Staff Member
@@ -370,7 +370,7 @@ const Staff = () => {
                                 <div className="flex gap-2 pt-4 border-t border-slate-50">
                                     <button
                                         onClick={() => { setEditingStaff(staff); setIsModalOpen(true); }}
-                                        className="flex-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-sm hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center justify-center gap-2"
+                                        className="flex-1 py-2.5 rounded-xl bg-slate-50 text-slate-600 font-bold text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
                                     >
                                         <Edit2 className="w-4 h-4" />
                                         Edit
@@ -401,7 +401,7 @@ const Staff = () => {
                     </p>
                     <button
                         onClick={() => { setEditingStaff(undefined); setIsModalOpen(true); }}
-                        className="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold shadow-lg hover:shadow-orange-600/30 transition-all"
+                        className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg hover:shadow-blue-600/30 transition-all"
                     >
                         Add Staff Member
                     </button>

@@ -20,7 +20,7 @@ const features = [
     title: "Business Audit & Growth Engine",
     description: "Understand what's selling, what's not, where profit can be made, and what campaigns to run. Get actionable insights daily.",
     highlights: ["Sales Analysis", "Stock Optimization", "Staff Utilization"],
-    color: "bg-orange-600",
+    color: "bg-blue-600",
     size: "large"
   },
   {
@@ -28,7 +28,7 @@ const features = [
     title: "Rewards, Cashback & Loyalty",
     description: "Earn cashback, loyalty points, free products, vouchers — all stored in your V-Card wallet.",
     highlights: ["V-Card Wallet", "Cashback", "Loyalty Points"],
-    color: "bg-orange-600",
+    color: "bg-blue-600",
     size: "medium"
   },
   {
@@ -36,7 +36,7 @@ const features = [
     title: "Customer Growth & Marketing",
     description: "QR campaigns, loyalty cards, coupons, vouchers, and local promotions to bring customers back automatically.",
     highlights: ["QR Campaigns", "Vouchers", "Local Promos"],
-    color: "bg-orange-600",
+    color: "bg-blue-600",
     size: "medium"
   },
   {
@@ -44,7 +44,7 @@ const features = [
     title: "80+ Business Software Tools",
     description: "CRM, sales tracking, deal pipelines, campaign builder, support desk, AI assistants, dashboards & analytics.",
     highlights: ["CRM", "AI Assistants", "Analytics"],
-    color: "bg-orange-600",
+    color: "bg-blue-600",
     size: "large"
   },
   {
@@ -52,7 +52,7 @@ const features = [
     title: "Machines & In-Store Tools",
     description: "Payment terminals, QR displays, loyalty scanners, and smart tills connected to your rewards system.",
     highlights: ["Payment Terminals", "QR Displays", "Smart Tills"],
-    color: "bg-orange-600",
+    color: "bg-blue-600",
     size: "medium"
   },
   {
@@ -60,7 +60,7 @@ const features = [
     title: "People & Support",
     description: "Account managers, business agents, AI assistants, help desk, and consultants — you're never alone.",
     highlights: ["Account Managers", "Help Desk", "Consultants"],
-    color: "bg-orange-600",
+    color: "bg-blue-600",
     size: "medium"
   },
   {
@@ -68,7 +68,7 @@ const features = [
     title: "Group & National Power",
     description: "Join with other businesses for group buying, shared marketing, national campaigns, and partner promotions.",
     highlights: ["Group Buying", "Shared Marketing", "Partner Promos"],
-    color: "bg-orange-600",
+    color: "bg-blue-600",
     size: "medium"
   },
   {
@@ -97,14 +97,14 @@ const Features = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 text-sm font-bold text-orange-600 bg-orange-50 border border-orange-100 px-4 py-2 rounded-full mb-6"
+            className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 border border-blue-100 px-4 py-2 rounded-full mb-6"
           >
             <Layers className="w-4 h-4" />
             Complete Business Suite
           </motion.div>
           <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
             Everything You Get with{' '}
-            <span className="text-orange-600">
+            <span className="text-blue-600">
               247GBS
             </span>
           </h2>
@@ -126,9 +126,9 @@ const Features = () => {
               className={`group relative ${feature.size === 'large' ? 'md:col-span-2 lg:col-span-1' : ''
                 }`}
             >
-              <div className="h-full relative bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-orange-200 transition-all duration-300 overflow-hidden">
+              <div className="h-full relative bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 overflow-hidden">
                 {/* Icon container - Solid background for max contrast */}
-                <div className={`relative w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mb-6 shadow-lg shadow-orange-600/20 group-hover:scale-110 transition-all duration-300`}>
+                <div className={`relative w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mb-6 shadow-lg ${feature.color === 'bg-slate-900' ? 'shadow-slate-900/20' : 'shadow-blue-600/20'} group-hover:scale-110 transition-all duration-300`}>
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
 
@@ -153,7 +153,7 @@ const Features = () => {
                 </div>
 
                 {/* Arrow indicator on hover */}
-                <div className="flex items-center text-orange-600 font-bold text-sm group-hover:gap-2 transition-all">
+                <div className="flex items-center text-blue-600 font-bold text-sm group-hover:gap-2 transition-all">
                   Learn more <ArrowRight className="w-4 h-4" />
                 </div>
               </div>

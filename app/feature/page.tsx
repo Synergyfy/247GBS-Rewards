@@ -52,9 +52,9 @@ const features = [
             'Free products and services',
             'Exclusive vouchers'
         ],
-        iconBg: 'bg-orange-600',
-        iconColor: 'text-orange-600',
-        cardBg: 'bg-orange-50',
+        iconBg: 'bg-blue-600',
+        iconColor: 'text-blue-600',
+        cardBg: 'bg-blue-50',
     },
     {
         id: 'marketing',
@@ -184,19 +184,25 @@ export default function FeaturePage() {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="relative overflow-hidden pt-32 pb-24">
-                {/* Background Image */}
-                <div className="absolute inset-0 z-0">
-                    <Image
-                        src="/images/hero_bg.png"
-                        alt="Background"
-                        fill
-                        className="object-cover"
-                        priority
-                        quality={100}
+            <section className="relative overflow-hidden pt-32 pb-24 bg-white">
+                {/* Background Decorations */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <motion.div
+                        animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.3, 0.5, 0.3],
+                        }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-[100px]"
                     />
-                    {/* Dark Overlay to preserve text contrast */}
-                    <div className="absolute inset-0 bg-slate-900/95" />
+                    <motion.div
+                        animate={{
+                            scale: [1.2, 1, 1.2],
+                            opacity: [0.2, 0.4, 0.2],
+                        }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                        className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-gradient-to-tr from-blue-100 to-purple-100 rounded-full blur-[80px]"
+                    />
                 </div>
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -206,50 +212,43 @@ export default function FeaturePage() {
                         transition={{ duration: 0.6 }}
                         className="text-center"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-600 mb-8">
-                            <Sparkles className="w-4 h-4 text-white" />
-                            <span className="text-white font-semibold text-sm">Everything You Get with 247GBS</span>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 mb-8">
+                            <Sparkles className="w-4 h-4 text-blue-600" />
+                            <span className="text-blue-900 font-bold text-sm">Everything You Get with 247GBS</span>
                         </div>
 
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6 leading-tight">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
                             Grow Your Business with{' '}
-                            <span className="text-orange-500">
+                            <span className="text-blue-600">
                                 One Complete System
                             </span>
                         </h1>
 
-                        <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+                        <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
                             Customers, rewards, cashback, marketing, software, and support — all in one platform.
                             247GBS is not just a tool. It&apos;s a full business growth engine.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link href="/signup">
-                                <button className="group px-8 py-4 bg-orange-600 text-white font-bold rounded-full shadow-xl hover:bg-orange-700 hover:-translate-y-1 transition-all flex items-center gap-2">
+                                <button className="group px-8 py-4 bg-blue-600 text-white font-bold rounded-full shadow-xl shadow-blue-600/20 hover:bg-blue-700 hover:-translate-y-1 transition-all flex items-center gap-2">
                                     Join & Start Getting Rewards
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </Link>
                             <Link href="#calculator">
-                                <button className="px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-slate-100 transition-all flex items-center gap-2">
-                                    <TrendingUp className="w-5 h-5 text-orange-600" />
+                                <button className="px-8 py-4 bg-white text-slate-700 font-bold rounded-full border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+                                    <TrendingUp className="w-5 h-5 text-blue-600" />
                                     See How Much I Could Earn
                                 </button>
                             </Link>
                         </div>
                     </motion.div>
                 </div>
-
-                {/* Wave divider */}
-                <div className="absolute bottom-0 left-0 right-0 z-10">
-                    <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white" />
-                    </svg>
-                </div>
             </section>
 
             {/* Features Grid */}
-            <section className="py-24 bg-white">
+            <section className="py-24 bg-white border-y border-slate-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -257,10 +256,10 @@ export default function FeaturePage() {
                         viewport={{ once: true }}
                         className="text-center mb-16"
                     >
-                        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
+                        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight">
                             Everything Your Business Needs
                         </h2>
-                        <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+                        <p className="text-xl text-slate-600 max-w-2xl mx-auto font-medium">
                             From auditing to marketing, hardware to support — we&apos;ve got you covered.
                         </p>
                     </motion.div>
@@ -274,7 +273,7 @@ export default function FeaturePage() {
             </section>
 
             {/* Why Different Section */}
-            <section className="py-24 bg-slate-50">
+            <section className="py-24 bg-slate-50/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -282,10 +281,10 @@ export default function FeaturePage() {
                         viewport={{ once: true }}
                         className="text-center mb-16"
                     >
-                        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
+                        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight">
                             Why 247GBS Is Different
                         </h2>
-                        <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+                        <p className="text-xl text-slate-600 max-w-2xl mx-auto font-medium">
                             We don&apos;t sell tools. We give you everything to grow.
                         </p>
                     </motion.div>
@@ -305,14 +304,14 @@ export default function FeaturePage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow flex items-center gap-4 border border-slate-100"
+                                className="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-shadow flex items-center gap-4 border border-slate-100"
                             >
-                                <div className="w-14 h-14 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0">
+                                <div className="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
                                     <item.icon className="w-7 h-7 text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-900 text-lg">{item.label}</h3>
-                                    <p className="text-slate-600">{item.desc}</p>
+                                    <h3 className="font-bold text-slate-900 text-lg tracking-tight">{item.label}</h3>
+                                    <p className="text-slate-600 text-sm font-medium">{item.desc}</p>
                                 </div>
                             </motion.div>
                         ))}
@@ -321,29 +320,29 @@ export default function FeaturePage() {
             </section>
 
             {/* Final CTA */}
-            <section className="py-24 bg-slate-900">
+            <section className="py-24 bg-white border-t border-slate-100">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-3xl sm:text-4xl font-black text-white mb-6">
+                        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-6 tracking-tight">
                             Start Earning Rewards & Growing Today
                         </h2>
-                        <p className="text-xl text-slate-300 mb-10">
+                        <p className="text-xl text-slate-600 mb-10 font-medium leading-relaxed">
                             Join thousands of businesses already using 247GBS to grow.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link href="/signup">
-                                <button className="group px-8 py-4 bg-orange-600 text-white font-bold rounded-full shadow-xl hover:bg-orange-700 hover:-translate-y-1 transition-all flex items-center gap-2">
+                                <button className="group px-8 py-4 bg-blue-600 text-white font-bold rounded-full shadow-xl shadow-blue-600/20 hover:bg-blue-700 hover:-translate-y-1 transition-all flex items-center gap-2">
                                     Join 247GBS & Start Getting Rewards
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </Link>
                             <Link href="#calculator">
-                                <button className="px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-slate-100 transition-all">
+                                <button className="px-8 py-4 bg-white text-slate-700 font-bold rounded-full border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
                                     See How Much I Could Earn
                                 </button>
                             </Link>
