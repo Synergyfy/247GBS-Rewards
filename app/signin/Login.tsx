@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowLeft, Loader2, Sparkles, AlertCircle, Users, TrendingUp, Shield, ChevronRight, Briefcase } from 'lucide-react';
+import { Mail, Lock, ArrowLeft, Loader2, Sparkles, AlertCircle, Users, TrendingUp, Shield, ChevronRight, Briefcase, Eye, EyeOff } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { errorType, useAuth } from '@/services/hooks/auth/hook';
 
@@ -11,6 +11,7 @@ const Login = () => {
   const router = useRouter();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const {
     data,
@@ -122,13 +123,20 @@ const Login = () => {
 
               <div className="relative group">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-12 py-4 text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all duration-300"
                 />
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 
