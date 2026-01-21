@@ -8,6 +8,7 @@ import HowItWorks from '@/components/landing/HowItWorks';
 // import Stats from '@/components/landing/Stats';
 import CTA from '@/components/landing/CTA';
 import Footer from '@/components/landing/Footer';
+import ChatFAB from '@/components/landing/ChatFAB';
 
 const Page = () => {
   return (
@@ -21,6 +22,7 @@ const Page = () => {
         <CTA />
       </main>
       <Footer />
+      <ChatFAB />
     </div>
   );
 };
