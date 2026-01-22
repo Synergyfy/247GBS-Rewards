@@ -17,10 +17,10 @@ const Navbar = () => {
   }, []);
 
   const seasons = [
-    { name: 'Summer Campaign', href: '#summer', icon: '☀️' },
-    { name: 'Autumn Campaign', href: '#autumn', icon: '🍂' },
-    { name: 'Winter Campaign', href: '#winter', icon: '❄️' },
-    { name: 'Spring Campaign', href: '#spring', icon: '🌸' },
+    { name: 'Summer Campaign', href: '/season/summer', icon: '☀️' },
+    { name: 'Autumn Campaign', href: '/season/autumn', icon: '🍂' },
+    { name: 'Winter Campaign', href: '/season/winter', icon: '❄️' },
+    { name: 'Spring Campaign', href: '/season/spring', icon: '🌸' },
   ];
 
   return (
@@ -46,13 +46,6 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden md:flex items-center space-x-1">
-            <Link
-              href="/feature"
-              className="px-4 py-2 rounded-full font-medium transition-all text-slate-600 hover:text-blue-600 hover:bg-blue-50"
-            >
-              Features
-            </Link>
-
             {/* Season Dropdown */}
             <div
               className="relative"
@@ -101,11 +94,29 @@ const Navbar = () => {
               </AnimatePresence>
             </div>
 
+            <Link
+              href="/feature"
+              className="px-4 py-2 rounded-full font-medium transition-all text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+            >
+              Features
+            </Link>
+            <Link
+              href="/support"
+              className="px-4 py-2 rounded-full font-medium transition-all text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+            >
+              Support
+            </Link>
+
             <div className="flex items-center gap-3 ml-6">
               <Link href="/signin">
                 <button className="group px-6 py-2.5 rounded-full font-bold bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:shadow-blue-600/30 transition-all flex items-center gap-2">
-                  <span className="relative z-10">Get Started</span>
+                  <span className="relative z-10">Sign In</span>
                   <Sparkles className="w-4 h-4 fill-white animate-pulse" />
+                </button>
+              </Link>
+              <Link href="/partner">
+                <button className="px-6 py-2.5 rounded-full font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+                  Partner
                 </button>
               </Link>
             </div>
@@ -129,14 +140,6 @@ const Navbar = () => {
             className="md:hidden bg-white border-b border-slate-100 overflow-hidden absolute top-20 left-0 w-full shadow-xl"
           >
             <div className="px-4 pt-2 pb-6 space-y-1">
-              <Link
-                href="/feature"
-                className="block px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-medium"
-                onClick={() => setIsOpen(false)}
-              >
-                Features
-              </Link>
-
               <div className="py-2">
                 <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Seasonal Campaigns</p>
                 {seasons.map((season) => (
@@ -152,9 +155,27 @@ const Navbar = () => {
                 ))}
               </div>
 
+              <Link
+                href="/feature"
+                className="block px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Features
+              </Link>
+              <Link
+                href="/support"
+                className="block px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Support
+              </Link>
+
               <div className="border-t border-slate-100 my-3 pt-3">
-                <Link href="/signin" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-center bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20">
-                  Get Started
+                <Link href="/signin" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-center bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 mb-3">
+                  Sign In
+                </Link>
+                <Link href="/partner" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-center bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-colors">
+                  Partner
                 </Link>
               </div>
             </div>
