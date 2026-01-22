@@ -14,6 +14,7 @@ export interface CampaignType {
   earnEnterCode: boolean;
   earnStaffPersonalCode: boolean;
   earnGiveStaffNumber: boolean;
+  earnUserScanQR: boolean;
 
   // Redeem point settings
   redeemStaffScanQR: boolean;

@@ -1,7 +1,7 @@
 'use client';
 import { errorType, useSignupCustomer } from '@/services/hooks/auth/hook';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const SignupForm = () => {
@@ -12,6 +12,9 @@ const SignupForm = () => {
   const [error, setError] = useState('');
 
   const [campaignId, setCampaignId] = useState<string>('');
+
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
 
   useEffect(() => {
     const campaignId = localStorage.getItem('campaignId');
@@ -36,9 +39,15 @@ const SignupForm = () => {
     }
 
     if (isSuccess) {
-      router.push('/campaign/login');
+      if (redirectUrl) {
+        router.push(
+          `/campaign/login?redirect=${encodeURIComponent(redirectUrl)}`
+        );
+      } else {
+        router.push('/campaign/login');
+      }
     }
-  }, [isError, signupError, isSuccess, router]);
+  }, [isError, signupError, isSuccess, router, redirectUrl]);
 
   const handleSubmit = () => {
     setError('');

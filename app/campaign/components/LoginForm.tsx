@@ -2,7 +2,7 @@
 
 import { errorType, useAuthCustomer } from '@/services/hooks/auth/hook';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { IoEye, IoEyeOff } from 'react-icons/io5';
 
@@ -13,6 +13,9 @@ const LoginForm = () => {
   const [campaignId, setCampaignId] = useState<string>('');
   const [campaignCode, setCampaignCode] = useState<string>('');
   const [visiblePassword, setVisiblePassword] = useState<boolean>(false);
+
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
 
   useEffect(() => {
     const campaign = localStorage.getItem('currentCampaign');
@@ -53,9 +56,13 @@ const LoginForm = () => {
       document.cookie = `customerToken=${data.accessToken}; max-age=86400; path=/; secure;`;
       document.cookie = `tokenOwner=${campaignCode}; max-age=86400; path=/; secure;`;
 
-      router.push(`/campaign/${currentCampaign}`);
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else {
+        router.push(`/campaign/${currentCampaign}`);
+      }
     }
-  }, [respError, isError, isSuccess, data, router, campaignCode]);
+  }, [respError, isError, isSuccess, data, router, campaignCode, redirectUrl]);
 
   return (
     <form className="form">

@@ -16,6 +16,7 @@ const initialState: CreateCampaign = {
   earnEnterCode: true,
   earnStaffPersonalCode: true,
   earnGiveStaffNumber: true,
+  earnUserScanQR: true,
 
   // Redeem point settings
   redeemStaffScanQR: true,
@@ -105,6 +106,7 @@ const createCampaignSlice = createSlice({
         earnEnterCode?: boolean;
         earnStaffPersonalCode?: boolean;
         earnGiveStaffNumber?: boolean;
+        earnUserScanQR?: boolean;
       }>
     ) => {
       return { ...state, ...action.payload };

@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import HomeSection from '../components/HomeSection';
 import { IconType } from 'react-icons';
 import { FaHandHolding, FaQrcode } from 'react-icons/fa';
+import { BsQrCodeScan } from 'react-icons/bs';
 import { RiMessage2Fill } from 'react-icons/ri';
 import { TbGiftCard } from 'react-icons/tb';
 import VerifyCodeModal from '../components/enterCode';
@@ -14,6 +15,7 @@ import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { getCookieValue } from '@/services/getCookieValue';
 import VerifyMerchantCodeModal from '../components/enterCodeMerchant';
+import ScanStoreQRModal from '../components/scanStoreQRModal';
 
 interface EarnMethodProps {
   icon: IconType;
@@ -52,8 +54,16 @@ const Page = () => {
     earnGiveStaffNumber,
     earnStaffPersonalCode,
     earnStaffScanQR,
+    earnUserScanQR,
   } = useSelector((state: RootState) => state.campaing);
   const earnMethods = [
+    {
+      icon: BsQrCodeScan,
+      title: 'Scan Store QR',
+      description: 'Use your camera to scan the QR code in the store.',
+      ModalComponent: ScanStoreQRModal,
+      available: earnUserScanQR,
+    },
     {
       icon: FaQrcode,
       title: 'QR code',
