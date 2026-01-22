@@ -205,7 +205,7 @@ const Hero = () => {
                 transition={{ duration: 0.6, ease: 'easeOut' }}
               >
                 <motion.h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-4 leading-[1.1]">
-                  <span className={`block text-transparent bg-clip-text bg-gradient-to-r ${currentSeason.colorPrimary}`}>
+                  <span className="block text-slate-900">
                     {currentSeason.headline}
                   </span>
                 </motion.h1>
