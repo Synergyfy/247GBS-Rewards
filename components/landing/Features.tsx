@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ClipboardCheck,
@@ -11,7 +11,9 @@ import {
   Users,
   Rocket,
   UsersRound,
-  ArrowRight
+  ArrowRight,
+  ArrowLeft,
+  X
 } from 'lucide-react';
 
 const features = [
@@ -19,6 +21,7 @@ const features = [
     icon: ClipboardCheck,
     title: "Business Audit & Growth Engine",
     description: "Understand what's selling, what's not, where profit can be made, and what campaigns to run. Get actionable insights daily.",
+    details: "Deep dive into your sales data with our AI-driven audit tools. Identify underperforming stock, optimize staff schedules, and discover untapped revenue streams with daily actionable reports.",
     highlights: ["Sales Analysis", "Stock Optimization", "Staff Utilization"],
     color: "bg-blue-600",
     size: "large"
@@ -27,6 +30,7 @@ const features = [
     icon: Coins,
     title: "Rewards, Cashback & Loyalty",
     description: "Earn cashback, loyalty points, free products, vouchers — all stored in your V-Card wallet.",
+    details: "Create a sticky customer base with flexible reward structures. Offer cashback, points, or direct product rewards that get stored instantly in their digital V-Card wallet.",
     highlights: ["V-Card Wallet", "Cashback", "Loyalty Points"],
     color: "bg-blue-600",
     size: "medium"
@@ -35,6 +39,7 @@ const features = [
     icon: Megaphone,
     title: "Customer Growth & Marketing",
     description: "QR campaigns, loyalty cards, coupons, vouchers, and local promotions to bring customers back automatically.",
+    details: "Automate your marketing with triggered campaigns. Send personalized offers via QR codes, push notifications, and email to bring customers back exactly when they're most likely to buy.",
     highlights: ["QR Campaigns", "Vouchers", "Local Promos"],
     color: "bg-blue-600",
     size: "medium"
@@ -43,6 +48,7 @@ const features = [
     icon: Layers,
     title: "80+ Business Software Tools",
     description: "CRM, sales tracking, deal pipelines, campaign builder, support desk, AI assistants, dashboards & analytics.",
+    details: "Replace multiple subscriptions with our all-in-one suite. Manage relationships with CRM, track deals, handle support tickets, and visualize your entire business performance in one dashboard.",
     highlights: ["CRM", "AI Assistants", "Analytics"],
     color: "bg-blue-600",
     size: "large"
@@ -51,6 +57,7 @@ const features = [
     icon: CreditCard,
     title: "Machines & In-Store Tools",
     description: "Payment terminals, QR displays, loyalty scanners, and smart tills connected to your rewards system.",
+    details: "Seamlessly integrate physical and digital. Our smart terminals and QR displays sync perfectly with your loyalty program, ensuring every in-store interaction is captured.",
     highlights: ["Payment Terminals", "QR Displays", "Smart Tills"],
     color: "bg-blue-600",
     size: "medium"
@@ -59,6 +66,7 @@ const features = [
     icon: Users,
     title: "People & Support",
     description: "Account managers, business agents, AI assistants, help desk, and consultants — you're never alone.",
+    details: "Get 24/7 access to a dedicated team. From technical troubleshooting to strategic business advice, our account managers and consultants are partners in your success.",
     highlights: ["Account Managers", "Help Desk", "Consultants"],
     color: "bg-blue-600",
     size: "medium"
@@ -67,6 +75,7 @@ const features = [
     icon: UsersRound,
     title: "Group & National Power",
     description: "Join with other businesses for group buying, shared marketing, national campaigns, and partner promotions.",
+    details: "Leverage collective bargaining power. Join a network of businesses to negotiate better rates, share marketing costs, and participate in nationwide promotional campaigns.",
     highlights: ["Group Buying", "Shared Marketing", "Partner Promos"],
     color: "bg-blue-600",
     size: "medium"
@@ -75,11 +84,134 @@ const features = [
     icon: Rocket,
     title: "Why 247GBS Is Different",
     description: "We don't sell tools. We give you customers, money, rewards, marketing, software, and support — everything to grow.",
+    details: "We align our success with yours. Unlike traditional SaaS that charges per user, we provide a holistic ecosystem designed to maximize your growth and profitability from day one.",
     highlights: ["Complete Solution", "Real Results", "Business Growth"],
     color: "bg-slate-900",
     size: "medium"
   }
 ];
+
+const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: number }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={!isFlipped ? { y: -5 } : {}}
+      className={`group relative h-96 ${feature.size === 'large' ? 'md:col-span-2 lg:col-span-1' : ''}`}
+      style={{ perspective: "1000px" }}
+    >
+      <motion.div
+        className="w-full h-full relative"
+        initial={false}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6, animationDirection: "normal" }}
+        style={{ transformStyle: "preserve-3d" }}
+      >
+        {/* Front Face */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-200 transition-shadow duration-300 overflow-hidden flex flex-col"
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          {/* Icon container */}
+          <div className={`relative w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mb-6 shadow-lg ${feature.color === 'bg-slate-900' ? 'shadow-slate-900/20' : 'shadow-blue-600/20'} group-hover:scale-110 transition-all duration-300 shrink-0`}>
+            <feature.icon className="w-8 h-8 text-white" />
+          </div>
+
+          {/* Content */}
+          <h3 className="text-2xl font-bold text-slate-900 mb-3 shrink-0">
+            {feature.title}
+          </h3>
+          <p className="text-slate-600 leading-relaxed mb-6 font-medium line-clamp-3 grow">
+            {feature.description}
+          </p>
+
+          {/* Highlight tags */}
+          <div className="flex flex-wrap gap-2 mb-4 shrink-0">
+            {feature.highlights.map((highlight, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200"
+              >
+                {highlight}
+              </span>
+            ))}
+          </div>
+
+          {/* Arrow indicator */}
+          <button 
+            onClick={() => setIsFlipped(true)}
+            className="flex items-center text-blue-600 font-bold text-sm hover:gap-2 transition-all shrink-0 mt-auto"
+          >
+            Learn more <ArrowRight className="w-4 h-4 ml-1" />
+          </button>
+        </div>
+
+        {/* Back Face */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-slate-50 rounded-3xl p-8 border border-blue-200 shadow-xl overflow-hidden flex flex-col cursor-pointer"
+          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+          onClick={() => setIsFlipped(false)}
+        >
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFlipped(false);
+            }}
+            className="absolute top-6 right-6 z-20 p-2 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Scrollable Content Container */}
+          <div 
+            className="flex-1 overflow-y-auto pr-2 mb-4 custom-scrollbar"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className={`w-10 h-10 rounded-xl ${feature.color} flex items-center justify-center shadow-md`}>
+                <feature.icon className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">
+                {feature.title}
+              </h3>
+            </div>
+            
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4">
+              <h4 className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-2">More Details</h4>
+              <p className="text-slate-700 leading-relaxed font-medium">
+                {feature.details}
+              </p>
+            </div>
+
+            <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Key Benefits</h4>
+            <ul className="space-y-2 mb-4">
+              {feature.highlights.map((highlight, idx) => (
+                <li key={idx} className="flex items-center gap-2 text-slate-700 font-medium text-sm">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  {highlight}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFlipped(false);
+            }}
+            className="flex items-center text-slate-600 hover:text-blue-600 font-bold text-sm gap-1 transition-colors mt-auto pt-2 bg-slate-50 z-10"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to summary
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const Features = () => {
   return (
@@ -116,48 +248,7 @@ const Features = () => {
         {/* Bento grid layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
           {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -5 }}
-              className={`group relative ${feature.size === 'large' ? 'md:col-span-2 lg:col-span-1' : ''
-                }`}
-            >
-              <div className="h-full relative bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 overflow-hidden">
-                {/* Icon container - Solid background for max contrast */}
-                <div className={`relative w-16 h-16 rounded-2xl ${feature.color} flex items-center justify-center mb-6 shadow-lg ${feature.color === 'bg-slate-900' ? 'shadow-slate-900/20' : 'shadow-blue-600/20'} group-hover:scale-110 transition-all duration-300`}>
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-
-                {/* Content */}
-                <h3 className="text-2xl font-bold text-slate-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-slate-600 leading-relaxed mb-6 font-medium">
-                  {feature.description}
-                </p>
-
-                {/* Highlight tags */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {feature.highlights.map((highlight, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200"
-                    >
-                      {highlight}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Arrow indicator on hover */}
-                <div className="flex items-center text-blue-600 font-bold text-sm group-hover:gap-2 transition-all">
-                  Learn more <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </motion.div>
+            <FeatureCard key={index} feature={feature} index={index} />
           ))}
         </div>
 

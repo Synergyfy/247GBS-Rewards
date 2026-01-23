@@ -17,10 +17,34 @@ const Navbar = () => {
   }, []);
 
   const seasons = [
-    { name: 'Summer Campaign', href: '/season/summer', icon: '☀️' },
-    { name: 'Autumn Campaign', href: '/season/autumn', icon: '🍂' },
-    { name: 'Winter Campaign', href: '/season/winter', icon: '❄️' },
-    { name: 'Spring Campaign', href: '/season/spring', icon: '🌸' },
+    {
+      name: 'Summer Campaign',
+      href: '/season/summer',
+      icon: '☀️',
+      hoverBg: 'hover:bg-orange-50',
+      hoverText: 'group-hover:text-orange-600'
+    },
+    {
+      name: 'Autumn Campaign',
+      href: '/season/autumn',
+      icon: '🍂',
+      hoverBg: 'hover:bg-amber-50',
+      hoverText: 'group-hover:text-amber-700'
+    },
+    {
+      name: 'Winter Campaign',
+      href: '/season/winter',
+      icon: '❄️',
+      hoverBg: 'hover:bg-blue-50',
+      hoverText: 'group-hover:text-blue-600'
+    },
+    {
+      name: 'Spring Campaign',
+      href: '/season/spring',
+      icon: '🌸',
+      hoverBg: 'hover:bg-emerald-50',
+      hoverText: 'group-hover:text-emerald-600'
+    },
   ];
 
   return (
@@ -80,10 +104,10 @@ const Navbar = () => {
                         <a
                           key={season.name}
                           href={season.href}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 transition-all group"
+                          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${season.hoverBg}`}
                         >
                           <span className="text-lg group-hover:scale-110 transition-transform">{season.icon}</span>
-                          <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
+                          <span className={`text-sm font-bold text-slate-700 transition-colors ${season.hoverText}`}>
                             {season.name}
                           </span>
                         </a>
@@ -101,6 +125,12 @@ const Navbar = () => {
               Features
             </Link>
             <Link
+              href="/partner"
+              className="px-4 py-2 rounded-full font-medium transition-all text-slate-600 hover:text-blue-600 hover:bg-blue-50"
+            >
+              Partner
+            </Link>
+            <Link
               href="/support"
               className="px-4 py-2 rounded-full font-medium transition-all text-slate-600 hover:text-blue-600 hover:bg-blue-50"
             >
@@ -116,7 +146,7 @@ const Navbar = () => {
               </Link>
               <Link href="/partner">
                 <button className="px-6 py-2.5 rounded-full font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
-                  Partner
+                  Partner Portal
                 </button>
               </Link>
             </div>
@@ -146,11 +176,13 @@ const Navbar = () => {
                   <a
                     key={season.name}
                     href={season.href}
-                    className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-medium"
+                    className={`flex items-center gap-3 px-4 py-3 text-slate-600 rounded-xl font-medium transition-all group ${season.hoverBg}`}
                     onClick={() => setIsOpen(false)}
                   >
                     <span>{season.icon}</span>
-                    {season.name}
+                    <span className={`transition-colors ${season.hoverText.replace('group-', '')}`}>
+                      {season.name}
+                    </span>
                   </a>
                 ))}
               </div>
@@ -161,6 +193,13 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Features
+              </Link>
+              <Link
+                href="/partner"
+                className="block px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Partner
               </Link>
               <Link
                 href="/support"
@@ -175,7 +214,7 @@ const Navbar = () => {
                   Sign In
                 </Link>
                 <Link href="/partner" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-center bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-colors">
-                  Partner
+                  Partner Portal
                 </Link>
               </div>
             </div>
