@@ -3,7 +3,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ['flagcdn.com'],
+    domains: ['flagcdn.com', 'placehold.co', 'api.qrserver.com', 'images.unsplash.com', 'mcom-backend.vercel.app'],
   },
   // async rewrites() {
   //       return [

@@ -3,10 +3,14 @@
 import React, { use } from 'react';
 import { notFound } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, TrendingUp, Users, Sparkles, ArrowRight, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, Users, Sparkles, Tag } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/landing/Navbar';
 import Footer from '@/components/landing/Footer';
+import SnowfallBackground from '@/components/landing/seasonal/SnowfallBackground';
+import SunFlareBackground from '@/components/landing/seasonal/SunFlareBackground';
+import FallingLeavesBackground from '@/components/landing/seasonal/FallingLeavesBackground';
+import SakuraBackground from '@/components/landing/seasonal/SakuraBackground';
 
 // --- Data Configuration ---
 
@@ -15,6 +19,10 @@ const seasonData: Record<string, {
     icon: string;
     gradient: string;
     accent: string;
+    themeColor: string;
+    lightBg: string;
+    border: string;
+    shadow: string;
     description: string;
     longDescription: string;
     duration: string;
@@ -26,6 +34,10 @@ const seasonData: Record<string, {
         icon: '☀️',
         gradient: 'from-orange-400 to-yellow-400',
         accent: 'text-orange-600',
+        themeColor: 'bg-orange-600',
+        lightBg: 'bg-orange-50',
+        border: 'border-orange-100',
+        shadow: 'shadow-orange-500/20',
         description: 'Capitalize on the heat with refreshing rewards and high-energy campaigns.',
         longDescription: 'Summer is the peak time for outdoor activities, tourism, and social gatherings. Leverage the 247GBS platform to drive foot traffic with weather-triggered promotions, "Cool Down" rewards, and exclusive holiday deals. Our system helps you capture the influx of new customers and turn transient tourists into loyal patrons.',
         duration: 'June 21 – September 22',
@@ -60,6 +72,10 @@ const seasonData: Record<string, {
         icon: '🍂',
         gradient: 'from-amber-600 to-orange-500',
         accent: 'text-amber-700',
+        themeColor: 'bg-amber-700',
+        lightBg: 'bg-amber-50',
+        border: 'border-amber-200',
+        shadow: 'shadow-amber-700/20',
         description: 'Transition into the cozy season with warm offers and back-to-school boosts.',
         longDescription: 'As the leaves turn, consumer behavior shifts towards coziness and preparation. This is the perfect time to utilize 247GBS for "Back to School" campaigns and Halloween specials. Focus on comfort-based value propositions and re-engaging customers who may have drifted during the summer holidays.',
         duration: 'September 23 – December 20',
@@ -94,6 +110,10 @@ const seasonData: Record<string, {
         icon: '❄️',
         gradient: 'from-blue-400 to-cyan-300',
         accent: 'text-blue-600',
+        themeColor: 'bg-blue-600',
+        lightBg: 'bg-blue-50',
+        border: 'border-blue-100',
+        shadow: 'shadow-blue-600/20',
         description: 'Maximize holiday spending with festive campaigns and end-of-year sales.',
         longDescription: 'The biggest spending season of the year. 247GBS empowers you to run festive advent calendars, Black Friday blowouts, and New Year resolutions campaigns. It’s crucial to build momentum before December and use post-holiday sales to clear inventory and maintain engagement into January.',
         duration: 'December 21 – March 19',
@@ -126,8 +146,12 @@ const seasonData: Record<string, {
     spring: {
         title: 'Spring Season',
         icon: '🌸',
-        gradient: 'from-pink-400 to-rose-400',
-        accent: 'text-pink-600',
+        gradient: 'from-emerald-400 to-teal-400',
+        accent: 'text-emerald-600',
+        themeColor: 'bg-emerald-600',
+        lightBg: 'bg-emerald-50',
+        border: 'border-emerald-100',
+        shadow: 'shadow-emerald-600/20',
         description: 'Refresh your business strategy with blooming offers and new beginnings.',
         longDescription: 'Spring represents renewal. Use this time to launch new products, clear out old inventory (Spring Cleaning sales), and engage customers with Easter egg hunts. 247GBS helps you re-activate dormant users who hibernate during winter with fresh, vibrant campaigns.',
         duration: 'March 20 – June 20',
@@ -161,16 +185,16 @@ const seasonData: Record<string, {
 
 // --- Components ---
 
-const CampaignCard = ({ campaign, index }: { campaign: any, index: number }) => (
+const CampaignCard = ({ campaign, index, theme }: { campaign: any, index: number, theme: any }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: index * 0.1 }}
         viewport={{ once: true }}
-        className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/50 border border-slate-100 hover:scale-[1.02] transition-transform"
+        className={`bg-white rounded-3xl p-6 shadow-xl ${theme.shadow} border ${theme.border} hover:scale-[1.02] transition-transform`}
     >
         <div className="flex justify-between items-start mb-4">
-            <div className="bg-slate-50 px-3 py-1 rounded-full text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div className={`${theme.lightBg} px-3 py-1 rounded-full text-xs font-bold ${theme.accent} uppercase tracking-wider`}>
                 {campaign.type}
             </div>
             <div className="flex items-center gap-1 text-green-600 font-bold text-sm">
@@ -179,19 +203,16 @@ const CampaignCard = ({ campaign, index }: { campaign: any, index: number }) => 
             </div>
         </div>
         <h3 className="text-xl font-bold text-slate-900 mb-2">{campaign.title}</h3>
-        <p className="text-slate-500 text-sm leading-relaxed mb-6">
+        <p className="text-slate-500 text-sm leading-relaxed">
             {campaign.description}
         </p>
-        <button className="w-full py-3 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-black transition-colors flex items-center justify-center gap-2 group">
-            Use Template <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </button>
     </motion.div>
 );
 
-const StatCard = ({ label, value }: { label: string, value: string }) => (
-    <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-4 rounded-2xl">
-        <div className="text-white/70 text-sm font-medium mb-1">{label}</div>
-        <div className="text-white text-2xl font-bold">{value}</div>
+const StatCard = ({ label, value, theme }: { label: string, value: string, theme: any }) => (
+    <div className={`bg-white/95 backdrop-blur-md border ${theme.border} p-5 rounded-2xl shadow-lg`}>
+        <div className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">{label}</div>
+        <div className={`text-3xl font-black ${theme.accent}`}>{value}</div>
     </div>
 );
 
@@ -211,12 +232,18 @@ export default function SeasonPage({ params }: { params: Promise<{ slug: string 
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 lg:pt-40 overflow-hidden">
+                {/* Seasonal Background Effects */}
+                {slug === 'winter' && <SnowfallBackground color="bg-blue-300" />}
+                {slug === 'summer' && <SunFlareBackground />}
+                {slug === 'autumn' && <FallingLeavesBackground />}
+                {slug === 'spring' && <SakuraBackground />}
+
                 {/* Abstract Backgrounds */}
                 <div className={`absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br ${season.gradient} rounded-full blur-[120px] opacity-20 -translate-y-1/2 translate-x-1/3 -z-10`} />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors mb-8 font-medium">
-                        <ArrowLeft className="w-4 h-4" /> Back to Home
+                    <Link href="/" className={`inline-flex items-center gap-2 text-slate-400 hover:${season.accent} transition-colors mb-8 font-medium group`}>
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Home
                     </Link>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -225,25 +252,25 @@ export default function SeasonPage({ params }: { params: Promise<{ slug: string 
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.8 }}
                         >
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-100 shadow-sm mb-6">
+                            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border ${season.border} shadow-sm mb-6`}>
                                 <Calendar className={`w-4 h-4 ${season.accent}`} />
                                 <span className="text-slate-600 font-bold text-sm">{season.duration}</span>
                             </div>
 
-                            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 mb-6 leading-tight">
-                                {season.title} <span className="block text-4xl mt-2 opacity-50">{season.icon}</span>
+                            <h1 className={`text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight ${season.accent}`}>
+                                {season.title} <span className={`block text-4xl mt-2 opacity-50`}>{season.icon}</span>
                             </h1>
 
                             <p className="text-xl text-slate-600 mb-8 leading-relaxed font-medium">
                                 {season.description}
                             </p>
 
-                            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                            <div className={`${season.lightBg} p-6 rounded-3xl border ${season.border}`}>
                                 <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
                                     <Sparkles className={`w-5 h-5 ${season.accent}`} />
                                     Why leverage this season?
                                 </h3>
-                                <p className="text-slate-500 leading-relaxed">
+                                <p className="text-slate-600 leading-relaxed">
                                     {season.longDescription}
                                 </p>
                             </div>
@@ -258,26 +285,26 @@ export default function SeasonPage({ params }: { params: Promise<{ slug: string 
                         >
                             <div className="grid grid-cols-2 gap-4">
                                 {season.stats.map((stat, i) => (
-                                    <StatCard key={i} {...stat} />
+                                    <StatCard key={i} {...stat} theme={season} />
                                 ))}
                             </div>
 
-                            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 mt-auto">
+                            <div className={`bg-white/95 backdrop-blur-md rounded-3xl p-6 border ${season.border} mt-auto shadow-lg`}>
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-2xl">
+                                    <div className={`w-12 h-12 rounded-full ${season.lightBg} flex items-center justify-center text-2xl border ${season.border}`}>
                                         {season.icon}
                                     </div>
                                     <div>
-                                        <div className="text-white font-bold text-lg">Season Active</div>
-                                        <div className="text-white/70 text-sm">Campaigns Ready</div>
+                                        <div className="text-slate-900 font-bold text-lg">Season Active</div>
+                                        <div className="text-slate-500 text-sm">Campaigns Ready</div>
                                     </div>
                                 </div>
-                                <div className="h-2 bg-black/20 rounded-full overflow-hidden">
+                                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: '70%' }}
                                         transition={{ duration: 1.5, delay: 0.5 }}
-                                        className="h-full bg-white"
+                                        className={`h-full ${season.themeColor}`}
                                     />
                                 </div>
                             </div>
@@ -287,20 +314,20 @@ export default function SeasonPage({ params }: { params: Promise<{ slug: string 
             </section>
 
             {/* Campaigns Section */}
-            <section className="py-24 bg-slate-50">
+            <section className={`relative z-10 py-24 bg-white ${season.lightBg}/30`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
-                            Recommended Campaigns
+                            Recommended <span className={season.accent}>Campaigns</span>
                         </h2>
-                        <p className="text-lg text-slate-500">
+                        <p className="text-lg text-slate-600">
                             Proven strategies to maximize your revenue during {season.title}.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {season.campaigns.map((campaign, idx) => (
-                            <CampaignCard key={idx} campaign={campaign} index={idx} />
+                            <CampaignCard key={idx} campaign={campaign} index={idx} theme={season} />
                         ))}
                     </div>
                 </div>

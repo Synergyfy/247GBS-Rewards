@@ -6,9 +6,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import ToolTip from './ToolTip';
 
 const GeneralForm: React.FC = () => {
-  const { businessId, name, signupPoints, customDomain } = useSelector(
+  const { businessId, name, signupPoints, customDomain, type, seasonId } = useSelector(
     (state: RootState) => state.campaing
   );
+
+  const seasons = [
+    { id: 'summer', name: 'Summer Season ☀️' },
+    { id: 'autumn', name: 'Autumn Season 🍂' },
+    { id: 'winter', name: 'Winter Season ❄️' },
+    { id: 'spring', name: 'Spring Season 🌸' },
+  ];
 
   const dispatch = useDispatch();
 
@@ -28,7 +35,7 @@ const GeneralForm: React.FC = () => {
       </p>
       {/* Business dropdown */}
       <div>
-         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Business (required)
           <ToolTip content="Select the business this campaign belongs to." />
         </label>
@@ -47,8 +54,50 @@ const GeneralForm: React.FC = () => {
             ))}
         </select>
       </div>
+
+      {/* Campaign Type */}
       <div>
-         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+          Campaign Type (required)
+          <ToolTip content="Select the type of campaign you want to create." />
+        </label>
+        <select
+          name="type"
+          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+          value={type}
+          onChange={handleInputChange}
+        >
+          <option value="PRESET">Preset</option>
+          <option value="SEASONAL">Seasonal</option>
+          <option value="CO_BRANDED">Co-Branded</option>
+        </select>
+      </div>
+
+      {/* Season Selection (Conditional) */}
+      {type === 'SEASONAL' && (
+        <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+          <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+            Select Season (required)
+            <ToolTip content="Choose which season this campaign belongs to." />
+          </label>
+          <select
+            name="seasonId"
+            className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+            value={seasonId}
+            onChange={handleInputChange}
+          >
+            <option value="">Select a Season</option>
+            {seasons.map((season) => (
+              <option key={season.id} value={season.id}>
+                {season.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div>
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Campaign name (required)
           <ToolTip content="Enter a unique name for your campaign." />
         </label>
@@ -63,7 +112,7 @@ const GeneralForm: React.FC = () => {
       </div>
       {/* Points for sign-up */}
       <div>
-         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Signup Point
           <ToolTip content="This is the amount of points customers receive instantly for signing up." />
         </label>
@@ -78,10 +127,10 @@ const GeneralForm: React.FC = () => {
       </div>
       {/* Custom Domain */}
       <div>
-         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-            Custom domain
-             <ToolTip content="Enter a custom domain for your campaign website (optional)." />
-         </label>
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+          Custom domain
+          <ToolTip content="Enter a custom domain for your campaign website (optional)." />
+        </label>
         <input
           type="text"
           placeholder="e.g. campaign.yourbusiness.com"

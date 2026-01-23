@@ -169,13 +169,6 @@ const Login = () => {
                   'Sign In'
                 )}
               </button>
-
-              <p className="text-center text-slate-500 text-sm mt-8 font-medium">
-                Don&apos;t have an account?{' '}
-                <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-black hover:underline transition-all">
-                  Create one now
-                </Link>
-              </p>
             </motion.form>
           </div>
         </div>

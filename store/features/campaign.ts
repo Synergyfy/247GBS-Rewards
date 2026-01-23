@@ -10,6 +10,8 @@ const initialState: CreateCampaign = {
   name: '',
   signupPoints: '',
   customDomain: '',
+  type: 'PRESET',
+  seasonId: '',
 
   // Earn point settings
   earnStaffScanQR: true,
@@ -72,6 +74,14 @@ const initialState: CreateCampaign = {
   mobileNavText: '#ffffff',
   mobileNavActiveBg: '#0D47A1',
   mobileNavActiveText: '#ffffff',
+  bannerUrl: '',
+  logoUrl: '',
+  audienceType: 'Public',
+  campaignMessage: '',
+  startDate: new Date().toISOString(),
+  endDate: new Date().toISOString(),
+  contactPhoneNumber: '',
+  contactEmail: '',
 };
 
 const createCampaignSlice = createSlice({

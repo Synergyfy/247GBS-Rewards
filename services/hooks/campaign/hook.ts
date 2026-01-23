@@ -19,17 +19,18 @@ export const useCreateCampaign = () => {
   return mutation;
 };
 
-export const useGetCampaigns = () => {
+export const useGetCampaigns = (type?: string) => {
   const fetch = async () => {
     const accessToken: string = getCookieValue('token') || '';
     setBearerToken(accessToken);
-    const request = api.get(`/campaign/all-campaigns/`);
+    const params = type && type !== 'ALL' ? { type } : {};
+    const request = api.get(`/campaign/all-campaigns/`, { params });
     const response = await request;
     return response['data'] as CampaignType[];
   };
 
   const query = useQuery({
-    queryKey: ['campaigns'],
+    queryKey: ['campaigns', type],
     queryFn: fetch,
     refetchOnMount: 'always',
   });
