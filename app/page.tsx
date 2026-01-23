@@ -5,9 +5,10 @@ import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
 import Features from '@/components/landing/Features';
 import HowItWorks from '@/components/landing/HowItWorks';
-import Stats from '@/components/landing/Stats';
+// import Stats from '@/components/landing/Stats';
 import CTA from '@/components/landing/CTA';
 import Footer from '@/components/landing/Footer';
+import ChatFAB from '@/components/landing/ChatFAB';
 
 const Page = () => {
   return (
@@ -15,12 +16,13 @@ const Page = () => {
       <Navbar />
       <main>
         <Hero />
-        <Stats />
+        {/* <Stats /> */}
         <Features />
         <HowItWorks />
         <CTA />
       </main>
       <Footer />
+      <ChatFAB />
     </div>
   );
 };

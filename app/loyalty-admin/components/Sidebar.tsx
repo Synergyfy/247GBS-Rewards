@@ -17,7 +17,7 @@ const menuItems = [
     icon: Users,
   },
   {
-    title: 'Reward',
+    title: 'Rewards',
     path: '/loyalty-admin/rewards',
     icon: Gift,
   },
@@ -76,8 +76,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 onClick={() => setIsOpen(false)}
                 data-tour-id={tourId}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                    ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
               >
                 <Icon size={20} className={isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'} />

@@ -22,7 +22,9 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { CampaignType } from '@/services/hooks/campaign/types';
-import { IoPencil } from 'react-icons/io5';
+import { IoPencil, IoStatsChart } from 'react-icons/io5';
+import CampaignAnalytics from '@/app/loyalty-admin/components/CampaignAnalytics';
+
 import {
   Table,
   TableBody,
@@ -47,6 +49,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { QRCodeSVG } from 'qrcode.react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS';
 
@@ -60,8 +69,12 @@ const Campaign: React.FC = () => {
 
   const [campaignId, setCampaignId] = useState('');
   const [editMode, setEditMode] = useState(false);
+  const [filterType, setFilterType] = useState('ALL');
 
+  const [analyticsCampaignId, setAnalyticsCampaignId] = useState('');
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<string>('');
+
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
   const tabs: MainTab[] = [
@@ -100,7 +113,7 @@ const Campaign: React.FC = () => {
     (state: RootState) => state.campaing
   ) as CampaignType;
 
-  const { data: fetchData, isLoading, refetch } = useGetCampaigns();
+  const { data: fetchData, isLoading, refetch } = useGetCampaigns(filterType);
 
   const { mutate, isPending, isSuccess } = useCreateCampaign();
 
@@ -117,11 +130,14 @@ const Campaign: React.FC = () => {
   } = useUpdateCampaign();
 
   const handleSubmit = () => {
-    const { businessId, name, signupPoints, rewardIds, topHeadline, topTitle } =
+    const { businessId, name, signupPoints, rewardIds, topHeadline, topTitle, type, seasonId } =
       campaign;
     if (!businessId) {
       setActiveTab('GENERAL');
       setErrorMsg('Select a business');
+    } else if (type === 'SEASONAL' && !seasonId) {
+      setActiveTab('GENERAL');
+      setErrorMsg('Select a season for seasonal campaign');
     } else if (!name) {
       setActiveTab('GENERAL');
       setErrorMsg('Campaign name is required');
@@ -176,6 +192,12 @@ const Campaign: React.FC = () => {
     }
   };
 
+  const handleViewAnalytics = (id: string) => {
+    setAnalyticsCampaignId(id);
+    setShowAnalytics(true);
+  };
+
+
   const processUpdate = () => {
     const { business, rewardIds } = campaign;
     const businessId = business?.id || '';
@@ -213,6 +235,23 @@ const Campaign: React.FC = () => {
 
   return (
     <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
+      <div className="mb-6 w-[200px] ml-auto">
+        <Select
+          value={filterType}
+          onValueChange={setFilterType}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Campaigns</SelectItem>
+            <SelectItem value="SEASONAL">Seasonal</SelectItem>
+            <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
+            <SelectItem value="PRESET">Preset</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {fetchData && fetchData?.length < 1 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="bg-blue-50 p-6 rounded-full mb-6">
@@ -385,7 +424,15 @@ const Campaign: React.FC = () => {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-3">
                           <button
+                            onClick={() => handleViewAnalytics(id ?? '')}
+                            className="text-gray-500 hover:text-emerald-600 transition-colors p-1"
+                            title="Analytics"
+                          >
+                            <IoStatsChart size={18} />
+                          </button>
+                          <button
                             onClick={() => handleEdit(id ?? '')}
+
                             className="text-gray-500 hover:text-blue-600 transition-colors p-1"
                             title="Edit"
                           >
@@ -449,6 +496,47 @@ const Campaign: React.FC = () => {
           <GoPlus size={28} />
         </button>
       )}
+
+      {/* Analytics Modal */}
+      <Dialog
+        open={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center border-b px-8 py-5">
+              <div className="flex items-center gap-3">
+                <div className="bg-emerald-50 p-2 rounded-lg">
+                  <IoStatsChart className="text-emerald-600 text-xl" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Campaign Analytics</h2>
+              </div>
+              <button
+                onClick={() => setShowAnalytics(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-8 py-6">
+              <CampaignAnalytics campaignId={analyticsCampaignId} />
+            </div>
+
+            <div className="border-t border-gray-100 px-8 py-4 bg-gray-50 flex justify-end">
+              <button
+                className="px-6 py-2 bg-gray-900 text-white font-semibold rounded-xl hover:bg-black transition-colors shadow-sm"
+                onClick={() => setShowAnalytics(false)}
+              >
+                Close Insights
+              </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
 
     </section>
   );

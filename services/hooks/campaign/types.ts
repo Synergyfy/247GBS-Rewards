@@ -8,6 +8,8 @@ export interface CampaignType {
   name: string;
   signupPoints: string;
   customDomain: string;
+  type: 'PRESET' | 'SEASONAL' | 'CO_BRANDED';
+  seasonId?: string;
 
   // Earn point settings
   earnStaffScanQR: boolean;
@@ -74,4 +76,12 @@ export interface CampaignType {
   rewards?: RewardType[];
 
   uniqueCode?: string;
+  bannerUrl?: string;
+  logoUrl?: string;
+  audienceType?: string;
+  campaignMessage?: string;
+  startDate?: string;
+  endDate?: string;
+  contactPhoneNumber?: string;
+  contactEmail?: string;
 }

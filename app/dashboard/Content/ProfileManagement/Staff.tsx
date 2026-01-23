@@ -22,7 +22,8 @@ import {
     useGetStaffs,
     useCreateStaff,
     useUpdateStaff,
-    useDeleteStaff
+    useDeleteStaff,
+    useGetBusiness
 } from '@/services/hooks/business/hook';
 import { StaffType } from '@/app/interfaces/business.type';
 import { Toaster, toast } from 'sonner';
@@ -32,6 +33,13 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 // --- Modal Component ---
 const StaffModal = ({
@@ -47,8 +55,9 @@ const StaffModal = ({
     initialData?: StaffType;
     isLoading: boolean;
 }) => {
+    const { data: businesses } = useGetBusiness();
     const [formData, setFormData] = useState<StaffType>({
-        businessId: '1', // Defaulting to 1 as per requirement context
+        businessId: '',
         name: '',
         email: '',
         password: '',
@@ -61,7 +70,7 @@ const StaffModal = ({
             setFormData(initialData);
         } else {
             setFormData({
-                businessId: '1',
+                businessId: '',
                 name: '',
                 email: '',
                 password: '',
@@ -109,6 +118,35 @@ const StaffModal = ({
 
                     <div className="space-y-4">
                         <TooltipProvider>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <label className="block text-sm font-medium text-slate-700">Business</label>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Info className="w-4 h-4 text-slate-400 cursor-help hover:text-blue-500 transition-colors" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Select the business this staff member belongs to.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
+                                <Select
+                                    value={formData.businessId}
+                                    onValueChange={(value) => setFormData({ ...formData, businessId: value })}
+                                >
+                                    <SelectTrigger className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all h-auto">
+                                        <SelectValue placeholder="Select a business" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {businesses?.map((business) => (
+                                            <SelectItem key={business.id} value={business.id}>
+                                                {business.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <label className="block text-sm font-medium text-slate-700">Full Name</label>
