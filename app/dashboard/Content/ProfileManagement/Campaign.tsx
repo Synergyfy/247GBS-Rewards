@@ -61,7 +61,11 @@ type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mcom-backend.vercel.app/';
 
-const Campaign: React.FC = () => {
+interface CampaignProps {
+  filterProp?: string;
+}
+
+const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<MainTab>('GENERAL');
@@ -69,7 +73,13 @@ const Campaign: React.FC = () => {
 
   const [campaignId, setCampaignId] = useState('');
   const [editMode, setEditMode] = useState(false);
-  const [filterType, setFilterType] = useState('ALL');
+  const [filterType, setFilterType] = useState(filterProp || 'ALL');
+
+  useEffect(() => {
+    if (filterProp) {
+      setFilterType(filterProp);
+    }
+  }, [filterProp]);
 
   const [analyticsCampaignId, setAnalyticsCampaignId] = useState('');
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -235,22 +245,24 @@ const Campaign: React.FC = () => {
 
   return (
     <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
-      <div className="mb-6 w-[200px] ml-auto">
-        <Select
-          value={filterType}
-          onValueChange={setFilterType}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All Campaigns</SelectItem>
-            <SelectItem value="SEASONAL">Seasonal</SelectItem>
-            <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
-            <SelectItem value="PRESET">Preset</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {!filterProp && (
+        <div className="mb-6 w-[200px] ml-auto">
+          <Select
+            value={filterType}
+            onValueChange={setFilterType}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Campaigns</SelectItem>
+              <SelectItem value="SEASONAL">Seasonal</SelectItem>
+              <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
+              <SelectItem value="PRESET">Preset</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {fetchData && fetchData?.length < 1 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">

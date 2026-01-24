@@ -103,7 +103,7 @@ const McomExchangeAndRedeem = dynamic(
 
 const componentsMap: { [key: string]: JSX.Element } = {
   Settings: <Settings />,
-  'QR Code Scanner': <QRScanner setScannedResult={() => {}} />,
+  'QR Code Scanner': <QRScanner setScannedResult={() => { }} />,
   'Customers Tab': <CustomersTab />,
   'Admin only feature': <AdminOnlyFeature />,
   Earning: <Earning />,

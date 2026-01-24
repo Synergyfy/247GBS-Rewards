@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Gift, Megaphone, X } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, Megaphone, X, ChevronDown } from 'lucide-react';
 
 const menuItems = [
   {
@@ -25,6 +25,13 @@ const menuItems = [
     title: 'Campaign',
     path: '/loyalty-admin/campaign',
     icon: Megaphone,
+    subLinks: [
+      { title: 'All Campaigns', path: '/loyalty-admin/campaign?type=ALL' },
+      { title: 'Preset', path: '/loyalty-admin/campaign?type=PRESET' },
+      { title: 'Seasonal', path: '/loyalty-admin/campaign?type=SEASONAL' },
+      { title: 'Co-Branded', path: '/loyalty-admin/campaign?type=CO_BRANDED' },
+      
+    ]
   },
 ];
 
@@ -35,6 +42,19 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const pathname = usePathname();
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const currentType = searchParams?.get('type') || (pathname === '/loyalty-admin/campaign' ? 'ALL' : '');
+
+  const [openSubMenus, setOpenSubMenus] = React.useState<Record<string, boolean>>({
+    Campaign: pathname.startsWith('/loyalty-admin/campaign')
+  });
+
+  const toggleSubMenu = (title: string) => {
+    setOpenSubMenus(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
 
   return (
     <>
@@ -65,9 +85,53 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
         <nav className="p-4 space-y-2" data-tour-id="sidebar-nav">
           {menuItems.map((item) => {
-            const isActive = pathname === item.path;
+            const isActive = pathname === item.path || (item.subLinks && item.subLinks.some(sub => pathname === sub.path.split('?')[0]));
             const Icon = item.icon;
             const tourId = `menu-${item.title.toLowerCase()}`;
+            const isSubMenuOpen = openSubMenus[item.title];
+
+            if (item.subLinks) {
+              return (
+                <div key={item.title} className="space-y-1">
+                  <button
+                    onClick={() => toggleSubMenu(item.title)}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                      ? 'bg-blue-50 text-blue-600 font-semibold'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon size={20} className={isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'} />
+                      <span>{item.title}</span>
+                    </div>
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${isSubMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isSubMenuOpen && (
+                    <div className="pl-12 space-y-1">
+                      {item.subLinks.map((sub) => {
+                        const subPathBase = sub.path.split('?')[0];
+                        const subType = new URLSearchParams(sub.path.split('?')[1]).get('type');
+                        const isSubActive = pathname === subPathBase && currentType === subType;
+
+                        return (
+                          <Link
+                            key={sub.path}
+                            href={sub.path}
+                            onClick={() => setIsOpen(false)}
+                            className={`block py-2 text-sm transition-colors duration-200 ${isSubActive
+                              ? 'text-blue-600 font-medium'
+                              : 'text-gray-500 hover:text-gray-900'
+                              }`}
+                          >
+                            {sub.title}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
 
             return (
               <Link

@@ -24,13 +24,13 @@ const SnowfallBackground = ({ color = 'bg-blue-200' }: { color?: string }) => {
       <style jsx>{`
         @keyframes snowfall {
           0% {
-            transform: translateY(-10vh) translateX(-10px);
+            transform: translateY(-10%) translateX(-10px);
           }
           50% {
-             transform: translateY(50vh) translateX(10px);
+             transform: translateY(50%) translateX(10px);
           }
           100% {
-            transform: translateY(110vh) translateX(-10px);
+            transform: translateY(110%) translateX(-10px);
           }
         }
       `}</style>
