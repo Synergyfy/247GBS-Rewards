@@ -48,17 +48,17 @@ const SakuraBackground = () => {
       <style jsx>{`
         @keyframes falling-petal {
           0% {
-            transform: translate(0, -10vh) rotate(0deg) translateX(0);
+            transform: translate(0, -10%) rotate(0deg) translateX(0);
             opacity: 0;
           }
           10% {
             opacity: 0.8;
           }
           50% {
-            transform: translate(100px, 50vh) rotate(180deg) translateX(50px);
+            transform: translate(100px, 50%) rotate(180deg) translateX(50px);
           }
           100% {
-            transform: translate(20px, 110vh) rotate(360deg) translateX(0);
+            transform: translate(20px, 110%) rotate(360deg) translateX(0);
             opacity: 0;
           }
         }
@@ -110,7 +110,7 @@ const SakuraBackground = () => {
           <FlowerIcon className="w-full h-full" />
         </div>
       ))}
-      
+
       {/* 3. Subtle Green Ambient Glow at bottom */}
       <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-emerald-50/50 to-transparent z-0" />
     </div>

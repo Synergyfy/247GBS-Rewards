@@ -51,23 +51,23 @@ const FallingLeavesBackground = () => {
       <style jsx>{`
         @keyframes falling-leaf {
           0% {
-            transform: translate(0, -10vh) rotate(0deg) translateX(0);
+            transform: translate(0, -10%) rotate(0deg) translateX(0);
             opacity: 0;
           }
           10% {
             opacity: 1;
           }
           25% {
-            transform: translate(20px, 25vh) rotate(45deg) translateX(20px);
+            transform: translate(20px, 25%) rotate(45deg) translateX(20px);
           }
           50% {
-            transform: translate(-20px, 50vh) rotate(90deg) translateX(-20px);
+            transform: translate(-20px, 50%) rotate(90deg) translateX(-20px);
           }
           75% {
-            transform: translate(20px, 75vh) rotate(135deg) translateX(20px);
+            transform: translate(20px, 75%) rotate(135deg) translateX(20px);
           }
           100% {
-            transform: translate(0, 110vh) rotate(180deg) translateX(0);
+            transform: translate(0, 110%) rotate(180deg) translateX(0);
             opacity: 0;
           }
         }
@@ -77,7 +77,7 @@ const FallingLeavesBackground = () => {
           animation-iteration-count: infinite;
         }
       `}</style>
-      
+
       {leaves.map((leaf) => {
         // Randomize colors: Amber, Orange, Red-Brown
         const colors = ['text-amber-500', 'text-orange-600', 'text-red-500', 'text-yellow-600'];

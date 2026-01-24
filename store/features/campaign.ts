@@ -1,10 +1,11 @@
 import { CampaignType } from '@/services/hooks/campaign/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// Type for campaign creation (excluding auto-generated fields)
-type CreateCampaign = Omit<CampaignType, 'id' | 'createdAt' | 'updatedAt'>;
+// Type for campaign state
+type CampaignState = CampaignType;
 
-const initialState: CreateCampaign = {
+const initialState: CampaignState = {
+  id: '',
   businessId: '',
   rewardIds: [],
   name: '',
@@ -91,7 +92,7 @@ const createCampaignSlice = createSlice({
     // Update any campaign field
     updateCampaignField: (
       state,
-      action: PayloadAction<{ [K in keyof CreateCampaign]?: CreateCampaign[K] }>
+      action: PayloadAction<{ [K in keyof CampaignState]?: CampaignState[K] }>
     ) => {
       return { ...state, ...action.payload };
     },
@@ -151,7 +152,7 @@ export const {
 
 // Selectors
 export const selectCreateCampaign = (state: {
-  createCampaign: CreateCampaign;
+  createCampaign: CampaignState;
 }) => state.createCampaign;
 
 export default createCampaignSlice.reducer;

@@ -84,4 +84,6 @@ export interface CampaignType {
   endDate?: string;
   contactPhoneNumber?: string;
   contactEmail?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
