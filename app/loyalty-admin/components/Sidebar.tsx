@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Gift, Megaphone, X } from 'lucide-react';
+import { LayoutDashboard, Users, Gift, Megaphone, X, QrCode } from 'lucide-react';
 
 const menuItems = [
   {
@@ -25,6 +25,11 @@ const menuItems = [
     title: 'Campaign',
     path: '/loyalty-admin/campaign',
     icon: Megaphone,
+  },
+  {
+    title: 'Generate Codes',
+    path: '/loyalty-admin/generate-codes',
+    icon: QrCode,
   },
 ];
 
@@ -67,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
           {menuItems.map((item) => {
             const isActive = pathname === item.path;
             const Icon = item.icon;
-            const tourId = `menu-${item.title.toLowerCase()}`;
+            const tourId = `menu-${item.title.toLowerCase().replace(' ', '-')}`;
 
             return (
               <Link

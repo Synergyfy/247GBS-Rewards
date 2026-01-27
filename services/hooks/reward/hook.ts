@@ -5,12 +5,14 @@ import {
   CustomerPointType,
   CustomerRedeemNumberType,
   GenerateCodeType,
+  GenerateBulkCodeType,
   GenerateRewardCodeType,
   PointHistoryType,
   RewardHistoryType,
   RewardMethod,
   RewardType,
   ValidateCodeType,
+  RedeemRewardType,
 } from './types';
 import { getCookieValue } from '@/services/getCookieValue';
 
@@ -43,6 +45,24 @@ export const useGeneratePoint = () => {
 
   const mutation = useMutation({
     mutationFn: (generatePoint: GenerateCodeType) => create(generatePoint),
+  });
+
+  return mutation;
+};
+
+export const useGenerateBulkPoints = () => {
+  const create = async (generatePoint: GenerateBulkCodeType) => {
+    const accessToken: string = getCookieValue('token') || '';
+    setBearerToken(accessToken);
+    const request = api.post(`reward/generate-bulk-codes/`, {
+      ...generatePoint,
+    });
+    const response = await request;
+    return response['data'] as GenerateCodeType[];
+  };
+
+  const mutation = useMutation({
+    mutationFn: (generatePoint: GenerateBulkCodeType) => create(generatePoint),
   });
 
   return mutation;
@@ -199,19 +219,30 @@ export const useGetRewards = () => {
   return query;
 };
 
-export const useGetCodes = (campaignId: string) => {
+export interface PaginatedCodesResponse {
+  data: GenerateCodeType[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export const useGetCodes = (campaignId: string, page: number = 1, limit: number = 10) => {
   const fetch = async () => {
-    const accessToken: string = getCookieValue('staffToken') || '';
+    const accessToken: string = getCookieValue('staffToken') || getCookieValue('token') || '';
     setBearerToken(accessToken);
-    const request = api.get(`/reward/all-campaigns/${campaignId}/`);
+    const request = api.get(`/reward/all-campaigns/${campaignId}/`, {
+      params: { page, limit }
+    });
     const response = await request;
-    return response['data'] as GenerateCodeType[];
+    return response['data'] as PaginatedCodesResponse;
   };
 
   const query = useQuery({
-    queryKey: ['generatedcodes'],
+    queryKey: ['generatedcodes', campaignId, page, limit],
     queryFn: fetch,
     refetchOnMount: 'always',
+    enabled: !!campaignId,
   });
 
   return query;
@@ -360,4 +391,20 @@ export const useGetPointBalance = (campaignId: string) => {
   });
 
   return query;
+};
+
+export const useRedeemRewardSelfService = () => {
+  const create = async (data: RedeemRewardType) => {
+    const accessToken: string = getCookieValue('customerToken') || '';
+    setBearerToken(accessToken);
+    const request = api.post(`reward/redeem-self-service/`, data);
+    const response = await request;
+    return response['data'];
+  };
+
+  const mutation = useMutation({
+    mutationFn: (data: RedeemRewardType) => create(data),
+  });
+
+  return mutation;
 };

@@ -2,7 +2,7 @@
 
 import { errorType, useAuthCustomer } from '@/services/hooks/auth/hook';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { IoEye, IoEyeOff } from 'react-icons/io5';
 
@@ -13,6 +13,10 @@ const LoginForm = () => {
   const [campaignId, setCampaignId] = useState<string>('');
   const [campaignCode, setCampaignCode] = useState<string>('');
   const [visiblePassword, setVisiblePassword] = useState<boolean>(false);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
 
   useEffect(() => {
     const campaign = localStorage.getItem('currentCampaign');
@@ -30,7 +34,6 @@ const LoginForm = () => {
     mutate,
   } = useAuthCustomer();
 
-  const router = useRouter();
 
   const handleSubmit = () => {
     setError('');
@@ -50,12 +53,20 @@ const LoginForm = () => {
     } else if (isSuccess) {
       const currentCampaign = localStorage.getItem('currentCampaign');
       console.log('current', currentCampaign);
-      document.cookie = `customerToken=${data.accessToken}; max-age=86400; path=/; secure;`;
-      document.cookie = `tokenOwner=${campaignCode}; max-age=86400; path=/; secure;`;
+      
+      const isSecure = window.location.protocol === 'https:';
+      const cookieString = `max-age=86400; path=/; ${isSecure ? 'secure;' : ''}`;
+      
+      document.cookie = `customerToken=${data.accessToken}; ${cookieString}`;
+      document.cookie = `tokenOwner=${campaignCode}; ${cookieString}`;
 
-      router.push(`/campaign/${currentCampaign}`);
+      if (redirectPath) {
+        router.push(redirectPath);
+      } else {
+        router.push(`/campaign/${currentCampaign}`);
+      }
     }
-  }, [respError, isError, isSuccess, data, router, campaignCode]);
+  }, [respError, isError, isSuccess, data, router, campaignCode, redirectPath]);
 
   return (
     <form className="form">

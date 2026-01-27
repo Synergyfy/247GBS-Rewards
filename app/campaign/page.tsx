@@ -13,20 +13,46 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useCheckCampaignJoinStatus, useJoinCampaign } from '@/services/hooks/customer-campaigns/hook';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import { getCookieValue } from '@/services/getCookieValue';
 
 export default function CampaignDetailPage() {
+  const router = useRouter();
+  const pathname = usePathname();
   const campaign = useSelector((state: RootState) => state.campaing);
   const [campaignId, setCampaignId] = useState<string>('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     const id = localStorage.getItem('campaignId');
     if (id) setCampaignId(id);
-  }, []);
 
-  const { data: joinStatus, isLoading: isJoinStatusLoading } = useCheckCampaignJoinStatus(campaignId);
+    // Proactive Login Check
+    const token = getCookieValue('customerToken');
+    if (!token) {
+      router.push(`/campaign/login?redirect=${pathname}`);
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router, pathname]);
+
+  const { data: joinStatus, isLoading: isJoinStatusLoading, error } = useCheckCampaignJoinStatus(campaignId);
   const { mutate: joinCampaignMutation, isPending: isJoining } = useJoinCampaign();
 
+  useEffect(() => {
+    if (error) {
+      const axiosError = error as any;
+      if (axiosError.response?.status === 401) {
+        router.push(`/campaign/login?redirect=${pathname}`);
+      }
+    }
+  }, [error, router, pathname]);
+  
   const isMember = !!joinStatus?.isJoined;
+
+  if (isCheckingAuth) {
+      return <LoadingSpinner />;
+  }
 
   const handleJoinClick = () => {
     if (!campaignId) return;

@@ -1,3 +1,14 @@
+export interface RewardConfig {
+  tierId?: string;
+  durationDays?: number;
+  url?: string;
+  site?: string;
+  username?: string;
+  password?: string;
+  loyalty?: { tierId: string; durationDays: number };
+  mall?: { tierId: string; durationDays: number };
+}
+
 export interface RewardType {
   id?: string;
   title: string;
@@ -7,6 +18,9 @@ export interface RewardType {
   expires: string | Date;
   description: string;
   currency: string;
+  quantityAvailable?: number;
+  type?: string;
+  config?: RewardConfig;
 }
 
 export interface expiresOptions {
@@ -18,6 +32,14 @@ export interface GenerateCodeType {
   code?: string;
   expiry?: string;
   type?: string;
+  campaignId: string;
+}
+
+export interface GenerateBulkCodeType {
+  points: number;
+  quantity: number;
+  expires: string;
+  type: string;
   campaignId: string;
 }
 
@@ -69,4 +91,9 @@ export interface RewardHistoryType {
   created_at: string;
   description: string;
   reward: RewardType;
+}
+
+export interface RedeemRewardType {
+  campaignId: string;
+  rewardId: string;
 }

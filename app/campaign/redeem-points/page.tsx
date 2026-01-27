@@ -8,10 +8,11 @@ import { Trophy, Gift, ArrowRight, Info } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { useGetParticipantBalance, useRedeemReward } from '@/services/hooks/customer-campaigns/hook';
+import { useGetPointBalance, useRedeemRewardSelfService } from '@/services/hooks/reward/hook';
 import PublicRewardCard from '@/components/rewards/PublicRewardCard';
 import { RedemptionSuccessDialog } from '@/components/customer/RedemptionSuccessDialog';
 import LoadingSpinner from '@/components/ui/Loading';
+import { toast } from 'sonner';
 
 export default function RedeemPointsPage() {
   const campaign = useSelector((state: RootState) => state.campaing);
@@ -23,35 +24,38 @@ export default function RedeemPointsPage() {
     if (id) setCampaignId(id);
   }, []);
 
-  const { data: balance, isLoading: isBalanceLoading } = useGetParticipantBalance(campaignId);
-  const { mutate: redeemReward } = useRedeemReward();
+  const { data: balance, isLoading: isBalanceLoading } = useGetPointBalance(campaignId);
+  const { mutate: redeemReward, isPending: isRedeeming } = useRedeemRewardSelfService();
 
-  const userPoints = balance?.balance || 0;
+  const userPoints = typeof balance === 'number' ? balance : 0;
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<{ title: string } | null>(null);
 
   const handleRedeemClick = (reward: any) => {
     const pointsRequired = Number(reward.pointCost || reward.pointsRequired || 0);
-    if (userPoints >= pointsRequired) {
-      const payload = {
-        staffId: 'customer-self-redeem',
-        participantId: 'me',
-        rewardId: reward.id,
-        redemptionCode: `RED-${Date.now()}`,
-      };
-
-      redeemReward(payload, {
-        onSuccess: () => {
-          setSelectedReward(reward);
-          setIsDialogOpen(true);
-        },
-        onError: (error) => {
-          console.error('Redemption failed:', error);
-          alert('Failed to redeem reward. Please try again.');
-        }
-      });
+    
+    if (userPoints < pointsRequired) {
+        toast.error("Insufficient points balance.");
+        return;
     }
+
+    const payload = {
+        campaignId,
+        rewardId: reward.id,
+    };
+
+    redeemReward(payload, {
+        onSuccess: () => {
+            setSelectedReward(reward);
+            setIsDialogOpen(true);
+        },
+        onError: (error: any) => {
+            console.error('Redemption failed:', error);
+            const errorMessage = error?.response?.data?.message || 'Failed to redeem reward. Please try again.';
+            toast.error(errorMessage);
+        }
+    });
   };
 
   if (isBalanceLoading) {
@@ -113,6 +117,7 @@ export default function RedeemPointsPage() {
                   isMember={true}
                   onRedeem={() => handleRedeemClick(reward)}
                   className="h-full"
+                  isLoading={isRedeeming}
                 />
               ))
             ) : (
@@ -131,7 +136,7 @@ export default function RedeemPointsPage() {
             <Info className="w-6 h-6 shrink-0" />
             <p className="font-medium text-sm">Points redeemed for rewards are non-refundable. Please review the reward details before claiming.</p>
           </div>
-          <Button variant="ghost" className="text-[#2D3DFF] font-bold flex items-center gap-2 group">
+          <Button variant="ghost" className="text-[#2D3DFF] font-bold flex items-center gap-2 group">     
             Terms of Service <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
