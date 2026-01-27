@@ -32,6 +32,7 @@ export interface BusinessType extends CreateBusinessGeneral {
   address: CreateBusinessContact;
   socials: CreateBusinessSocial;
   links: CreateBusinessLink[];
+  profileImage?: string;
 }
 
 export interface StaffType {

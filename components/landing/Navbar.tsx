@@ -124,12 +124,7 @@ const Navbar = () => {
             >
               Features
             </Link>
-            <Link
-              href="/partner"
-              className="px-4 py-2 rounded-full font-medium transition-all text-slate-600 hover:text-blue-600 hover:bg-blue-50"
-            >
-              Partner
-            </Link>
+           
             <Link
               href="/support"
               className="px-4 py-2 rounded-full font-medium transition-all text-slate-600 hover:text-blue-600 hover:bg-blue-50"
@@ -146,7 +141,7 @@ const Navbar = () => {
               </Link>
               <Link href="/partner">
                 <button className="px-6 py-2.5 rounded-full font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
-                  Partner Portal
+                  Affliate
                 </button>
               </Link>
             </div>

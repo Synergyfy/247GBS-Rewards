@@ -22,8 +22,9 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { CampaignType } from '@/services/hooks/campaign/types';
-import { IoPencil, IoStatsChart } from 'react-icons/io5';
+import { IoPencil, IoStatsChart, IoShareSocial } from 'react-icons/io5';
 import CampaignAnalytics from '@/app/loyalty-admin/components/CampaignAnalytics';
+import { FaCopy } from 'react-icons/fa';
 
 import {
   Table,
@@ -61,7 +62,11 @@ type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mcom-backend.vercel.app/';
 
-const Campaign: React.FC = () => {
+interface CampaignProps {
+  filterProp?: string;
+}
+
+const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<MainTab>('GENERAL');
@@ -69,11 +74,20 @@ const Campaign: React.FC = () => {
 
   const [campaignId, setCampaignId] = useState('');
   const [editMode, setEditMode] = useState(false);
-  const [filterType, setFilterType] = useState('ALL');
+  const [filterType, setFilterType] = useState(filterProp || 'ALL');
+
+  useEffect(() => {
+    if (filterProp) {
+      setFilterType(filterProp);
+    }
+  }, [filterProp]);
 
   const [analyticsCampaignId, setAnalyticsCampaignId] = useState('');
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<string>('');
+
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedShareCampaign, setSelectedShareCampaign] = useState<{ name: string; uniqueCode: string } | null>(null);
 
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
@@ -197,6 +211,16 @@ const Campaign: React.FC = () => {
     setShowAnalytics(true);
   };
 
+  const handleShare = (name: string, uniqueCode: string) => {
+    setSelectedShareCampaign({ name, uniqueCode });
+    setShareModalOpen(true);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    // You could add a toast notification here if desired
+  };
+
 
   const processUpdate = () => {
     const { business, rewardIds } = campaign;
@@ -235,22 +259,24 @@ const Campaign: React.FC = () => {
 
   return (
     <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
-      <div className="mb-6 w-[200px] ml-auto">
-        <Select
-          value={filterType}
-          onValueChange={setFilterType}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All Campaigns</SelectItem>
-            <SelectItem value="SEASONAL">Seasonal</SelectItem>
-            <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
-            <SelectItem value="PRESET">Preset</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {!filterProp && (
+        <div className="mb-6 w-[200px] ml-auto">
+          <Select
+            value={filterType}
+            onValueChange={setFilterType}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Campaigns</SelectItem>
+              <SelectItem value="SEASONAL">Seasonal</SelectItem>
+              <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
+              <SelectItem value="PRESET">Preset</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {fetchData && fetchData?.length < 1 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -413,12 +439,13 @@ const Campaign: React.FC = () => {
                             Staff View
                           </Link>
                           <div className="h-4 w-px bg-gray-300"></div>
-                          <div className="w-8 h-8">
-                            <QRCodeSVG
-                              value={`${baseUrl}campaign/${uniqueCode ?? ''}`}
-                              size={32}
-                            />
-                          </div>
+                          <button
+                            onClick={() => handleShare(name, uniqueCode ?? '')}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors"
+                          >
+                            <IoShareSocial size={16} />
+                            Share
+                          </button>
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -532,6 +559,73 @@ const Campaign: React.FC = () => {
                 onClick={() => setShowAnalytics(false)}
               >
                 Close Insights
+              </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
+      {/* Share Modal */}
+      <Dialog
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden transform transition-all">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Share Campaign</h3>
+              <button
+                onClick={() => setShareModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="p-8 flex flex-col items-center">
+              {selectedShareCampaign && (
+                <>
+                  <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-dashed border-gray-200 mb-6">
+                    <QRCodeSVG
+                      value={`${baseUrl}campaign/${selectedShareCampaign.uniqueCode}`}
+                      size={200}
+                      level="H"
+                      includeMargin={true}
+                    />
+                  </div>
+
+                  <h4 className="text-xl font-bold text-gray-900 mb-2 text-center">
+                    {selectedShareCampaign.name}
+                  </h4>
+                  <p className="text-gray-500 text-sm mb-6 text-center">
+                    Scan this QR code to join the campaign
+                  </p>
+
+                  <div className="w-full bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center gap-3">
+                    <div className="flex-1 truncate text-sm text-gray-600 font-medium">
+                      {`${baseUrl}campaign/${selectedShareCampaign.uniqueCode}`}
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard(`${baseUrl}campaign/${selectedShareCampaign.uniqueCode}`)}
+                      className="text-blue-600 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Copy Link"
+                    >
+                      <FaCopy size={18} />
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+              <button
+                onClick={() => setShareModalOpen(false)}
+                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 shadow-sm"
+              >
+                Close
               </button>
             </div>
           </Dialog.Panel>

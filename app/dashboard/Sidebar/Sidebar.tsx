@@ -107,9 +107,8 @@ export function Sidebar({ onSelect }: { onSelect: (label: string) => void }) {
             >
               <span className="mr-2">{item.label}</span>
               <IoMdArrowDropdown
-                className={`transform transition-transform ${
-                  openSections[item.label] ? 'rotate-180' : 'rotate-0'
-                }`}
+                className={`transform transition-transform ${openSections[item.label] ? 'rotate-180' : 'rotate-0'
+                  }`}
               />
             </button>
             {openSections[item.label] && (
@@ -118,11 +117,10 @@ export function Sidebar({ onSelect }: { onSelect: (label: string) => void }) {
                   <li key={subLink.label}>
                     <button
                       onClick={() => handleSelect(subLink.label)}
-                      className={`block font-medium p-2 px-8 transition duration-200 w-full text-left rounded-full ${
-                        activeLink === subLink.label
+                      className={`block font-medium p-2 px-8 transition duration-200 w-full text-left rounded-full ${activeLink === subLink.label
                           ? 'bg-blue-500 text-white'
                           : 'text-black hover:bg-blue-500 hover:text-white'
-                      }`}
+                        }`}
                     >
                       {subLink.label}
                     </button>

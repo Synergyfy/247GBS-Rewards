@@ -17,6 +17,8 @@ const Navbar = () => {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState(false);
 
+  if (pathname === '/campaign') return null;
+
   const navItems = [
     { name: 'Campaign', link: '/campaign', icon: Zap },
     { name: 'Earn', link: '/campaign/earn-points', icon: Wallet },
