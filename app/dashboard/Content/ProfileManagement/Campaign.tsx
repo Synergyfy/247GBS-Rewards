@@ -24,7 +24,8 @@ import { RootState } from '@/store/store';
 import { CampaignType } from '@/services/hooks/campaign/types';
 import { IoPencil, IoStatsChart, IoShareSocial } from 'react-icons/io5';
 import CampaignAnalytics from '@/app/loyalty-admin/components/CampaignAnalytics';
-import { FaCopy } from 'react-icons/fa';
+import { FaCopy, FaCheck } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 import {
   Table,
@@ -49,18 +50,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import {
-  Select,
-  SelectContent,
+  Select,  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import html2canvas from 'html2canvas';
+import { MdDownload, MdPrint } from 'react-icons/md';
 
 type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS';
-
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mcom-backend.vercel.app/';
 
 interface CampaignProps {
   filterProp?: string;
@@ -76,6 +76,14 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
   const [editMode, setEditMode] = useState(false);
   const [filterType, setFilterType] = useState(filterProp || 'ALL');
 
+  const [dynamicBaseUrl, setDynamicBaseUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setDynamicBaseUrl(`${window.location.origin}/`);
+    }
+  }, []);
+
   useEffect(() => {
     if (filterProp) {
       setFilterType(filterProp);
@@ -90,38 +98,11 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
   const [selectedShareCampaign, setSelectedShareCampaign] = useState<{ name: string; uniqueCode: string } | null>(null);
 
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
+  const [copiedState, setCopiedState] = useState<'copy' | 'download' | 'print' | null>(null);
 
-  const tabs: MainTab[] = [
-    'GENERAL',
-    'REWARD',
-    'SETTINGS',
-    'CONTENT',
-    'COLORS',
-  ];
-
-  const handleOpenModal = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setIsOpen(true);
-    }, 500);
-  };
+  const shareRef = React.useRef<HTMLDivElement>(null);
 
   const dispatch = useDispatch();
-
-  const handleClose = useCallback(() => {
-    dispatch(resetCampaign());
-    setIsOpen(false);
-    setEditMode(false);
-    setErrorMsg('');
-  }, [dispatch]);
-
-  const handleOpenDeleteModal = (id: string) => {
-    if (!openDeleteModal) {
-      setOpenDeleteModal(true);
-      setCampaignToDelete(id);
-    }
-  };
 
   const campaign = useSelector(
     (state: RootState) => state.campaing
@@ -167,6 +148,62 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
     } else mutate(campaign);
   };
 
+  const tabs: MainTab[] = ['GENERAL', 'REWARD', 'SETTINGS', 'CONTENT', 'COLORS'];
+
+  const handleOpenModal = () => {
+    // If filterType is a specific campaign type, auto-select it in the form
+    if (filterType === 'SEASONAL' || filterType === 'CO_BRANDED' || filterType === 'PRESET') {
+      dispatch(updateCampaignField({ type: filterType as any }));
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setIsOpen(true);
+    }, 500);
+  };
+
+  const handleClose = useCallback(() => {
+    dispatch(resetCampaign());
+    setIsOpen(false);
+    setEditMode(false);
+    setErrorMsg('');
+  }, [dispatch]);
+
+  const handleOpenDeleteModal = (id: string) => {
+    if (!openDeleteModal) {
+      setOpenDeleteModal(true);
+      setCampaignToDelete(id);
+    }
+  };
+
+  const handleDelete = () => {
+    if (!deletePending) deleteMutate(campaignToDelete);
+  };
+
+  const handleEdit = (id: string) => {
+    const campaign: CampaignType | undefined = fetchData?.find(
+      item => item.id === id
+    );
+
+    if (campaign) {
+      dispatch(updateCampaignField(campaign));
+      setCampaignId(id);
+      setEditMode(true);
+      setIsOpen(true);
+    }
+  };
+
+  const handleViewAnalytics = (id: string) => {
+    setAnalyticsCampaignId(id);
+    setShowAnalytics(true);
+  };
+
+  const handleShare = (name: string, uniqueCode: string) => {
+    setSelectedShareCampaign({ name, uniqueCode });
+    setShareModalOpen(true);
+  };
+
   useEffect(() => {
     if (isSuccess) {
       refetch();
@@ -189,38 +226,61 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
     }
   }, [deleteSuccess, refetch]);
 
-  const handleDelete = () => {
-    if (!deletePending) deleteMutate(campaignToDelete);
-  };
-  const handleEdit = (id: string) => {
-    const campaign: CampaignType | undefined = fetchData?.find(
-      item => item.id === id
-    );
-
-    if (campaign) {
-      dispatch(updateCampaignField(campaign));
-
-      setCampaignId(id);
-      setEditMode(true);
-      setIsOpen(true);
+  const handleDownload = async () => {
+    if (shareRef.current) {
+      setCopiedState('download');
+      const canvas = await html2canvas(shareRef.current);
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `${selectedShareCampaign?.name || 'campaign'}-qr.png`;
+      link.click();
+      toast.success('Campaign QR downloaded successfully!');
+      setTimeout(() => setCopiedState(null), 2000);
     }
   };
 
-  const handleViewAnalytics = (id: string) => {
-    setAnalyticsCampaignId(id);
-    setShowAnalytics(true);
-  };
-
-  const handleShare = (name: string, uniqueCode: string) => {
-    setSelectedShareCampaign({ name, uniqueCode });
-    setShareModalOpen(true);
+  const handlePrint = async () => {
+    if (shareRef.current) {
+      setCopiedState('print');
+      const canvas = await html2canvas(shareRef.current);
+      const imageData = canvas.toDataURL('image/png');
+      
+      const printWindow = window.open('', '', 'height=600,width=800');
+      if (printWindow) {
+        printWindow.document.write('<html><head><title>Print QR Code</title>');
+        printWindow.document.write('<style>body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; } img { max-width: 100%; height: auto; }</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(`<img src="${imageData}" alt="Campaign QR Code" />`);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        
+        // Wait for image to load before printing
+        const img = printWindow.document.querySelector('img');
+        if (img) {
+          img.onload = () => {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+            toast.success('Preparing for print...');
+            setCopiedState(null);
+          };
+        } else {
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+          setCopiedState(null);
+        }
+      }
+    }
   };
 
   const copyToClipboard = (text: string) => {
+    setCopiedState('copy');
     navigator.clipboard.writeText(text);
-    // You could add a toast notification here if desired
+    toast.success('Campaign link copied to clipboard!');
+    setTimeout(() => setCopiedState(null), 2000);
   };
-
 
   const processUpdate = () => {
     const { business, rewardIds } = campaign;
@@ -259,24 +319,33 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
 
   return (
     <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
-      {!filterProp && (
-        <div className="mb-6 w-[200px] ml-auto">
-          <Select
-            value={filterType}
-            onValueChange={setFilterType}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Campaigns</SelectItem>
-              <SelectItem value="SEASONAL">Seasonal</SelectItem>
-              <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
-              <SelectItem value="PRESET">Preset</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <button
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+          onClick={handleOpenModal}
+        >
+          Create Campaign
+        </button>
+
+        {!filterProp && (
+          <div className="w-[200px]">
+            <Select
+              value={filterType}
+              onValueChange={setFilterType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Campaigns</SelectItem>
+                <SelectItem value="SEASONAL">Seasonal</SelectItem>
+                <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
+                <SelectItem value="PRESET">Preset</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
 
       {fetchData && fetchData?.length < 1 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -514,16 +583,6 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
         </div>
       )}
 
-      {fetchData && fetchData.length > 0 && (
-        <button
-          className="fixed bottom-8 right-8 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 hover:scale-105 transition-all z-40"
-          onClick={() => setIsOpen(true)}
-          title="Add New Campaign"
-        >
-          <GoPlus size={28} />
-        </button>
-      )}
-
       {/* Analytics Modal */}
       <Dialog
         open={showAnalytics}
@@ -588,32 +647,51 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
             <div className="p-8 flex flex-col items-center">
               {selectedShareCampaign && (
                 <>
-                  <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-dashed border-gray-200 mb-6">
-                    <QRCodeSVG
-                      value={`${baseUrl}campaign/${selectedShareCampaign.uniqueCode}`}
-                      size={200}
-                      level="H"
-                      includeMargin={true}
-                    />
+                  <div ref={shareRef} className="bg-white p-8 flex flex-col items-center w-full">
+                    <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-dashed border-gray-200 mb-6">
+                      <QRCodeCanvas
+                        value={`${dynamicBaseUrl}campaign/${selectedShareCampaign.uniqueCode}`}
+                        size={200}
+                        level="H"
+                        includeMargin={true}
+                      />
+                    </div>
+
+                    <h4 className="text-xl font-bold text-gray-900 mb-2 text-center">
+                      {selectedShareCampaign.name}
+                    </h4>
+                    <p className="text-gray-500 text-sm mb-6 text-center">
+                      Scan this QR code to join the campaign
+                    </p>
+
+                    <div className="w-full bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center justify-center">
+                      <div className="truncate text-sm text-gray-600 font-medium">
+                        {`${dynamicBaseUrl}campaign/${selectedShareCampaign.uniqueCode}`}
+                      </div>
+                    </div>
                   </div>
 
-                  <h4 className="text-xl font-bold text-gray-900 mb-2 text-center">
-                    {selectedShareCampaign.name}
-                  </h4>
-                  <p className="text-gray-500 text-sm mb-6 text-center">
-                    Scan this QR code to join the campaign
-                  </p>
-
-                  <div className="w-full bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-center gap-3">
-                    <div className="flex-1 truncate text-sm text-gray-600 font-medium">
-                      {`${baseUrl}campaign/${selectedShareCampaign.uniqueCode}`}
-                    </div>
+                  <div className="grid grid-cols-3 gap-3 w-full mt-6">
                     <button
-                      onClick={() => copyToClipboard(`${baseUrl}campaign/${selectedShareCampaign.uniqueCode}`)}
-                      className="text-blue-600 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Copy Link"
+                      onClick={() => copyToClipboard(`${dynamicBaseUrl}campaign/${selectedShareCampaign.uniqueCode}`)}
+                      className="flex flex-col items-center justify-center gap-2 p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors"
                     >
-                      <FaCopy size={18} />
+                      {copiedState === 'copy' ? <FaCheck size={20} className="text-blue-600" /> : <FaCopy size={20} />}
+                      <span className="text-xs font-bold">{copiedState === 'copy' ? 'Copied' : 'Copy Link'}</span>
+                    </button>
+                    <button
+                      onClick={handleDownload}
+                      className="flex flex-col items-center justify-center gap-2 p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors"
+                    >
+                      {copiedState === 'download' ? <FaCheck size={20} className="text-emerald-600" /> : <MdDownload size={22} />}
+                      <span className="text-xs font-bold">{copiedState === 'download' ? 'Downloaded' : 'Download'}</span>
+                    </button>
+                    <button
+                      onClick={handlePrint}
+                      className="flex flex-col items-center justify-center gap-2 p-3 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition-colors"
+                    >
+                      {copiedState === 'print' ? <FaCheck size={20} className="text-purple-600" /> : <MdPrint size={22} />}
+                      <span className="text-xs font-bold">{copiedState === 'print' ? 'Printing' : 'Print'}</span>
                     </button>
                   </div>
                 </>
