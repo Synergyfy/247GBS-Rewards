@@ -8,7 +8,8 @@ export enum VoucherType {
   LINK = "LINK",
   CREDENTIALS = "CREDENTIALS",
   MCOM_LOYALTY_TIER = "MCOM_LOYALTY_TIER",
-  MCOM_MALL_TIER = "MCOM_MALL_TIER"
+  MCOM_MALL_TIER = "MCOM_MALL_TIER",
+  MCOM_BUNDLE = "MCOM_BUNDLE"
 }
 
 export interface CreateVoucherBatchDto {

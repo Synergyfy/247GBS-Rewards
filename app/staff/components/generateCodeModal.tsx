@@ -142,8 +142,8 @@ const GenerateCodeModal = () => {
           {showCodes && (
             <div className="flex flex-col gap-2 max-h-[30rem] overflow-y-auto">
               {data &&
-                data?.length > 0 &&
-                data.map((item, i) => (
+                data?.data?.length > 0 &&
+                data.data.map((item, i) => (
                   <span
                     key={i}
                     className="border-l-2 border-black flex flex-col gap-1 pl-2"

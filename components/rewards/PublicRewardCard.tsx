@@ -26,6 +26,7 @@ interface PublicRewardCardProps {
     isMember?: boolean;
     onRedeem?: (reward: Reward) => void;
     className?: string;
+    isLoading?: boolean;
 }
 
 export default function PublicRewardCard({
@@ -33,7 +34,8 @@ export default function PublicRewardCard({
     userPoints = 0,
     isMember = false,
     onRedeem,
-    className
+    className,
+    isLoading = false
 }: PublicRewardCardProps) {
     const pointsRequired = Number(reward.pointCost || reward.pointsRequired || 0);
     const rewardImage = reward.image || reward.headerImg || 'https://placehold.co/600x400?text=Reward';
@@ -122,7 +124,7 @@ export default function PublicRewardCard({
                     {onRedeem ? (
                         <Button
                             onClick={() => onRedeem(reward)}
-                            disabled={!canRedeem}
+                            disabled={!canRedeem || isLoading}
                             className={cn(
                                 "w-full py-6 rounded-xl text-base font-bold shadow-md transition-all duration-300",
                                 canRedeem
@@ -130,7 +132,11 @@ export default function PublicRewardCard({
                                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
                             )}
                         >
-                            {canRedeem ? (
+                            {isLoading ? (
+                                <span className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redeeming...
+                                </span>
+                            ) : canRedeem ? (
                                 <span className="flex items-center gap-2">
                                     <Unlock className="w-4 h-4" /> Redeem Reward
                                 </span>

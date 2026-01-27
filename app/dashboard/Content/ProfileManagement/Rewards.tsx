@@ -301,7 +301,7 @@ const Rewards = () => {
         currency,
         quantityAvailable: Number(quantityAvailable),
         type: rewardType,
-        config: rewardType === 'STANDARD' ? null : config,
+        config: rewardType === 'STANDARD' ? undefined : config,
       };
 
       mutate(data);
@@ -395,7 +395,7 @@ const Rewards = () => {
       currency,
       quantityAvailable: Number(quantityAvailable),
       type: rewardType,
-      config: rewardType === 'STANDARD' ? null : config,
+      config: rewardType === 'STANDARD' ? undefined : config,
     };
     updateMutate({ id: rewardId, reward });
   };
