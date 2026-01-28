@@ -31,6 +31,7 @@ export default function RedeemPointsPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<{ title: string } | null>(null);
+  const [redemptionData, setRedemptionData] = useState<any>(null);
 
   const handleRedeemClick = (reward: any) => {
     const pointsRequired = Number(reward.pointCost || reward.pointsRequired || 0);
@@ -46,7 +47,8 @@ export default function RedeemPointsPage() {
     };
 
     redeemReward(payload, {
-        onSuccess: () => {
+        onSuccess: (data) => {
+            setRedemptionData(data);
             setSelectedReward(reward);
             setIsDialogOpen(true);
         },
@@ -147,6 +149,7 @@ export default function RedeemPointsPage() {
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
           rewardTitle={selectedReward.title}
+          redemptionData={redemptionData}
         />
       )}
     </div>
