@@ -62,6 +62,11 @@ const initialState: CampaignState = {
   contactText: 'Get in touch.',
   contactImg: '',
 
+  // Reward Page Content
+  rewardPageTitle: '',
+  rewardPageMessage: '',
+  rewardPageLink: '',
+
   // Colors
   background: '#EEEEEE',
   text: '#333333',
@@ -136,6 +141,19 @@ const createCampaignSlice = createSlice({
       return { ...state, ...action.payload };
     },
 
+    // Update reward page content
+    updateRewardPageContent: (
+      state,
+      action: PayloadAction<{
+        rewardPageTitle?: string;
+        rewardPageMessage?: string;
+        rewardPageLink?: string;
+      }>
+    ) => {
+      return { ...state, ...action.payload };
+    },
+
+
     // Reset form
     resetCampaign: () => initialState,
   },
@@ -147,6 +165,7 @@ export const {
   updateRewards,
   updateEarnSettings,
   updateColors,
+  updateRewardPageContent,
   resetCampaign,
 } = createCampaignSlice.actions;
 

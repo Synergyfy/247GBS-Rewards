@@ -19,7 +19,7 @@ import PublicRewardCard from '@/components/rewards/PublicRewardCard';
 export default function CampaignDetail() {
   const router = useRouter();
   const pathname = usePathname();
-  const campaign = useSelector((state: RootState) => state.campaing);
+  const campaign = useSelector((state: RootState) => state.createCampaign);
   const [campaignId, setCampaignId] = useState<string>('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -47,7 +47,7 @@ export default function CampaignDetail() {
       }
     }
   }, [error, router, pathname]);
-  
+
   const isMember = !!joinStatus?.isJoined;
 
   const handleJoinClick = () => {
@@ -64,7 +64,7 @@ export default function CampaignDetail() {
   };
 
   if (isCheckingAuth) {
-      return <LoadingSpinner />;
+    return <LoadingSpinner />;
   }
 
   if (!campaign.name && !campaignId) {

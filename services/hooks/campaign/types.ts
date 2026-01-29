@@ -58,6 +58,11 @@ export interface CampaignType {
   contactText: string;
   contactImg?: string;
 
+  // Reward Page Content
+  rewardPageTitle?: string;
+  rewardPageMessage?: string;
+  rewardPageLink?: string;
+
   // Colors
   background: string;
   text: string;

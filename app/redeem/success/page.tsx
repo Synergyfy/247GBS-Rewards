@@ -19,6 +19,8 @@ const SuccessNotification = () => {
     const expiryDate = searchParams.get('expiryDate');
     const activationLink = searchParams.get('activationLink');
     const customerName = searchParams.get('customerName');
+    const successTitle = searchParams.get('successTitle');
+    const successMessage = searchParams.get('successMessage');
 
     const isPointsReward = !!points;
     const title = rewardName || campaignName || 'Reward';
@@ -89,7 +91,7 @@ const SuccessNotification = () => {
                     transition={{ delay: 0.4 }}
                     className="text-gray-500 text-lg"
                 >
-                    {isPointsReward ? 'Points added to your balance.' : 'You have a new reward!'}
+                    {successMessage || (isPointsReward ? 'Points added to your balance.' : 'You have a new reward!')}
                 </motion.p>
 
 

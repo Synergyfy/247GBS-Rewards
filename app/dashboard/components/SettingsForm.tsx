@@ -19,7 +19,7 @@ const SettingsForm: React.FC = () => {
     redeemGiveStaffNumber,
     redeemStaffPersonalCode,
     redeemStaffScanQR,
-  } = useSelector((state: RootState) => state.campaing);
+  } = useSelector((state: RootState) => state.createCampaign);
 
   const dispatch = useDispatch();
 
@@ -81,11 +81,10 @@ const SettingsForm: React.FC = () => {
         {(['EARNPOINTS', 'REDEEMREWARDS'] as SubTab[]).map(tab => (
           <button
             key={tab}
-            className={`pb-2 px-3 font-medium transition-colors border-b-2 ${
-              activeSubTab === tab
+            className={`pb-2 px-3 font-medium transition-colors border-b-2 ${activeSubTab === tab
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+              }`}
             onClick={() => setActiveSubTab(tab)}
           >
             {tab === 'EARNPOINTS' ? 'EARN POINTS' : 'REDEEM REWARDS'}
@@ -95,26 +94,26 @@ const SettingsForm: React.FC = () => {
 
       {activeSubTab === 'EARNPOINTS' && (
         <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-           <div className="flex items-center gap-2 mb-3">
-               <h3 className="font-medium text-gray-900">How can customers earn points?</h3>
-               <ToolTip content="Select the methods customers can use to earn points." />
-           </div>
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="font-medium text-gray-900">How can customers earn points?</h3>
+            <ToolTip content="Select the methods customers can use to earn points." />
+          </div>
           <div className="space-y-3">
             {earnOptions.map((option, index) => {
-                const { label, name, value } = option;
-                return (
+              const { label, name, value } = option;
+              return (
                 <label key={index} className="flex items-center cursor-pointer">
-                    <input
+                  <input
                     type="checkbox"
                     id={`earn-${index}`}
                     className="mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     name={name}
                     checked={value}
                     onChange={handleInputChange}
-                    />
-                    <span className="text-gray-700">{label}</span>
+                  />
+                  <span className="text-gray-700">{label}</span>
                 </label>
-                );
+              );
             })}
           </div>
         </div>
@@ -122,26 +121,26 @@ const SettingsForm: React.FC = () => {
 
       {activeSubTab === 'REDEEMREWARDS' && (
         <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-           <div className="flex items-center gap-2 mb-3">
-               <h3 className="font-medium text-gray-900">How can customers redeem rewards?</h3>
-               <ToolTip content="Select the methods customers can use to redeem earned points." />
-           </div>
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="font-medium text-gray-900">How can customers redeem rewards?</h3>
+            <ToolTip content="Select the methods customers can use to redeem earned points." />
+          </div>
           <div className="space-y-3">
             {redeemOptions.map((option, index) => {
-                const { label, name, value } = option;
-                return (
-                 <label key={index} className="flex items-center cursor-pointer">
-                    <input
+              const { label, name, value } = option;
+              return (
+                <label key={index} className="flex items-center cursor-pointer">
+                  <input
                     type="checkbox"
                     id={`redeem-${index}`}
                     className="mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     name={name}
                     checked={value}
                     onChange={handleInputChange}
-                    />
-                    <span className="text-gray-700">{label}</span>
+                  />
+                  <span className="text-gray-700">{label}</span>
                 </label>
-                );
+              );
             })}
           </div>
         </div>

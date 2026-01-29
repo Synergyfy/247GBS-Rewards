@@ -30,7 +30,7 @@ const Page = () => {
     earnGiveStaffNumber,
     earnStaffPersonalCode,
     earnStaffScanQR,
-  } = useSelector((state: RootState) => state.campaing);
+  } = useSelector((state: RootState) => state.createCampaign);
 
   const earnMethods = [
     {

@@ -13,6 +13,7 @@ import RewardForm from '../../components/RewardForm';
 import SettingsForm from '../../components/SettingsForm';
 import ContentForm from '../../components/ContentForm';
 import ColorsForm from '../../components/ColorsForm';
+import RewardPageForm from '../../components/RewardPageForm';
 import {
   useCreateCampaign,
   useDeleteCampaign,
@@ -58,7 +59,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS';
+type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS' | 'REWARD_PAGE';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mcom-backend.vercel.app/';
 
@@ -97,6 +98,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
     'SETTINGS',
     'CONTENT',
     'COLORS',
+    'REWARD_PAGE',
   ];
 
   const handleOpenModal = () => {
@@ -124,7 +126,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
   };
 
   const campaign = useSelector(
-    (state: RootState) => state.campaing
+    (state: RootState) => state.createCampaign
   ) as CampaignType;
 
   const { data: fetchData, isLoading, refetch } = useGetCampaigns(filterType);
@@ -360,6 +362,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
                   {activeTab === 'SETTINGS' && <SettingsForm />}
                   {activeTab === 'CONTENT' && <ContentForm />}
                   {activeTab === 'COLORS' && <ColorsForm />}
+                  {activeTab === 'REWARD_PAGE' && <RewardPageForm />}
                 </div>
               </div>
             </div>

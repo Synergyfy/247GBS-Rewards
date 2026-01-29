@@ -3,7 +3,7 @@ import businessGeneral from './features/businessGeneral';
 import businessContact from './features/businessContact';
 import businessSocials from './features/businessSocials';
 import businessLinks from './features/businessLink';
-import campaing from './features/campaign';
+import createCampaign from './features/campaign';
 
 export const store = configureStore({
   reducer: {
@@ -11,7 +11,7 @@ export const store = configureStore({
     businessContact,
     businessSocials,
     businessLinks,
-    campaing,
+    createCampaign,
   },
 });
 

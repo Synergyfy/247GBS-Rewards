@@ -19,7 +19,7 @@ const Page = () => {
   const campaignCode = (params.code as string) || currentCampaign;
 
   const { homeText, homeTitle } = useSelector(
-    (state: RootState) => state.campaing
+    (state: RootState) => state.createCampaign
   );
 
   useEffect(() => {

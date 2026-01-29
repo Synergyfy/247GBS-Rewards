@@ -32,7 +32,7 @@ const ContentForm: React.FC = () => {
     redeemTitle,
     contactText,
     contactTitle,
-  } = useSelector((state: RootState) => state.campaing);
+  } = useSelector((state: RootState) => state.createCampaign);
 
   const dispatch = useDispatch();
 
@@ -48,19 +48,19 @@ const ContentForm: React.FC = () => {
   // A helper to render an “upload field” similar to previous examples.
   const renderImageInput = (placeholder: string, tooltip: string) => (
     <div className="mt-4">
-        <label className="mb-2 flex items-center gap-2 font-medium text-gray-700 text-sm">
-            {placeholder}
-            <ToolTip content={tooltip} />
-        </label>
-        <label className="flex items-center justify-center cursor-pointer w-full p-3 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 hover:bg-gray-50 transition-all">
+      <label className="mb-2 flex items-center gap-2 font-medium text-gray-700 text-sm">
+        {placeholder}
+        <ToolTip content={tooltip} />
+      </label>
+      <label className="flex items-center justify-center cursor-pointer w-full p-3 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 hover:bg-gray-50 transition-all">
         <IoMdAttach className="mr-2 text-gray-500" />
         <span className="text-sm text-gray-600">Upload Image</span>
         <input
-            type="file"
-            className="hidden"
-            // Add onChange handler here if implemented
+          type="file"
+          className="hidden"
+        // Add onChange handler here if implemented
         />
-        </label>
+      </label>
     </div>
   );
 
@@ -72,11 +72,10 @@ const ContentForm: React.FC = () => {
           tab => (
             <button
               key={tab}
-              className={`pb-2 px-3 font-medium transition-colors border-b-2 whitespace-nowrap ${
-                activeSubTab === tab
+              className={`pb-2 px-3 font-medium transition-colors border-b-2 whitespace-nowrap ${activeSubTab === tab
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+                }`}
               onClick={() => setActiveSubTab(tab)}
             >
               {tab}
@@ -123,8 +122,8 @@ const ContentForm: React.FC = () => {
         <div className="space-y-6">
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Home Title
-                 <ToolTip content="The title for the home section." />
+              Home Title
+              <ToolTip content="The title for the home section." />
             </label>
             <input
               type="text"
@@ -137,8 +136,8 @@ const ContentForm: React.FC = () => {
           </div>
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Description
-                 <ToolTip content="The main content description for the home section." />
+              Description
+              <ToolTip content="The main content description for the home section." />
             </label>
             <TextEditor
               value={homeText}
@@ -152,49 +151,49 @@ const ContentForm: React.FC = () => {
           <div className="border-t pt-4 mt-6">
             <h3 className="text-lg font-bold text-gray-800 mb-2">Columns</h3>
             <p className="text-gray-600 mb-4">
-                The campaign home page may contain three columns with content.
+              The campaign home page may contain three columns with content.
             </p>
             <div>
-                 <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                    Columns title
-                     <ToolTip content="The overall title for the columns section." />
-                </label>
-                <input
+              <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                Columns title
+                <ToolTip content="The overall title for the columns section." />
+              </label>
+              <input
                 type="text"
                 placeholder="Columns title"
                 className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 value={columnsTitle}
                 name="columnsTitle"
                 onChange={handleInputChange}
-                />
+              />
             </div>
           </div>
 
           <div className="space-y-4 border p-4 rounded-md bg-gray-50">
             <p className="text-lg font-medium text-blue-600">Column one</p>
             <div>
-                <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                    Title
-                     <ToolTip content="Title for the first column." />
-                </label>
-                <input
+              <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                Title
+                <ToolTip content="Title for the first column." />
+              </label>
+              <input
                 type="text"
                 placeholder="Column one title"
                 className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 value={col1Title}
                 name="col1Title"
                 onChange={handleInputChange}
-                />
+              />
             </div>
             <div>
-                 <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                    Content
-                     <ToolTip content="Content for the first column." />
-                </label>
-                <TextEditor
+              <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                Content
+                <ToolTip content="Content for the first column." />
+              </label>
+              <TextEditor
                 value={col1Text ?? ''}
                 onChange={html => handleTextEditorChange('col1Text', html)}
-                />
+              />
             </div>
             <div>{renderImageInput('Column one image', 'Image for the first column.')}</div>
           </div>
@@ -202,28 +201,28 @@ const ContentForm: React.FC = () => {
           <div className="space-y-4 border p-4 rounded-md bg-gray-50">
             <p className="text-lg font-medium text-blue-600">Column two</p>
             <div>
-                <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                    Title
-                    <ToolTip content="Title for the second column." />
-                </label>
-                <input
+              <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                Title
+                <ToolTip content="Title for the second column." />
+              </label>
+              <input
                 type="text"
                 placeholder="Column two title"
                 className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 value={col2Title}
                 name="col2Title"
                 onChange={handleInputChange}
-                />
+              />
             </div>
             <div>
-                <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                    Content
-                    <ToolTip content="Content for the second column." />
-                </label>
-                <TextEditor
+              <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                Content
+                <ToolTip content="Content for the second column." />
+              </label>
+              <TextEditor
                 value={col2Text ?? ''}
                 onChange={html => handleTextEditorChange('col2Text', html)}
-                />
+              />
             </div>
             <div>{renderImageInput('Column two image', 'Image for the second column.')}</div>
           </div>
@@ -231,28 +230,28 @@ const ContentForm: React.FC = () => {
           <div className="space-y-4 border p-4 rounded-md bg-gray-50">
             <p className="text-lg font-medium text-blue-600">Column three</p>
             <div>
-                 <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                    Title
-                    <ToolTip content="Title for the third column." />
-                </label>
-                <input
+              <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                Title
+                <ToolTip content="Title for the third column." />
+              </label>
+              <input
                 type="text"
                 placeholder="Column three title"
                 className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 value={col3Title}
                 name="col3Title"
                 onChange={handleInputChange}
-                />
+              />
             </div>
             <div>
-                 <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                    Content
-                    <ToolTip content="Content for the third column." />
-                </label>
-                <TextEditor
+              <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+                Content
+                <ToolTip content="Content for the third column." />
+              </label>
+              <TextEditor
                 value={col3Text ?? ''}
                 onChange={html => handleTextEditorChange('col3Text', html)}
-                />
+              />
             </div>
             <div>{renderImageInput('Column three image', 'Image for the third column.')}</div>
           </div>
@@ -263,8 +262,8 @@ const ContentForm: React.FC = () => {
         <div className="space-y-6">
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Title
-                <ToolTip content="The title for the 'Earn' section." />
+              Title
+              <ToolTip content="The title for the 'Earn' section." />
             </label>
             <input
               type="text"
@@ -277,8 +276,8 @@ const ContentForm: React.FC = () => {
           </div>
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Description
-                <ToolTip content="Instructions on how to earn points." />
+              Description
+              <ToolTip content="Instructions on how to earn points." />
             </label>
             <TextEditor
               value={earnText}
@@ -295,8 +294,8 @@ const ContentForm: React.FC = () => {
         <div className="space-y-6">
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Title
-                <ToolTip content="The title for the 'Redeem' section." />
+              Title
+              <ToolTip content="The title for the 'Redeem' section." />
             </label>
             <input
               type="text"
@@ -309,8 +308,8 @@ const ContentForm: React.FC = () => {
           </div>
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Description
-                <ToolTip content="Instructions on how to redeem rewards." />
+              Description
+              <ToolTip content="Instructions on how to redeem rewards." />
             </label>
             <TextEditor
               value={redeemText}
@@ -327,8 +326,8 @@ const ContentForm: React.FC = () => {
         <div className="space-y-6">
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Title
-                 <ToolTip content="The title for the 'Contact' section." />
+              Title
+              <ToolTip content="The title for the 'Contact' section." />
             </label>
             <input
               type="text"
@@ -341,8 +340,8 @@ const ContentForm: React.FC = () => {
           </div>
           <div>
             <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                Description
-                 <ToolTip content="Contact information or instructions." />
+              Description
+              <ToolTip content="Contact information or instructions." />
             </label>
             <TextEditor
               value={contactText}

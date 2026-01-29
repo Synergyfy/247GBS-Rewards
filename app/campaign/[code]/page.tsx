@@ -20,7 +20,7 @@ import Link from 'next/link';
 export default function CampaignDetailPage() {
   const params = useParams();
   const dispatch = useDispatch();
-  const campaign = useSelector((state: RootState) => state.campaing);
+  const campaign = useSelector((state: RootState) => state.createCampaign);
   const [isReady, setIsReady] = useState(false);
   const campaignCode = params.code as string;
 

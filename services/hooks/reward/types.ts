@@ -21,6 +21,9 @@ export interface RewardType {
   quantityAvailable?: number;
   type?: string;
   config?: RewardConfig;
+  rewardPageTitle?: string;
+  rewardPageMessage?: string;
+  rewardPageLink?: string;
 }
 
 export interface expiresOptions {

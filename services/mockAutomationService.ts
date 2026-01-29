@@ -6,6 +6,8 @@ export interface ValidationResponse {
     message: string;
     campaignName: string;
     customerName?: string;
+    rewardPageTitle?: string;
+    rewardPageMessage?: string;
   };
   error?: string;
 }
@@ -22,6 +24,8 @@ export const mockAutomationService = {
         message: 'Welcome Bonus!',
         campaignName: 'New Year Campaign',
         customerName: 'Dave1',
+        rewardPageTitle: 'Custom Congratz!',
+        rewardPageMessage: 'You just unlocked the custom reward page message!',
       },
       'SUMMER_FUN': {
         points: 100,

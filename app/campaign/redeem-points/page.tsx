@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 export default function RedeemPointsPage() {
-  const campaign = useSelector((state: RootState) => state.campaing);
+  const campaign = useSelector((state: RootState) => state.createCampaign);
   const router = useRouter();
   const [campaignId, setCampaignId] = useState<string>('');
 
