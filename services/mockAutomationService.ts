@@ -5,6 +5,7 @@ export interface ValidationResponse {
     points: number;
     message: string;
     campaignName: string;
+    customerName?: string;
   };
   error?: string;
 }
@@ -15,21 +16,24 @@ export const mockAutomationService = {
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // Define valid codes for testing
-    const validCodes: Record<string, { points: number; message: string; campaignName: string }> = {
+    const validCodes: Record<string, { points: number; message: string; campaignName: string; customerName: string }> = {
       'PROMO2026': {
         points: 500,
         message: 'Welcome Bonus!',
         campaignName: 'New Year Campaign',
+        customerName: 'Dave1',
       },
       'SUMMER_FUN': {
         points: 100,
         message: 'Summer Vibes Reward',
         campaignName: 'Summer Sale',
+        customerName: 'Alice',
       },
       'LOYALTY_GOLD': {
         points: 1000,
         message: 'Gold Member Perk',
         campaignName: 'VIP Club',
+        customerName: 'Bob',
       },
     };
 

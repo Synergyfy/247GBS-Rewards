@@ -10,9 +10,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useGetPointBalance, useRedeemRewardSelfService } from '@/services/hooks/reward/hook';
 import PublicRewardCard from '@/components/rewards/PublicRewardCard';
-import { RedemptionSuccessDialog } from '@/components/customer/RedemptionSuccessDialog';
 import LoadingSpinner from '@/components/ui/Loading';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 export default function RedeemPointsPage() {
   const campaign = useSelector((state: RootState) => state.campaing);
@@ -29,34 +29,48 @@ export default function RedeemPointsPage() {
 
   const userPoints = typeof balance === 'number' ? balance : 0;
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedReward, setSelectedReward] = useState<{ title: string } | null>(null);
-  const [redemptionData, setRedemptionData] = useState<any>(null);
-
   const handleRedeemClick = (reward: any) => {
     const pointsRequired = Number(reward.pointCost || reward.pointsRequired || 0);
-    
+
     if (userPoints < pointsRequired) {
-        toast.error("Insufficient points balance.");
-        return;
+      toast.error("Insufficient points balance.");
+      return;
     }
 
     const payload = {
-        campaignId,
-        rewardId: reward.id,
+      campaignId,
+      rewardId: reward.id,
     };
 
     redeemReward(payload, {
-        onSuccess: (data) => {
-            setRedemptionData(data);
-            setSelectedReward(reward);
-            setIsDialogOpen(true);
-        },
-        onError: (error: any) => {
-            console.error('Redemption failed:', error);
-            const errorMessage = error?.response?.data?.message || 'Failed to redeem reward. Please try again.';
-            toast.error(errorMessage);
+      onSuccess: (data) => {
+        const isMcomLoyaltyReward = data?.reward?.type === 'MCOM_LOYALTY_TIER';
+        const isMcomMallReward = data?.reward?.type === 'MCOM_MALL_TIER';
+        const uniqueCode = data?.uniqueCode;
+        const expiryDate = data?.reward?.expires ? format(new Date(data.reward.expires), 'd MMM yyyy') : '';
+        const customerName = data?.customer?.fullName || 'Customer';
+        const rewardTitle = reward.title;
+
+        let activationLink = '';
+        if (isMcomLoyaltyReward) {
+          activationLink = `https://mcomloyalty.vercel.app/business/signup?provisionCode=${uniqueCode}`;
+        } else if (isMcomMallReward) {
+          activationLink = `https://mcom-mall.vercel.app/signup?provisionCode=${uniqueCode}`;
         }
+
+        const params = new URLSearchParams();
+        if (rewardTitle) params.append('rewardName', rewardTitle);
+        if (expiryDate) params.append('expiryDate', expiryDate);
+        if (activationLink) params.append('activationLink', activationLink);
+        if (customerName) params.append('customerName', customerName);
+
+        router.push(`/redeem/success?${params.toString()}`);
+      },
+      onError: (error: any) => {
+        console.error('Redemption failed:', error);
+        const errorMessage = error?.response?.data?.message || 'Failed to redeem reward. Please try again.';
+        toast.error(errorMessage);
+      }
     });
   };
 
@@ -138,20 +152,11 @@ export default function RedeemPointsPage() {
             <Info className="w-6 h-6 shrink-0" />
             <p className="font-medium text-sm">Points redeemed for rewards are non-refundable. Please review the reward details before claiming.</p>
           </div>
-          <Button variant="ghost" className="text-[#2D3DFF] font-bold flex items-center gap-2 group">     
+          <Button variant="ghost" className="text-[#2D3DFF] font-bold flex items-center gap-2 group">
             Terms of Service <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </div>
-
-      {selectedReward && (
-        <RedemptionSuccessDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          rewardTitle={selectedReward.title}
-          redemptionData={redemptionData}
-        />
-      )}
     </div>
   );
 }

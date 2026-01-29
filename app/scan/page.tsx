@@ -27,7 +27,8 @@ const ScanPage = () => {
                 const params = new URLSearchParams({
                     points: response.reward.points.toString(),
                     message: response.reward.message,
-                    campaignName: response.reward.campaignName
+                    campaignName: response.reward.campaignName,
+                    customerName: response.reward.customerName || 'Valued Customer'
                 });
                 router.push(`/redeem/success?${params.toString()}`);
             } else {
