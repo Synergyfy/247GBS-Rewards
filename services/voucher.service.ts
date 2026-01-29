@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 export const MCOM_BACKEND_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002';
-export const MCOM_LOYALTY_API_URL = process.env.NEXT_PUBLIC_MCOM_LOYALTY_API_URL || 'http://localhost:3000/api/v1';
-export const MCOM_MALL_API_URL = process.env.NEXT_PUBLIC_MCOM_MALL_API_URL || 'http://localhost:3001/api/v1';
+export const MCOM_LOYALTY_API_URL = process.env.NEXT_PUBLIC_MCOM_LOYALTY_API_URL || 'https://mcom-loyalty-api.vercel.app/api/v1';
+export const MCOM_MALL_API_URL = process.env.NEXT_PUBLIC_MCOM_MALL_API_URL || 'https://mcom-mall-rest.vercel.app/api/v1';
 
 export enum VoucherType {
   LINK = "LINK",
