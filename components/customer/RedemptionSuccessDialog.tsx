@@ -25,12 +25,19 @@ export const RedemptionSuccessDialog = ({
     redemptionData,
 }: RedemptionSuccessDialogProps) => {
     const isMcomLoyaltyReward = redemptionData?.reward?.type === 'MCOM_LOYALTY_TIER';
+    const isMcomMallReward = redemptionData?.reward?.type === 'MCOM_MALL_TIER';
 
-    if (isMcomLoyaltyReward) {
+    if (isMcomLoyaltyReward || isMcomMallReward) {
         const customerName = redemptionData?.customer?.fullName || 'Customer';
         const uniqueCode = redemptionData?.uniqueCode;
         const expiryDate = redemptionData?.reward?.expires ? format(new Date(redemptionData.reward.expires), 'd MMM yyyy') : '';
-        const activationLink = `https://mcomloyalty.vercel.app/business/signup?provisionCode=${uniqueCode}`;
+
+        let activationLink = '';
+        if (isMcomLoyaltyReward) {
+             activationLink = `https://mcomloyalty.vercel.app/business/signup?provisionCode=${uniqueCode}`;
+        } else {
+             activationLink = `https://mcom-mall.vercel.app/signup?provisionCode=${uniqueCode}`;
+        }
 
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
