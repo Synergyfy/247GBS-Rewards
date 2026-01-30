@@ -2,6 +2,8 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { updateRewardPageContent } from '@/store/features/campaign';
+import TextEditor from './TextEditor';
+import DOMPurify from 'dompurify';
 
 interface RewardPageFormProps {
     title?: string;
@@ -21,19 +23,21 @@ const RewardPageForm: React.FC<RewardPageFormProps> = ({ title, message, link, s
     const currentMessage = message !== undefined ? message : campaign.rewardPageMessage;
     const currentLink = link !== undefined ? link : campaign.rewardPageLink;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
         if (name === 'rewardPageTitle') {
             if (setTitle) setTitle(value);
             else dispatch(updateRewardPageContent({ rewardPageTitle: value }));
-        } else if (name === 'rewardPageMessage') {
-            if (setMessage) setMessage(value);
-            else dispatch(updateRewardPageContent({ rewardPageMessage: value }));
         } else if (name === 'rewardPageLink') {
             if (setLink) setLink(value);
             else dispatch(updateRewardPageContent({ rewardPageLink: value }));
         }
+    };
+
+    const handleMessageChange = (html: string) => {
+        if (setMessage) setMessage(html);
+        else dispatch(updateRewardPageContent({ rewardPageMessage: html }));
     };
 
     return (
@@ -68,20 +72,15 @@ const RewardPageForm: React.FC<RewardPageFormProps> = ({ title, message, link, s
 
                 {/* Message Input */}
                 <div className="space-y-2">
-                    <label htmlFor="rewardPageMessage" className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700">
                         Success Page Message
                     </label>
-                    <textarea
-                        id="rewardPageMessage"
-                        name="rewardPageMessage"
+                    <TextEditor
                         value={currentMessage || ''}
-                        onChange={handleChange}
-                        placeholder="e.g., You have successfully claimed your reward!"
-                        rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
+                        onChange={handleMessageChange}
                     />
                     <p className="text-xs text-gray-500">
-                        A subtitle or message providing more details.
+                        A subtitle or message providing more details. Emojis, links, and images are supported.
                     </p>
                 </div>
 
@@ -116,9 +115,14 @@ const RewardPageForm: React.FC<RewardPageFormProps> = ({ title, message, link, s
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
                             {currentTitle || 'Congratulations!'}
                         </h2>
-                        <p className="text-gray-500 mb-6">
-                            {currentMessage || 'You have a new reward!'}
-                        </p>
+                        <div
+                            className="text-gray-500 mb-6 prose prose-sm max-w-none break-words"
+                            dangerouslySetInnerHTML={{
+                                __html: typeof window !== 'undefined'
+                                    ? DOMPurify.sanitize(currentMessage || 'You have a new reward!')
+                                    : (currentMessage || 'You have a new reward!')
+                            }}
+                        />
                         {currentLink && (
                             <div className="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold text-sm">
                                 Custom Link Button
