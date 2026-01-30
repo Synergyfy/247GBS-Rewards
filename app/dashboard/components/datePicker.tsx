@@ -5,9 +5,10 @@ import 'react-datepicker/dist/react-datepicker.css';
 interface DateTimePickerType {
   date: Date;
   setDate: (date: Date) => void;
+  showTime?: boolean;
 }
 
-const DateTimePicker: React.FC<DateTimePickerType> = ({ date, setDate }) => {
+const DateTimePicker: React.FC<DateTimePickerType> = ({ date, setDate, showTime = true }) => {
   return (
     <div>
       <DatePicker
@@ -15,10 +16,10 @@ const DateTimePicker: React.FC<DateTimePickerType> = ({ date, setDate }) => {
         onChange={date => {
           if (date) setDate(date);
         }}
-        showTimeSelect
+        showTimeSelect={showTime}
         timeFormat="HH:mm"
         timeIntervals={15}
-        dateFormat="MMMM d, yyyy h:mm aa"
+        dateFormat={showTime ? "MMMM d, yyyy h:mm aa" : "MMMM d, yyyy"}
         className="w-[28rem] h-[2rem] border-b outline-blue-600 p-2"
       />
     </div>

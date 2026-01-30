@@ -432,6 +432,21 @@ const Rewards = () => {
 
   return (
     <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          {/* You can add a subtitle or search here if needed */}
+        </div>
+        {rewardData && rewardData.length > 0 && (
+          <button
+            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
+            onClick={handleOpenModal}
+          >
+            <GoPlus className="text-xl" />
+            Create Reward
+          </button>
+        )}
+      </div>
+
       {!rewardData ||
         (rewardData.length < 1 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -788,15 +803,6 @@ const Rewards = () => {
             </TableBody>
           </Table>
         </div>
-      )}
-      {rewardData && rewardData.length > 0 && (
-        <button
-          className="fixed bottom-8 right-8 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 hover:scale-105 transition-all z-40"
-          onClick={() => setIsOpen(true)}
-          title="Add New Reward"
-        >
-          <GoPlus size={28} />
-        </button>
       )}
 
       <CNDialog

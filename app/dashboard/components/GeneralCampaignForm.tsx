@@ -4,17 +4,20 @@ import { RootState } from '@/store/store';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ToolTip from './ToolTip';
+import DateTimePicker from './datePicker';
 
 const GeneralForm: React.FC = () => {
-  const { businessId, name, signupPoints, customDomain, type, seasonId } = useSelector(
+  const { businessId, name, signupPoints, customDomain, type, seasonId, startDate, endDate } = useSelector(
     (state: RootState) => state.createCampaign
   );
 
+  const currentYear = new Date().getFullYear();
+
   const seasons = [
-    { id: 'summer', name: 'Summer Season ☀️' },
-    { id: 'autumn', name: 'Autumn Season 🍂' },
-    { id: 'winter', name: 'Winter Season ❄️' },
-    { id: 'spring', name: 'Spring Season 🌸' },
+    { id: 'summer', name: 'Summer Season ☀️', startDate: `${currentYear}-06-21`, endDate: `${currentYear}-09-21` },
+    { id: 'autumn', name: 'Autumn Season 🍂', startDate: `${currentYear}-09-22`, endDate: `${currentYear}-12-20` },
+    { id: 'winter', name: 'Winter Season ❄️', startDate: `${currentYear}-12-21`, endDate: `${currentYear + 1}-03-19` },
+    { id: 'spring', name: 'Spring Season 🌸', startDate: `${currentYear}-03-20`, endDate: `${currentYear}-06-20` },
   ];
 
   const dispatch = useDispatch();
@@ -24,6 +27,25 @@ const GeneralForm: React.FC = () => {
   ) => {
     const { name, value } = event.target;
     dispatch(updateCampaignField({ [name]: value }));
+  };
+
+  const handleSeasonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    const selectedSeason = seasons.find((s) => s.id === value);
+    
+    if (selectedSeason) {
+      dispatch(updateCampaignField({ 
+        seasonId: value,
+        startDate: selectedSeason.startDate,
+        endDate: selectedSeason.endDate
+      }));
+    } else {
+      dispatch(updateCampaignField({ seasonId: value }));
+    }
+  };
+
+  const handleDateChange = (name: 'startDate' | 'endDate', date: Date) => {
+    dispatch(updateCampaignField({ [name]: date.toISOString() }));
   };
 
   const { data } = useGetBusiness();
@@ -84,7 +106,7 @@ const GeneralForm: React.FC = () => {
             name="seasonId"
             className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
             value={seasonId}
-            onChange={handleInputChange}
+            onChange={handleSeasonChange}
           >
             <option value="">Select a Season</option>
             {seasons.map((season) => (
@@ -95,6 +117,35 @@ const GeneralForm: React.FC = () => {
           </select>
         </div>
       )}
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+            Start Date (Day / Month / Year)
+            <ToolTip content="When does this campaign start?" />
+          </label>
+          <div className="border border-gray-300 rounded-md p-1 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
+            <DateTimePicker 
+              date={startDate ? new Date(startDate) : new Date()} 
+              setDate={(date) => handleDateChange('startDate', date)} 
+              showTime={false}
+            />
+          </div>
+        </div>
+        <div>
+          <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+            End Date (Day / Month / Year)
+            <ToolTip content="When does this campaign end?" />
+          </label>
+          <div className="border border-gray-300 rounded-md p-1 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
+            <DateTimePicker 
+              date={endDate ? new Date(endDate) : new Date()} 
+              setDate={(date) => handleDateChange('endDate', date)} 
+              showTime={false}
+            />
+          </div>
+        </div>
+      </div>
 
       <div>
         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">

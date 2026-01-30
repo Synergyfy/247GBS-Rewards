@@ -328,32 +328,34 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
 
   return (
     <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <button
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
-          onClick={handleOpenModal}
-        >
-          Create Campaign
-        </button>
-
-        {!filterProp && (
-          <div className="w-[200px]">
-            <Select
-              value={filterType}
-              onValueChange={setFilterType}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+        <div></div>
+        <div className="flex items-center gap-4">
+          {!filterProp && (
+            <div className="w-[200px]">
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Campaigns</SelectItem>
+                  <SelectItem value="SEASONAL">Seasonal</SelectItem>
+                  <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
+                  <SelectItem value="PRESET">Preset</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {fetchData && fetchData.length > 0 && (
+            <button
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
+              onClick={handleOpenModal}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Campaigns</SelectItem>
-                <SelectItem value="SEASONAL">Seasonal</SelectItem>
-                <SelectItem value="CO_BRANDED">Co-Branded</SelectItem>
-                <SelectItem value="PRESET">Preset</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+              <GoPlus className="text-xl" />
+              Create Campaign
+            </button>
+          )}
+        </div>
       </div>
 
       {fetchData && fetchData?.length < 1 && (
