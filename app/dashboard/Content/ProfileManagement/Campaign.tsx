@@ -358,7 +358,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
         </div>
       </div>
 
-      {fetchData && fetchData?.length < 1 && (
+      {(!fetchData || fetchData?.length < 1) && !isLoading && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="bg-blue-50 p-6 rounded-full mb-6">
             <BsGiftFill className="w-20 h-20 text-blue-600" />

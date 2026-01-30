@@ -49,6 +49,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { FaTimes } from 'react-icons/fa';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/app/helpers/cropImage';
 
 const Businesses = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +59,13 @@ const Businesses = () => {
     'GENERAL' | 'CONTACT' | 'SOCIAL' | 'LINKS'
   >('GENERAL');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  // Cropping states
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   const tabs: Array<'GENERAL' | 'CONTACT' | 'SOCIAL' | 'LINKS'> = [
     'GENERAL',
@@ -242,13 +251,58 @@ const Businesses = () => {
     const files = e.target.files;
     if (files && files[0]) {
       const reader = new FileReader();
-      reader.onload = () => setLogoPreview(reader.result as string);
+      reader.onload = () => {
+        setImageToCrop(reader.result as string);
+        setIsCropModalOpen(true);
+      };
       reader.readAsDataURL(files[0]);
+    }
+  };
+
+  const onCropComplete = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleCropSave = async () => {
+    try {
+      if (imageToCrop && croppedAreaPixels) {
+        const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
+        setLogoPreview(croppedImage);
+        setIsCropModalOpen(false);
+        setImageToCrop(null);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
   const removeLogo = () => {
     setLogoPreview(null);
+  };
+
+  const isLastTab = activeTab === tabs[tabs.length - 1];
+  const isFirstTab = activeTab === tabs[0];
+
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+      setErrorMsg('');
+    } else {
+      if (editMode) {
+        processUpdate();
+      } else {
+        handleSubmit();
+      }
+    }
+  };
+
+  const handleBack = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+      setErrorMsg('');
+    }
   };
 
   return (
@@ -266,8 +320,7 @@ const Businesses = () => {
         )}
       </div>
 
-      {!fetchData ||
-        (fetchData?.length < 1 && (
+      {(!fetchData || fetchData?.length < 1) && !isLoading && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="bg-blue-50 p-6 rounded-full mb-6">
                  <IoMdBusiness className="w-20 h-20 text-blue-600" />
@@ -297,7 +350,7 @@ const Businesses = () => {
               </div>
             )}
           </div>
-        ))}
+        )}
 
       <Dialog
         open={isOpen}
@@ -360,31 +413,38 @@ const Businesses = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+          <div className="border-t border-gray-200 px-6 py-4 flex justify-between items-center bg-gray-50 rounded-b-xl">
              <button
-                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
                 onClick={handleDialogClose}
                 disabled={isPending || updatePending}
               >
                 Cancel
               </button>
-             {!editMode ? (
-                 <button
-                 className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                 onClick={handleSubmit}
-                 disabled={isPending}
-               >
-                 {isPending ? 'Creating...' : 'Create Business'}
-               </button>
-             ): (
+             <div className="flex gap-3">
+                {!isFirstTab && (
+                  <button
+                    className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                    onClick={handleBack}
+                    disabled={isPending || updatePending}
+                  >
+                    Back
+                  </button>
+                )}
                 <button
-                className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                onClick={processUpdate}
-                disabled={updatePending}
-              >
-                {updatePending ? 'Saving...' : 'Save Changes'}
-              </button>
-             )}
+                  className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 min-w-[140px]"
+                  onClick={handleNext}
+                  disabled={isPending || updatePending}
+                >
+                  {!isLastTab ? (
+                    'Next'
+                  ) : editMode ? (
+                    updatePending ? 'Updating...' : 'Update Business'
+                  ) : (
+                    isPending ? 'Creating...' : 'Create Business'
+                  )}
+                </button>
+             </div>
           </div>
         </Dialog.Panel>
         </div>
@@ -509,6 +569,71 @@ const Businesses = () => {
           </DialogFooter>
         </DialogContent>
       </CNDialog>
+
+      {/* Crop Modal */}
+      <Dialog
+        open={isCropModalOpen}
+        onClose={() => setIsCropModalOpen(false)}
+        className="relative z-[60]"
+      >
+        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center border-b px-6 py-4">
+              <h3 className="text-lg font-bold text-gray-900">Crop Logo</h3>
+              <button onClick={() => setIsCropModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            <div className="relative h-80 w-full bg-gray-100">
+              {imageToCrop && (
+                <Cropper
+                  image={imageToCrop}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  onCropChange={setCrop}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                />
+              )}
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-gray-700">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsCropModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  onClick={handleCropSave}
+                >
+                  Save Crop
+                </button>
+              </div>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
     </section>
   );
 };
