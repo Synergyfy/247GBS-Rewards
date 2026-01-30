@@ -13,6 +13,7 @@ import RewardForm from '../../components/RewardForm';
 import SettingsForm from '../../components/SettingsForm';
 import ContentForm from '../../components/ContentForm';
 import ColorsForm from '../../components/ColorsForm';
+import RewardPageForm from '../../components/RewardPageForm';
 import {
   useCreateCampaign,
   useDeleteCampaign,
@@ -52,7 +53,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { QRCodeCanvas } from 'qrcode.react';
 import {
-  Select,  SelectContent,
+  Select, SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -60,7 +61,7 @@ import {
 import html2canvas from 'html2canvas';
 import { MdDownload, MdPrint } from 'react-icons/md';
 
-type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS';
+type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS' | 'REWARD_PAGE';
 
 interface CampaignProps {
   filterProp?: string;
@@ -100,12 +101,34 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [copiedState, setCopiedState] = useState<'copy' | 'download' | 'print' | null>(null);
 
+  const tabs: MainTab[] = [
+    'GENERAL',
+    'REWARD',
+    'SETTINGS',
+    'CONTENT',
+    'COLORS',
+    'REWARD_PAGE',
+  ];
+
   const shareRef = React.useRef<HTMLDivElement>(null);
+
+  const handleOpenModal = () => {
+    // If filterType is a specific campaign type, auto-select it in the form
+    if (filterType === 'SEASONAL' || filterType === 'CO_BRANDED' || filterType === 'PRESET') {
+      dispatch(updateCampaignField({ type: filterType as any }));
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setIsOpen(true);
+    }, 500);
+  };
 
   const dispatch = useDispatch();
 
   const campaign = useSelector(
-    (state: RootState) => state.campaing
+    (state: RootState) => state.createCampaign
   ) as CampaignType;
 
   const { data: fetchData, isLoading, refetch } = useGetCampaigns(filterType);
@@ -148,20 +171,6 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
     } else mutate(campaign);
   };
 
-  const tabs: MainTab[] = ['GENERAL', 'REWARD', 'SETTINGS', 'CONTENT', 'COLORS'];
-
-  const handleOpenModal = () => {
-    // If filterType is a specific campaign type, auto-select it in the form
-    if (filterType === 'SEASONAL' || filterType === 'CO_BRANDED' || filterType === 'PRESET') {
-      dispatch(updateCampaignField({ type: filterType as any }));
-    }
-
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setIsOpen(true);
-    }, 500);
-  };
 
   const handleClose = useCallback(() => {
     dispatch(resetCampaign());
@@ -245,7 +254,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
       setCopiedState('print');
       const canvas = await html2canvas(shareRef.current);
       const imageData = canvas.toDataURL('image/png');
-      
+
       const printWindow = window.open('', '', 'height=600,width=800');
       if (printWindow) {
         printWindow.document.write('<html><head><title>Print QR Code</title>');
@@ -254,7 +263,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
         printWindow.document.write(`<img src="${imageData}" alt="Campaign QR Code" />`);
         printWindow.document.write('</body></html>');
         printWindow.document.close();
-        
+
         // Wait for image to load before printing
         const img = printWindow.document.querySelector('img');
         if (img) {
@@ -429,6 +438,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
                   {activeTab === 'SETTINGS' && <SettingsForm />}
                   {activeTab === 'CONTENT' && <ContentForm />}
                   {activeTab === 'COLORS' && <ColorsForm />}
+                  {activeTab === 'REWARD_PAGE' && <RewardPageForm />}
                 </div>
               </div>
             </div>

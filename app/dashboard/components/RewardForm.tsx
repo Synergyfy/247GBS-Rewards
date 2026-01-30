@@ -8,7 +8,7 @@ import { RewardType } from '@/services/hooks/reward/types';
 import { RootState } from '@/store/store';
 
 const RewardForm: React.FC = () => {
-  const rewardIds = useSelector((state: RootState) => state.campaing.rewardIds);
+  const rewardIds = useSelector((state: RootState) => state.createCampaign.rewardIds);
   const [selectedOptions, setSelectedOptions] = useState<string[]>(
     rewardIds || []
   );
@@ -40,7 +40,7 @@ const RewardForm: React.FC = () => {
       <p className="text-gray-600">Select the rewards that will be available for customers in this campaign.</p>
       {/* Rewards dropdown */}
       <div>
-         <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
+        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
           Rewards (required)
           <ToolTip content="Select one or more rewards to attach to this campaign." />
         </label>
@@ -53,11 +53,11 @@ const RewardForm: React.FC = () => {
             text="Select rewards..."
           />
         ) : (
-            <p className="text-sm text-gray-500 italic">Loading rewards...</p>
+          <p className="text-sm text-gray-500 italic">Loading rewards...</p>
         )}
 
         {data && data.length === 0 && (
-            <p className="text-sm text-red-500 mt-2">No rewards found. Please create a reward first.</p>
+          <p className="text-sm text-red-500 mt-2">No rewards found. Please create a reward first.</p>
         )}
       </div>
     </div>

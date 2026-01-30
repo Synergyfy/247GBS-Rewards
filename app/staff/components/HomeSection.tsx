@@ -9,7 +9,7 @@ const HomeSection: React.FC<{
   description?: string;
 }> = ({ headerText, description }) => {
   const { homeText, homeTitle, secondaryBg, secondaryText } = useSelector(
-    (state: RootState) => state.campaing
+    (state: RootState) => state.createCampaign
   );
   return (
     <section

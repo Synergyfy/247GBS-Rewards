@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { CheckCircle2, Scan, Home, Gift, ExternalLink, Calendar, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import DOMPurify from 'dompurify';
 
 const SuccessNotification = () => {
     const searchParams = useSearchParams();
@@ -19,6 +20,8 @@ const SuccessNotification = () => {
     const expiryDate = searchParams.get('expiryDate');
     const activationLink = searchParams.get('activationLink');
     const customerName = searchParams.get('customerName');
+    const successTitle = searchParams.get('successTitle');
+    const successMessage = searchParams.get('successMessage');
 
     const isPointsReward = !!points;
     const title = rewardName || campaignName || 'Reward';
@@ -81,16 +84,16 @@ const SuccessNotification = () => {
                     transition={{ delay: 0.3 }}
                     className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900"
                 >
-                    {customerName ? `Congratulations, ${customerName}!` : 'Congratulations!'}
+                    {successTitle || (customerName ? `Congratulations, ${customerName}!` : 'Congratulations!')}
                 </motion.h1>
-                <motion.p
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-gray-500 text-lg"
-                >
-                    {isPointsReward ? 'Points added to your balance.' : 'You have a new reward!'}
-                </motion.p>
+                <div
+                    className="text-gray-500 text-lg prose prose-sm max-w-none break-words"
+                    dangerouslySetInnerHTML={{
+                        __html: typeof window !== 'undefined'
+                            ? DOMPurify.sanitize(successMessage || (isPointsReward ? 'Points added to your balance.' : 'You have a new reward!'))
+                            : (successMessage || (isPointsReward ? 'Points added to your balance.' : 'You have a new reward!'))
+                    }}
+                />
 
 
                 {/* Main Card */}

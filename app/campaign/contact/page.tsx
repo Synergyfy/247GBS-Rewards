@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 
 export default function ContactUsPage() {
-  const campaign = useSelector((state: RootState) => state.campaing);
+  const campaign = useSelector((state: RootState) => state.createCampaign);
 
   const contactMethods = [];
 

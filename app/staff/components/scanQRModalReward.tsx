@@ -32,7 +32,7 @@ const ScanQRModal = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [rewardId, setRewardId] = useState<string>('');
 
-  const { rewards } = useSelector((state: RootState) => state.campaing);
+  const { rewards } = useSelector((state: RootState) => state.createCampaign);
 
   const { mutate, isPending, isSuccess, isError, error } =
     useValidatCustomerRedeemNumber();

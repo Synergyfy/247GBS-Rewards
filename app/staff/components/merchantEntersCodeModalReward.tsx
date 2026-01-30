@@ -32,7 +32,7 @@ const MerchantEntersCodeModal = () => {
   const [generatedCode, setGeneratedCode] = useState('');
   const [campaignId, setCampaignId] = useState<string>('');
 
-  const { rewards } = useSelector((state: RootState) => state.campaing);
+  const { rewards } = useSelector((state: RootState) => state.createCampaign);
 
   useEffect(() => {
     const campaignId = localStorage.getItem('campaignId');

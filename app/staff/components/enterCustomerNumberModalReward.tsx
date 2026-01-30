@@ -27,7 +27,7 @@ import { RootState } from '@/store/store';
 import { useSelector } from 'react-redux';
 
 const EnterCustomerNumberModal = () => {
-  const { rewards } = useSelector((state: RootState) => state.campaing);
+  const { rewards } = useSelector((state: RootState) => state.createCampaign);
   const [customerNumber, setCustomerNumber] = useState('');
   const [errMsg, setErrMsg] = useState<string>('');
   const [isOpen, setIsOpen] = useState<boolean>(false);

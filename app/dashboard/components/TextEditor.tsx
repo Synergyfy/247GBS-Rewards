@@ -44,11 +44,14 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
         editorState={editorState}
         onEditorStateChange={onEditorStateChange}
         toolbar={{
-          options: ['inline', 'link'],
-          inline: { options: ['bold', 'italic'] },
-          link: { options: ['link'] },
+          options: ['inline', 'fontSize', 'fontFamily', 'list', 'textAlign', 'colorPicker', 'link', 'embedded', 'emoji', 'image', 'remove', 'history'],
+          inline: { inDropdown: true },
+          list: { inDropdown: true },
+          textAlign: { inDropdown: true },
+          link: { inDropdown: true },
+          history: { inDropdown: true },
         }}
-        editorClassName="border p-2"
+        editorClassName="border p-2 min-h-[300px] prose prose-sm max-w-none"
       />
     </div>
   );

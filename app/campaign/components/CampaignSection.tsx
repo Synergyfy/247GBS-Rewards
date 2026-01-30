@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 
 const CampaignSection = () => {
-  const { rewards } = useSelector((state: RootState) => state.campaing);
+  const { rewards } = useSelector((state: RootState) => state.createCampaign);
   return (
     <section>
       <div>

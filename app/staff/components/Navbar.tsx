@@ -11,7 +11,7 @@ import { MdOutlineMenu } from 'react-icons/md';
 
 const Navbar = () => {
   const { topTitle, topHeadline, primaryBg, primaryText } = useSelector(
-    (state: RootState) => state.campaing
+    (state: RootState) => state.createCampaign
   );
   const [openMenu, setOpenMenu] = useState(false);
 

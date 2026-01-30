@@ -7,7 +7,7 @@ import ToolTip from './ToolTip';
 
 const GeneralForm: React.FC = () => {
   const { businessId, name, signupPoints, customDomain, type, seasonId } = useSelector(
-    (state: RootState) => state.campaing
+    (state: RootState) => state.createCampaign
   );
 
   const seasons = [

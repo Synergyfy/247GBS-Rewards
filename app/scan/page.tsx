@@ -28,7 +28,9 @@ const ScanPage = () => {
                     points: response.reward.points.toString(),
                     message: response.reward.message,
                     campaignName: response.reward.campaignName,
-                    customerName: response.reward.customerName || 'Valued Customer'
+                    customerName: response.reward.customerName || 'Valued Customer',
+                    successTitle: response.reward.rewardPageTitle || '',
+                    successMessage: response.reward.rewardPageMessage || '',
                 });
                 router.push(`/redeem/success?${params.toString()}`);
             } else {

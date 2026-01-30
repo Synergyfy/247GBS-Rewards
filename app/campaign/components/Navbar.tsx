@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 const Navbar = () => {
   const { topTitle, topHeadline, primaryBg, primaryText } = useSelector(
-    (state: RootState) => state.campaing
+    (state: RootState) => state.createCampaign
   );
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState(false);

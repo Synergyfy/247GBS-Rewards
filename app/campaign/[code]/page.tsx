@@ -16,11 +16,12 @@ import { useGetCampaign } from '@/services/hooks/campaign/hook';
 import { updateCampaignField } from '@/store/features/campaign';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { getCookieValue } from '@/services/getCookieValue';
 
 export default function CampaignDetailPage() {
   const params = useParams();
   const dispatch = useDispatch();
-  const campaign = useSelector((state: RootState) => state.campaing);
+  const campaign = useSelector((state: RootState) => state.createCampaign);
   const [isReady, setIsReady] = useState(false);
   const campaignCode = params.code as string;
 
@@ -118,7 +119,17 @@ export default function CampaignDetailPage() {
             </div>
 
             {/* Desktop Action Button (Hero) */}
-            {!isMember ? (
+            {!getCookieValue('customerToken') ? (
+              <div className="hidden md:block shrink-0">
+                <Link href="/campaign/login">
+                  <Button
+                    className="bg-[#2D3DFF] hover:bg-blue-700 text-white text-lg px-8 py-6 rounded-full shadow-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl border-2 border-white/20 font-bold"
+                  >
+                    Sign In to Join
+                  </Button>
+                </Link>
+              </div>
+            ) : !isMember ? (
               <div className="hidden md:block shrink-0">
                 <Button
                   onClick={handleJoinClick}
@@ -262,9 +273,17 @@ export default function CampaignDetailPage() {
       </div >
 
       {/* Sticky Mobile/Bottom Action Bar */}
-      < div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-4 z-50 md:hidden" >
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-4 z-50 md:hidden" >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          {!isMember ? (
+          {!getCookieValue('customerToken') ? (
+            <Link href="/campaign/login" className="w-full">
+              <Button
+                className="w-full bg-[#2D3DFF] hover:bg-blue-700 text-white text-lg py-6 rounded-xl shadow-lg font-bold"
+              >
+                Sign In to Join
+              </Button>
+            </Link>
+          ) : !isMember ? (
             <Button
               onClick={handleJoinClick}
               disabled={isJoining}
