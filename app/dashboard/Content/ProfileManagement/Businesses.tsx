@@ -331,11 +331,11 @@ const Businesses = () => {
       <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
           <div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Business Directory</h1>
-            <p className="text-gray-500 mt-2 font-medium">Manage and monitor your business network efficiently.</p>
+            <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Business Directory</h1>
+            <p className="text-gray-500 mt-2 font-medium italic opacity-80">Manage and monitor your business network efficiently.</p>
           </div>
           <button
-            className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-gray-200 hover:bg-black hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
+            className="bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold shadow-xl shadow-gray-200 hover:bg-black hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
             onClick={handleOpenModal}
           >
             <div className="bg-white/20 p-1 rounded-lg group-hover:rotate-90 transition-transform">
@@ -352,8 +352,8 @@ const Businesses = () => {
                 <stat.icon className={`text-2xl ${stat.color}`} />
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">{stat.label}</p>
-                <p className="text-3xl font-black text-gray-900 mt-1">{stat.value}</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-3xl font-bold text-gray-700 mt-1">{stat.value}</p>
               </div>
             </div>
           ))}
@@ -369,13 +369,13 @@ const Businesses = () => {
             <input
               type="text"
               placeholder="Search by name, industry or email..."
-              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 focus:border-blue-600 transition-all font-medium text-gray-700"
+              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 focus:border-blue-600 transition-all font-medium text-gray-600 placeholder:text-gray-300"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-3">
-             <span className="text-sm font-bold text-gray-400 uppercase tracking-widest px-4">
+             <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest px-4">
                {filteredBusinesses?.length || 0} Results
              </span>
           </div>
@@ -384,25 +384,25 @@ const Businesses = () => {
         {/* Content State */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-32">
-             <Bars height="50" width="50" color="#000" />
-             <p className="mt-4 font-bold text-gray-400 animate-pulse">Fetching your data...</p>
+             <Bars height="50" width="50" color="#94a3b8" />
+             <p className="mt-4 font-semibold text-gray-400 animate-pulse">Fetching your data...</p>
           </div>
         ) : (!fetchData || fetchData?.length < 1) ? (
           <div className="flex flex-col items-center justify-center py-32 text-center px-6">
             <div className="bg-gray-50 p-10 rounded-[3rem] mb-8 relative">
                  <HiOutlineOfficeBuilding className="w-24 h-24 text-gray-200" />
-                 <div className="absolute -bottom-2 -right-2 bg-blue-600 p-4 rounded-2xl shadow-xl shadow-blue-200">
+                 <div className="absolute -bottom-2 -right-2 bg-blue-500 p-4 rounded-2xl shadow-xl shadow-blue-100">
                    <GoPlus className="text-white text-2xl" />
                  </div>
             </div>
 
-            <h2 className="text-3xl font-black text-gray-900 mb-3">Your directory is empty</h2>
-            <p className="text-gray-500 max-w-sm mb-10 leading-relaxed font-medium">
+            <h2 className="text-3xl font-bold text-gray-700 mb-3">Your directory is empty</h2>
+            <p className="text-gray-400 max-w-sm mb-10 leading-relaxed font-medium">
                 Connect your first business entity to start launching loyalty campaigns and managing staff.
             </p>
 
             <button
-                className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all"
+                className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-semibold shadow-2xl shadow-blue-100 hover:bg-blue-700 hover:-translate-y-1 transition-all"
                 onClick={handleOpenModal}
               >
                 Get Started Now
@@ -413,10 +413,10 @@ const Businesses = () => {
             <Table>
               <TableHeader className="bg-gray-50/50">
                 <TableRow className="border-none">
-                  <TableHead className="py-5 font-bold text-gray-400 uppercase tracking-widest text-xs px-8">Business</TableHead>
-                  <TableHead className="font-bold text-gray-400 uppercase tracking-widest text-xs">Contact Details</TableHead>
-                  <TableHead className="font-bold text-gray-400 uppercase tracking-widest text-xs">Location</TableHead>
-                  <TableHead className="font-bold text-gray-400 uppercase tracking-widest text-xs text-right px-8">Actions</TableHead>
+                  <TableHead className="py-5 font-semibold text-gray-400 uppercase tracking-widest text-[10px] px-8">Business</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px]">Contact Details</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px]">Location</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px] text-right px-8">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -429,16 +429,16 @@ const Businesses = () => {
                         <div className="flex items-center gap-4">
                           <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
                             {profileImage ? (
-                               <Image src={profileImage} alt={name} fill className="object-cover" />
+                               <Image src={profileImage} alt={name} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                             ) : (
-                               <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+                               <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
                                  <HiOutlineOfficeBuilding size={24} />
                                </div>
                             )}
                           </div>
                           <div>
-                            <p className="font-black text-gray-900 text-lg">{name}</p>
-                            <span className="inline-block mt-1 px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-tighter">
+                            <p className="font-semibold text-gray-700 text-lg">{name}</p>
+                            <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-[10px] font-bold uppercase tracking-widest">
                               {industry}
                             </span>
                           </div>
@@ -446,28 +446,28 @@ const Businesses = () => {
                       </TableCell>
                       <TableCell>
                         <div className="space-y-2">
-                           <div className="flex items-center gap-2 text-sm text-gray-600">
-                             <FaEnvelope className="text-gray-300" />
+                           <div className="flex items-center gap-2 text-sm text-gray-500">
+                             <FaEnvelope className="text-gray-200" />
                              <span className="font-medium">{email}</span>
                            </div>
-                           <div className="flex items-center gap-2 text-sm text-gray-600">
-                             <FaPhoneAlt className="text-gray-300" />
+                           <div className="flex items-center gap-2 text-sm text-gray-500">
+                             <FaPhoneAlt className="text-gray-200" />
                              <span className="font-medium">{phoneNumber}</span>
                            </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                           <FiMapPin className="text-gray-300" />
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                           <FiMapPin className="text-gray-200" />
                            <span className="font-medium">{city}, {state}</span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-1 pl-6 truncate max-w-[150px]">{street}</p>
+                        <p className="text-xs text-gray-300 mt-1 pl-6 truncate max-w-[150px] font-medium">{street}</p>
                       </TableCell>
                       <TableCell className="text-right px-8">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                           <button
                               onClick={() => handleEdit(id!)}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 transition-all shadow-sm"
                               title="Edit"
                           >
                             <IoPencil size={18}/>
@@ -484,15 +484,15 @@ const Businesses = () => {
                             }}
                           >
                             <DialogTrigger asChild>
-                               <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-400 hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Delete">
+                               <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-red-50 hover:text-red-600 border border-gray-100 transition-all shadow-sm" title="Delete">
                                   <MdDelete size={20} />
                                </button>
                             </DialogTrigger>
                             <DialogContent className="rounded-[2rem]">
                               <DialogHeader>
-                                <DialogTitle className="text-2xl font-black">Delete Business?</DialogTitle>
-                                <DialogDescription className="font-medium text-gray-500">
-                                  This will permanently remove <span className="text-gray-900 font-bold">{name}</span> from your directory. This action is irreversible.
+                                <DialogTitle className="text-2xl font-bold text-gray-800">Delete Business?</DialogTitle>
+                                <DialogDescription className="font-medium text-gray-400">
+                                  This will permanently remove <span className="text-gray-700 font-bold">{name}</span> from your directory. This action is irreversible.
                                 </DialogDescription>
                               </DialogHeader>
                               <DialogFooter className="mt-6 gap-3">
@@ -500,7 +500,7 @@ const Businesses = () => {
                                   type="button"
                                   variant={'outline'}
                                   onClick={() => setOpenDeleteModal(false)}
-                                  className="rounded-xl font-bold h-12"
+                                  className="rounded-xl font-semibold h-12 text-gray-400"
                                 >
                                   Keep it
                                 </Button>
@@ -532,18 +532,18 @@ const Businesses = () => {
         onClose={handleDialogClose}
         className="relative z-50"
       >
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px]" aria-hidden="true" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-             <Dialog.Panel className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-                <div className="flex justify-between items-center border-b border-gray-100 px-10 py-8 bg-gray-50/50">
+             <Dialog.Panel className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+                <div className="flex justify-between items-center border-b border-gray-50 px-10 py-8 bg-gray-50/30">
                     <div>
-                    <h2 className="text-3xl font-black text-gray-900 leading-none">{editMode ? 'Update Business' : 'New Business'}</h2>
-                    <p className="text-gray-500 text-sm mt-3 font-medium">
+                    <h2 className="text-3xl font-bold text-gray-800 leading-none">{editMode ? 'Update Business' : 'New Business'}</h2>
+                    <p className="text-gray-400 text-sm mt-3 font-medium">
                         {editMode ? 'Refine your business profile details.' : 'Let&apos;s get your business on the map.'}
                     </p>
                     </div>
-                    <button onClick={handleDialogClose} className="text-gray-400 hover:text-gray-900 transition-colors p-3 rounded-2xl hover:bg-white shadow-sm">
+                    <button onClick={handleDialogClose} className="text-gray-300 hover:text-gray-600 transition-colors p-3 rounded-2xl hover:bg-white shadow-sm">
                      <FaTimes size={20} />
                     </button>
                 </div>
@@ -551,14 +551,14 @@ const Businesses = () => {
           <div className="flex-1 overflow-y-auto">
              <div className="px-10 py-8">
                  {/* Tabs */}
-                 <div className="flex border-b border-gray-100 mb-10 space-x-8 overflow-x-auto scrollbar-hide">
+                 <div className="flex border-b border-gray-50 mb-10 space-x-8 overflow-x-auto scrollbar-hide">
                     {tabs.map(tab => (
                         <button
                         key={tab}
-                        className={`pb-4 px-1 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-4 ${
+                        className={`pb-4 px-1 text-[10px] font-bold uppercase tracking-[0.2em] transition-all border-b-4 ${
                             activeTab === tab
-                            ? 'border-blue-600 text-gray-900'
-                            : 'border-transparent text-gray-300 hover:text-gray-400'
+                            ? 'border-blue-500 text-gray-700'
+                            : 'border-transparent text-gray-200 hover:text-gray-300'
                         }`}
                         onClick={() => setActiveTab(tab)}
                         >
@@ -568,9 +568,9 @@ const Businesses = () => {
                 </div>
 
                 {errorMsg && (
-                    <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-5 mb-8 rounded-2xl flex items-center gap-3">
-                        <div className="bg-red-500 p-1 rounded-full"><FaTimes className="text-white text-[10px]" /></div>
-                        <p className="font-bold text-sm">{errorMsg}</p>
+                    <div className="bg-red-50 border-l-4 border-red-400 text-red-600 p-5 mb-8 rounded-2xl flex items-center gap-3">
+                        <div className="bg-red-400 p-1 rounded-full"><FaTimes className="text-white text-[8px]" /></div>
+                        <p className="font-semibold text-sm">{errorMsg}</p>
                     </div>
                 )}
 
@@ -589,9 +589,9 @@ const Businesses = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-100 px-10 py-6 flex justify-between items-center bg-gray-50/80">
+          <div className="border-t border-gray-50 px-10 py-6 flex justify-between items-center bg-gray-50/50">
              <button
-                className="px-6 py-3 text-gray-400 font-bold hover:text-gray-900 transition-colors"
+                className="px-6 py-3 text-gray-300 font-bold hover:text-gray-500 transition-colors"
                 onClick={handleDialogClose}
                 disabled={isPending || updatePending}
               >
@@ -600,7 +600,7 @@ const Businesses = () => {
              <div className="flex gap-4">
                 {!isFirstTab && (
                   <button
-                    className="px-8 py-3.5 text-gray-700 font-bold bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+                    className="px-8 py-3.5 text-gray-500 font-bold bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
                     onClick={handleBack}
                     disabled={isPending || updatePending}
                   >
@@ -608,7 +608,7 @@ const Businesses = () => {
                   </button>
                 )}
                 <button
-                  className="px-10 py-3.5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 hover:scale-[1.02] transition-all shadow-xl shadow-blue-200 disabled:opacity-70 min-w-[160px]"
+                  className="px-10 py-3.5 bg-blue-500 text-white font-bold rounded-2xl hover:bg-blue-600 hover:scale-[1.02] transition-all shadow-xl shadow-blue-50 disabled:opacity-70 min-w-[160px]"
                   onClick={handleNext}
                   disabled={isPending || updatePending}
                 >
@@ -623,9 +623,8 @@ const Businesses = () => {
              </div>
           </div>
         </Dialog.Panel>
-        </div>
-      </Dialog>
-
+      </div>
+    </Dialog>
       <CNDialog
         open={openStepModal}
         onOpenChange={() => setOpenStepModal(!openStepModal)}

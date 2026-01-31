@@ -1,0 +1,20 @@
+./app/dashboard/Content/ProfileManagement/Businesses.tsx:625:15
+Parsing ecmascript source code failed
+  623 |              </div>
+  624 |           </div>
+> 625 |         </div>
+      |               ^
+> 626 |       </Dialog>
+      | ^^^^^^^
+  627 |       <CNDialog
+  628 |         open={openStepModal}
+  629 |         onOpenChange={() => setOpenStepModal(!openStepModal)}
+
+Expected '</', got 'jsx text (
+      )'
+
+Import trace:
+  Client Component Browser:
+    ./app/dashboard/Content/ProfileManagement/Businesses.tsx [Client Component Browser]
+    ./app/loyalty-admin/(loyalty-menus)/business/page.tsx [Client Component Browser]
+    ./app/loyalty-admin/(loyalty-menus)/business/page.tsx [Server Component]

@@ -13,7 +13,7 @@ const Page = () => {
   return (
     <div className="sm:w-[80%] mx-auto mt-10 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-5">Rewards</h1>
+        <h1 className="text-3xl font-semibold text-gray-500 mb-5">Rewards</h1>
         <RewardsComponent />
       </div>
       
