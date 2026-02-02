@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { EditorState, ContentState, convertToRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import draftToHtml from 'draftjs-to-html';
@@ -14,20 +14,26 @@ interface TextEditorProps {
 
 const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const lastValueRef = useRef<string | null>(null);
 
   // On mount or when the value changes from parent,
   // convert the incoming HTML to EditorState.
   useEffect(() => {
-    if (value) {
-      const blocksFromHtml = htmlToDraft(value);
-      if (blocksFromHtml) {
-        const { contentBlocks, entityMap } = blocksFromHtml;
-        const contentState = ContentState.createFromBlockArray(
-          contentBlocks,
-          entityMap
-        );
-        setEditorState(EditorState.createWithContent(contentState));
+    if (value !== lastValueRef.current) {
+      if (value) {
+        const blocksFromHtml = htmlToDraft(value);
+        if (blocksFromHtml) {
+          const { contentBlocks, entityMap } = blocksFromHtml;
+          const contentState = ContentState.createFromBlockArray(
+            contentBlocks,
+            entityMap
+          );
+          setEditorState(EditorState.createWithContent(contentState));
+        }
+      } else {
+        setEditorState(EditorState.createEmpty());
       }
+      lastValueRef.current = value;
     }
   }, [value]);
 
@@ -35,7 +41,10 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
     setEditorState(newState);
     const rawContentState = convertToRaw(newState.getCurrentContent());
     const html = draftToHtml(rawContentState);
-    onChange(html);
+    if (html !== lastValueRef.current) {
+      lastValueRef.current = html;
+      onChange(html);
+    }
   };
 
   return (
