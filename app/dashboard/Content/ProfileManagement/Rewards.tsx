@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { BsGiftFill } from 'react-icons/bs';
 import {
@@ -10,7 +12,7 @@ import GeneralForm from '../../components/GeneralRewardsForm';
 import DateRangeForm from '../../components/DateRangeForm';
 import DescriptionForm from '../../components/DescriptionForm';
 import ImagesForm from '../../components/ImagesForm';
-import RewardPageForm from '../../components/RewardPageForm'; // Import the form
+import RewardPageForm from '../../components/RewardPageForm';
 import { RewardType } from '@/services/hooks/reward/types';
 import {
   useCreateRewards,
@@ -21,14 +23,13 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { GoPlus } from 'react-icons/go';
-import { IoCheckmarkDoneSharp, IoPencil, IoStatsChart } from 'react-icons/io5';
+import { IoCheckmarkDoneSharp, IoPencil, IoStatsChart, IoSearchOutline } from 'react-icons/io5';
 import RewardAnalytics from '@/app/loyalty-admin/components/RewardAnalytics';
 
 import { compareDates, formatDateShort } from '@/app/helpers/formatDate';
@@ -42,17 +43,29 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaGift, FaCoins, FaCalendarAlt, FaTag } from 'react-icons/fa';
+import { FiActivity } from 'react-icons/fi';
 import { VoucherType } from '@/services/voucher.service';
 import { useLoyaltyTiers, useMallTiers } from '@/services/hooks/useTiers';
 import { RewardConfig } from '@/services/hooks/reward/types';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/app/helpers/cropImage';
 
 const Rewards = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<
     'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT REWARD PAGE'
   >('GENERAL');
+
+  // Cropping states
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [currentCropType, setCurrentCropType] = useState<string | null>(null);
 
   // States for GENERAL tab
   const [title, setTitle] = useState('');
@@ -111,60 +124,13 @@ const Rewards = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [analyticsRewardId, setAnalyticsRewardId] = useState('');
 
+  const { data: rewardData, isLoading, refetch } = useGetRewards();
 
-  const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      const reader = new FileReader();
-      reader.onload = () => setMainImagePreview(reader.result as string);
-      reader.readAsDataURL(files[0]);
-    }
-  };
-
-  const handleAdditionalImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    key: keyof typeof additionalImagePreviews
-  ) => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setAdditionalImagePreviews(prev => ({
-          ...prev,
-          [key]: reader.result as string,
-        }));
-      };
-      reader.readAsDataURL(files[0]);
-    }
-  };
-
-  const removeMainImage = () => {
-    setMainImagePreview(null);
-  };
-
-  const removeAdditionalImage = (key: keyof typeof additionalImagePreviews) => {
-    setAdditionalImagePreviews(prev => ({ ...prev, [key]: null }));
-  };
-
-  const tabs: Array<
-    'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT REWARD PAGE'
-  > = [
-      'GENERAL',
-      'DATE RANGE',
-      'DESCRIPTION',
-      'IMAGES',
-      'EDIT REWARD PAGE',
-    ];
-
-  const handleOpenModal = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setIsOpen(true);
-    }, 500);
-  };
-
-  const { data: rewardData, refetch } = useGetRewards();
+  const filteredRewards = rewardData?.filter(r => 
+    r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.pointCost.toString().includes(searchQuery)
+  );
 
   const { mutate, isSuccess, isPending } = useCreateRewards();
 
@@ -241,8 +207,6 @@ const Rewards = () => {
   }, [deleteSuccess, refetch]);
 
   const handleSubmit = () => {
-    // Process form data here as needed.
-
     if (!title) {
       setActiveTab('GENERAL');
       setErrorMsg('Title is required');
@@ -266,7 +230,6 @@ const Rewards = () => {
       setErrorMsg('Select your preferred currency');
     }
 
-    // Validation for specific types
     if (rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) {
       if (!tierId) {
         setActiveTab('GENERAL');
@@ -292,8 +255,6 @@ const Rewards = () => {
       setActiveTab('DATE RANGE');
       setErrorMsg(dateRange as string);
     } else {
-
-      // Build Config
       let config: RewardConfig = {};
       if (rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) {
         config = { tierId, durationDays: Number(durationDays) };
@@ -385,7 +346,6 @@ const Rewards = () => {
 
       setEditMode(true);
       setIsOpen(true);
-
       setRewardId(id);
     }
   };
@@ -395,9 +355,7 @@ const Rewards = () => {
     setShowAnalytics(true);
   };
 
-
   const processUpdate = () => {
-    // Build Config
     let config: RewardConfig = {};
     if (rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) {
       config = { tierId, durationDays: Number(durationDays) };
@@ -425,92 +383,336 @@ const Rewards = () => {
     updateMutate({ id: rewardId, reward });
   };
 
+  const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageToCrop(reader.result as string);
+        setCurrentCropType('main');
+        setIsCropModalOpen(true);
+      };
+      reader.readAsDataURL(files[0]);
+    }
+  };
+
+  const handleAdditionalImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    key: keyof typeof additionalImagePreviews
+  ) => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageToCrop(reader.result as string);
+        setCurrentCropType(key);
+        setIsCropModalOpen(true);
+      };
+      reader.readAsDataURL(files[0]);
+    }
+  };
+
+  const onCropComplete = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleCropSave = async () => {
+    try {
+      if (imageToCrop && croppedAreaPixels) {
+        const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
+        if (currentCropType === 'main') {
+          setMainImagePreview(croppedImage);
+        } else if (currentCropType) {
+          setAdditionalImagePreviews(prev => ({
+            ...prev,
+            [currentCropType]: croppedImage,
+          }));
+        }
+        setIsCropModalOpen(false);
+        setImageToCrop(null);
+        setCurrentCropType(null);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const removeMainImage = () => setMainImagePreview(null);
+  const removeAdditionalImage = (key: keyof typeof additionalImagePreviews) =>
+    setAdditionalImagePreviews(prev => ({ ...prev, [key]: null }));
+
+  const tabs: Array<'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT REWARD PAGE'> = [
+    'GENERAL', 'DATE RANGE', 'DESCRIPTION', 'IMAGES', 'EDIT REWARD PAGE'
+  ];
+
+  const handleOpenModal = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setIsOpen(true);
+    }, 500);
+  };
+
+  const isLastTab = activeTab === tabs[tabs.length - 1];
+  const isFirstTab = activeTab === tabs[0];
+
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+      setErrorMsg('');
+    } else {
+      if (editMode) { processUpdate(); } else { handleSubmit(); }
+    }
+  };
+
+  const handleBack = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+      setErrorMsg('');
+    }
+  };
+
   const formatVoucherType = (t: string) => {
     if (t === 'STANDARD') return 'Standard';
     return t.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace('Mcom', 'MCom');
   };
 
+  const stats = [
+    { label: 'Total Rewards', value: rewardData?.length || 0, icon: FaGift, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'Active Now', value: rewardData?.filter(r => new Date(r.expires) > new Date()).length || 0, icon: FiActivity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Total Value', value: rewardData?.reduce((acc, curr) => {
+      const val = parseFloat(curr.rewardValue);
+      return acc + (isNaN(val) ? 0 : val);
+    }, 0).toLocaleString() || 0, icon: FaCoins, color: 'text-amber-600', bg: 'bg-amber-50', suffix: ' pts' },
+  ];
+
   return (
-    <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          {/* You can add a subtitle or search here if needed */}
-        </div>
-        {rewardData && rewardData.length > 0 && (
+    <section className="space-y-8 pb-10">
+      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-3xl font-semibold text-gray-500 tracking-tight">Reward Inventory</h1>
+            <p className="text-gray-500 mt-2 font-medium italic opacity-80">Create and manage incentives for your loyal customers.</p>
+          </div>
           <button
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
+            className="bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold shadow-xl shadow-gray-200 hover:bg-black hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
             onClick={handleOpenModal}
           >
-            <GoPlus className="text-xl" />
-            Create Reward
+            <div className="bg-white/20 p-1 rounded-lg group-hover:rotate-90 transition-transform">
+              <GoPlus className="text-xl" />
+            </div>
+            Create New Reward
           </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {stats.map((stat, i) => (
+            <div key={i} className={`${stat.bg} p-6 rounded-3xl border border-white/50 flex items-center gap-5 transition-transform hover:scale-[1.02]`}>
+              <div className={`p-4 rounded-2xl bg-white shadow-sm`}>
+                <stat.icon className={`text-2xl ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-3xl font-semibold text-gray-600 mt-1">{stat.value}{stat.suffix}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-50 bg-gray-50/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:max-w-md group">
+            <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-indigo-600 transition-colors" />
+            <input
+              type="text"
+              placeholder="Search by title, type or cost..."
+              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-600 transition-all font-medium text-gray-600 placeholder:text-gray-300"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+             <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest px-4">
+               {filteredRewards?.length || 0} Rewards Found
+             </span>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-32">
+             <Bars height="50" width="50" color="#94a3b8" />
+             <p className="mt-4 font-semibold text-gray-400 animate-pulse">Syncing rewards...</p>
+          </div>
+        ) : (!rewardData || rewardData.length < 1) ? (
+          <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+            <div className="bg-gray-50 p-10 rounded-[3rem] mb-8 relative">
+                 <FaGift className="w-24 h-24 text-gray-200" />
+                 <div className="absolute -bottom-2 -right-2 bg-indigo-600 p-4 rounded-2xl shadow-xl shadow-indigo-100">
+                   <GoPlus className="text-white text-2xl" />
+                 </div>
+            </div>
+            <h2 className="text-3xl font-semibold text-gray-500 mb-3">No rewards yet</h2>
+            <p className="text-gray-400 max-w-sm mb-10 leading-relaxed font-medium">
+                Set up your first reward to incentivize customer engagement and increase retention.
+            </p>
+            <button
+                className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-semibold shadow-2xl shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 transition-all"
+                onClick={handleOpenModal}
+              >
+                Create My First Reward
+              </button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-gray-50/50">
+                <TableRow className="border-none">
+                  <TableHead className="py-5 font-semibold text-gray-400 uppercase tracking-widest text-[10px] px-8">Reward Details</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px]">Cost & Value</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px]">Validity Period</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px] text-right px-8">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRewards?.map((item, i) => {
+                  const { title, activeFrom, expires, pointCost, id, type, rewardValue, currency } = item;
+                  return (
+                    <TableRow key={i} className="group hover:bg-gray-50/50 transition-colors border-b border-gray-50">
+                      <TableCell className="py-5 px-8">
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
+                             <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                               <FaGift size={24} />
+                             </div>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-500 text-lg">{title}</p>
+                            <span className={`inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-[10px] font-bold uppercase tracking-widest ${type && type !== 'STANDARD' ? 'text-indigo-500 bg-indigo-50' : ''}`}>
+                                {formatVoucherType(type || 'STANDARD')}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                           <div className="flex items-center gap-2">
+                             <div className="bg-amber-50 p-1.5 rounded-lg border border-amber-100/50">
+                               <FaCoins className="text-amber-500 text-xs" />
+                             </div>
+                             <span className="font-semibold text-gray-500">{pointCost} <span className="text-[10px] text-gray-300 uppercase tracking-tighter">Points</span></span>
+                           </div>
+                           <p className="text-[11px] text-gray-400 pl-8 font-medium italic opacity-70">Value: {currency}{rewardValue}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-2">
+                           <div className="flex items-center gap-2 text-xs text-gray-400 font-bold opacity-80">
+                             <FaCalendarAlt className="text-gray-200" />
+                             <span>{formatDateShort(activeFrom as string)} — {formatDateShort(expires as string)}</span>
+                           </div>
+                           {new Date(expires) < new Date() ? (
+                             <span className="inline-block px-2 py-0.5 bg-red-50 text-red-400 rounded text-[9px] font-bold uppercase tracking-widest border border-red-100/50">Expired</span>
+                           ) : (
+                             <span className="inline-block px-2 py-0.5 bg-emerald-50 text-emerald-500 rounded text-[9px] font-bold uppercase tracking-widest border border-emerald-100/50">Active</span>
+                           )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                          <button
+                              onClick={() => handleViewAnalytics(id ?? '')}
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-100 transition-all shadow-sm"
+                              title="Analytics"
+                          >
+                            <IoStatsChart size={18} />
+                          </button>
+                          <button
+                              onClick={() => handleEdit(id ?? '')}
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 transition-all shadow-sm"
+                              title="Edit"
+                          >
+                            <IoPencil size={18} />
+                          </button>
+                          <CNDialog
+                            open={openDeleteModal && rewardToDelete === id}
+                            onOpenChange={(open) => {
+                              if(!open) {
+                                setOpenDeleteModal(false);
+                                setRewardToDelete('');
+                              } else {
+                                handleOpenDeleteModal(id!);
+                              }
+                            }}
+                          >
+                            <DialogTrigger asChild>
+                               <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-red-50 hover:text-red-600 border border-gray-100 transition-all shadow-sm" title="Delete">
+                                  <MdDelete size={20} />
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent className="rounded-[2rem]">
+                              <DialogHeader>
+                                <DialogTitle className="text-2xl font-bold text-gray-800">Delete Reward?</DialogTitle>
+                                <DialogDescription className="font-medium text-gray-400">
+                                  This will permanently remove <span className="text-gray-700 font-bold">{title}</span> from your inventory.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <DialogFooter className="mt-6 gap-3">
+                                <Button
+                                  type="button"
+                                  variant={'outline'}
+                                  onClick={() => setOpenDeleteModal(false)}
+                                  className="rounded-xl font-semibold h-12 text-gray-400"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={'destructive'}
+                                  onClick={handleDelete}
+                                  disabled={deletePending}
+                                  className="rounded-xl font-bold h-12"
+                                >
+                                  {deletePending ? 'Deleting...' : 'Delete Reward'}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </CNDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
 
-      {!rewardData ||
-        (rewardData.length < 1 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="bg-blue-50 p-6 rounded-full mb-6">
-              <BsGiftFill className="w-20 h-20 text-blue-600" />
-            </div>
-
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Rewards Found</h2>
-            <p className="text-gray-500 max-w-md mb-8">
-              You do not have any rewards yet. Create a reward so you can attach it to your campaign when you want to start one.
-            </p>
-
-            <button
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
-              onClick={handleOpenModal}
-            >
-              <GoPlus className="text-xl" />
-              Create a Reward
-            </button>
-
-            {loading && (
-              <div className="flex items-center justify-center mt-6">
-                <Bars
-                  height="40"
-                  width="40"
-                  color="#2D3DFF"
-                  ariaLabel="bars-loading"
-                />
-              </div>
-            )}
-          </div>
-        ))}
-
-      <Dialog
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-
+      <Dialog open={isOpen} onClose={handleCloseModal} className="relative z-50">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px]" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center border-b px-6 py-4">
+          <Dialog.Panel className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+            <div className="flex justify-between items-center border-b border-gray-50 px-10 py-8 bg-gray-50/30">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{editMode ? 'Edit Reward' : 'Create Reward'}</h2>
-                <p className="text-gray-500 text-sm mt-1">
-                  {editMode ? 'Update reward details.' : 'Create a new reward for your customers.'}
+                <h2 className="text-3xl font-bold text-gray-800 leading-none">{editMode ? 'Edit Reward' : 'New Reward'}</h2>
+                <p className="text-gray-400 text-sm mt-3 font-medium">
+                  {editMode ? 'Update reward details and settings.' : 'Create a fresh incentive for your customers.'}
                 </p>
               </div>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100">
+              <button onClick={handleCloseModal} className="text-gray-300 hover:text-gray-600 transition-colors p-3 rounded-2xl hover:bg-white shadow-sm">
                 <FaTimes size={20} />
               </button>
             </div>
-
             <div className="flex-1 overflow-y-auto">
-              <div className="px-6 py-4">
-                {/* Tabs */}
-                <div className="flex border-b border-gray-200 mb-6 space-x-2 overflow-x-auto">
+              <div className="px-10 py-8">
+                <div className="flex border-b border-gray-50 mb-10 space-x-8 overflow-x-auto scrollbar-hide">
                   {tabs.map(tab => (
                     <button
                       key={tab}
-                      className={`pb-2 px-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === tab
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      className={`pb-4 px-1 text-[10px] font-bold uppercase tracking-[0.2em] transition-all border-b-4 ${activeTab === tab
+                        ? 'border-indigo-500 text-gray-700'
+                        : 'border-transparent text-gray-200 hover:text-gray-300'
                         }`}
                       onClick={() => setActiveTab(tab)}
                     >
@@ -518,28 +720,23 @@ const Rewards = () => {
                     </button>
                   ))}
                 </div>
-
                 {errorMsg && (
-                  <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
-                    <p>{errorMsg}</p>
+                  <div className="bg-red-50 border-l-4 border-red-400 text-red-600 p-5 mb-8 rounded-2xl flex items-center gap-3">
+                    <div className="bg-red-400 p-1 rounded-full"><FaTimes className="text-white text-[8px]" /></div>
+                    <p className="font-semibold text-sm">{errorMsg}</p>
                   </div>
                 )}
-
-                <div className="mt-2">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {activeTab === 'GENERAL' && (
                     <div className="space-y-6">
-                      {/* Reward Type Selector */}
                       <div>
-                        <label className="mb-1 flex items-center gap-2 font-medium text-gray-700 text-sm">
-                          Reward Type
+                        <label className="mb-2 flex items-center gap-2 font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">
+                          <FaTag className="text-indigo-400" /> Reward Type
                         </label>
                         <select
-                          className="block w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                          className="block w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                           value={rewardType}
-                          onChange={e => {
-                            setRewardType(e.target.value);
-                            setTierId(''); // Reset dynamic fields
-                          }}
+                          onChange={e => { setRewardType(e.target.value); setTierId(''); }}
                         >
                           <option value="STANDARD">Standard Reward</option>
                           <option value={VoucherType.MCOM_LOYALTY_TIER}>MCom Loyalty Tier</option>
@@ -548,15 +745,13 @@ const Rewards = () => {
                           <option value={VoucherType.CREDENTIALS}>Account Credentials</option>
                         </select>
                       </div>
-
-                      {/* Dynamic Config Fields */}
                       {(rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) && (
-                        <div className="p-4 bg-gray-50 rounded-md border border-gray-200 space-y-4">
-                          <h4 className="font-semibold text-sm text-gray-700">Tier Configuration</h4>
+                        <div className="p-6 bg-indigo-50/30 rounded-[2rem] border border-indigo-100/50 space-y-6">
+                          <h4 className="font-bold text-[10px] text-indigo-400 uppercase tracking-widest">Tier Configuration</h4>
                           <div>
-                            <label className="mb-1 block font-medium text-gray-700 text-sm">Target Tier</label>
+                            <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Target Tier</label>
                             <select
-                              className="block w-full p-2 border border-gray-300 rounded-md"
+                              className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                               value={tierId}
                               onChange={e => setTierId(e.target.value)}
                             >
@@ -567,59 +762,57 @@ const Rewards = () => {
                             </select>
                           </div>
                           <div>
-                            <label className="mb-1 block font-medium text-gray-700 text-sm">Duration (Days)</label>
+                            <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Duration (Days)</label>
                             <input
                               type="number"
-                              className="block w-full p-2 border border-gray-300 rounded-md"
+                              className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                               value={durationDays}
                               onChange={e => setDurationDays(Number(e.target.value))}
                             />
                           </div>
                         </div>
                       )}
-
                       {rewardType === VoucherType.LINK && (
-                        <div className="p-4 bg-gray-50 rounded-md border border-gray-200 space-y-4">
+                        <div className="p-6 bg-indigo-50/30 rounded-[2rem] border border-indigo-100/50 space-y-4">
                           <div>
-                            <label className="mb-1 block font-medium text-gray-700 text-sm">Target URL</label>
+                            <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Target URL</label>
                             <input
                               type="text"
                               placeholder="https://..."
-                              className="block w-full p-2 border border-gray-300 rounded-md"
+                              className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                               value={url}
                               onChange={e => setUrl(e.target.value)}
                             />
                           </div>
                         </div>
                       )}
-
                       {rewardType === VoucherType.CREDENTIALS && (
-                        <div className="p-4 bg-gray-50 rounded-md border border-gray-200 space-y-4">
+                        <div className="p-6 bg-indigo-50/30 rounded-[2rem] border border-indigo-100/50 space-y-6">
                           <div>
-                            <label className="mb-1 block font-medium text-gray-700 text-sm">Site URL</label>
+                            <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Site URL</label>
                             <input
                               type="text"
                               placeholder="https://..."
-                              className="block w-full p-2 border border-gray-300 rounded-md"
+                              className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                               value={site}
                               onChange={e => setSite(e.target.value)}
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="mb-1 block font-medium text-gray-700 text-sm">Username</label>
+                              <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Username</label>
                               <input
                                 type="text"
-                                className="block w-full p-2 border border-gray-300 rounded-md"
+                                className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
                               />
                             </div>
                             <div>
-                              <label className="mb-1 block font-medium text-gray-700 text-sm">Password</label>
+                              <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Password</label>
                               <input
                                 type="text"
-                                className="block w-full p-2 border border-gray-300 rounded-md"
+                                className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                               />
@@ -627,7 +820,6 @@ const Rewards = () => {
                           </div>
                         </div>
                       )}
-
                       <GeneralForm
                         title={title}
                         pointsCost={pointsCost}
@@ -679,204 +871,139 @@ const Rewards = () => {
                 </div>
               </div>
             </div>
-
-            <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+            <div className="border-t border-gray-50 px-10 py-6 flex justify-between items-center bg-gray-50/50">
               <button
-                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 text-gray-300 font-bold hover:text-gray-500 transition-colors"
                 onClick={handleCloseModal}
                 disabled={isPending || updatePending}
               >
                 Cancel
               </button>
-              {!editMode ? (
+              <div className="flex gap-4">
+                {!isFirstTab && (
+                  <button
+                    className="px-8 py-3.5 text-gray-500 font-bold bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+                    onClick={handleBack}
+                    disabled={isPending || updatePending}
+                  >
+                    Back
+                  </button>
+                )}
                 <button
-                  className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                  onClick={handleSubmit}
-                  disabled={isPending}
+                  className="px-10 py-3.5 bg-indigo-500 text-white font-bold rounded-2xl hover:bg-indigo-600 hover:scale-[1.02] transition-all shadow-xl shadow-indigo-50 disabled:opacity-70 min-w-[160px]"
+                  onClick={handleNext}
+                  disabled={isPending || updatePending}
                 >
-                  {isPending ? 'Creating...' : 'Create Reward'}
+                  {!isLastTab ? 'Continue' : editMode ? (updatePending ? 'Updating...' : 'Save Changes') : (isPending ? 'Creating...' : 'Launch Reward')}
                 </button>
-              ) : (
-                <button
-                  className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                  onClick={processUpdate}
-                  disabled={updatePending}
-                >
-                  {updatePending ? 'Saving...' : 'Save Changes'}
-                </button>
-              )}
+              </div>
             </div>
           </Dialog.Panel>
         </div>
       </Dialog>
 
-      {rewardData && rewardData.length > 0 && (
-        <div className="overflow-x-auto">
-          <Table className="text-base">
-            <TableCaption>A list of your rewards.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-center">Point Cost</TableHead>
-                <TableHead>Active from</TableHead>
-                <TableHead>Expires</TableHead>
-                <TableHead>Redemptions</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rewardData.map((item, i) => {
-                const { title, activeFrom, expires, pointCost, id, type } = item;
-                return (
-                  <TableRow key={i}>
-                    <TableCell className="font-medium">{title}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${type && type !== 'STANDARD' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
-                        {formatVoucherType(type || 'STANDARD')}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">{pointCost}</TableCell>
-                    <TableCell className="text-base">
-                      {formatDateShort(activeFrom as string)}
-                    </TableCell>
-                    <TableCell className="text-base">
-                      {formatDateShort(expires as string)}
-                    </TableCell>
-                    <TableCell>{0}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-3">
-                        <button
-                          onClick={() => handleViewAnalytics(id ?? '')}
-                          className="text-gray-500 hover:text-emerald-600 transition-colors p-1"
-                          title="Analytics"
-                        >
-                          <IoStatsChart size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(id ?? '')}
-                          className="text-gray-500 hover:text-blue-600 transition-colors p-1"
-                          title="Edit"
-                        >
-                          <IoPencil size={18} />
-                        </button>
-                        <CNDialog
-                          open={openDeleteModal}
-                          onOpenChange={() => handleOpenDeleteModal(id ?? '')}
-                        >
-                          <DialogTrigger asChild>
-                            <button className="text-gray-500 hover:text-red-600 transition-colors p-1" title="Delete">
-                              <MdDelete size={20} />
-                            </button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Are you absolutely sure?</DialogTitle>
-                              <DialogDescription>
-                                This action will delete the reward.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                              <Button
-                                type="button"
-                                variant={'outline'}
-                                onClick={() => setOpenDeleteModal(false)}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                type="button"
-                                variant={'destructive'}
-                                onClick={handleDelete}
-                                disabled={deletePending}
-                              >
-                                {deletePending ? 'Deleting...' : 'Delete'}
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </CNDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-
-      <CNDialog
-        open={openStepModal}
-        onOpenChange={() => setOpenStepModal(!openStepModal)}
-      >
-        <DialogContent className="sm:max-w-md">
+      <CNDialog open={openStepModal} onOpenChange={() => setOpenStepModal(!openStepModal)}>
+        <DialogContent className="sm:max-w-md border-none rounded-[2rem] shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Progress Status</DialogTitle>
-            <DialogDescription className="mt-3 text-lg text-gray-800 space-y-2">
-              <div className="flex items-center justify-between p-2 bg-green-50 rounded-md">
-                <span>Create a business</span>
-                <IoCheckmarkDoneSharp className="text-green-600 text-xl" />
+            <DialogTitle className="text-2xl font-bold text-gray-800">Progress Status</DialogTitle>
+            <DialogDescription className="mt-3 text-lg text-gray-500 space-y-2">
+              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-2xl border border-emerald-100/50">
+                <span className="font-semibold text-emerald-700">Create a business</span>
+                <IoCheckmarkDoneSharp className="text-emerald-600 text-2xl" />
               </div>
-              <div className="flex items-center justify-between p-2 bg-green-50 rounded-md">
-                <span>Create a staff</span>
-                <IoCheckmarkDoneSharp className="text-green-600 text-xl" />
+              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-2xl border border-emerald-100/50">
+                <span className="font-semibold text-emerald-700">Create a staff</span>
+                <IoCheckmarkDoneSharp className="text-emerald-600 text-2xl" />
               </div>
-              <div className="flex items-center justify-between p-2 bg-green-50 rounded-md">
-                <span>Create a reward</span>
-                <IoCheckmarkDoneSharp className="text-green-600 text-xl" />
+              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-2xl border border-emerald-100/50">
+                <span className="font-semibold text-emerald-700">Create a reward</span>
+                <IoCheckmarkDoneSharp className="text-emerald-600 text-2xl" />
               </div>
-              <div className="flex items-center justify-between p-2">
-                <span>Create a campaign</span>
-                <MdOutlineCancel className="text-gray-300 text-xl" />
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                <span className="font-semibold text-gray-400">Create a campaign</span>
+                <MdOutlineCancel className="text-gray-300 text-2xl" />
               </div>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant={'default'}
-              onClick={() => setOpenStepModal(false)}
-            >
+          <DialogFooter className="mt-6">
+            <Button type="button" className="w-full h-12 rounded-xl bg-gray-800 font-bold" onClick={() => setOpenStepModal(false)}>
               Continue
             </Button>
           </DialogFooter>
         </DialogContent>
       </CNDialog>
-      <Dialog
-        open={showAnalytics}
-        onClose={() => setShowAnalytics(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
 
+      <Dialog open={showAnalytics} onClose={() => setShowAnalytics(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px]" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-[2rem] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div className="flex justify-between items-center border-b px-8 py-5 bg-white">
+          <Dialog.Panel className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+            <div className="flex justify-between items-center border-b border-gray-50 px-8 py-6 bg-white">
               <div className="flex items-center gap-3">
-                <div className="bg-blue-50 p-2 rounded-xl">
-                  <IoStatsChart className="text-blue-600 text-xl" />
+                <div className="bg-blue-50 p-3 rounded-2xl border border-blue-100/50">
+                  <IoStatsChart className="text-blue-500 text-xl" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Reward Performance</h2>
+                <h2 className="text-xl font-bold text-gray-800">Reward Performance</h2>
               </div>
-              <button
-                onClick={() => setShowAnalytics(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
-              >
+              <button onClick={() => setShowAnalytics(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-50">
                 <FaTimes size={20} />
               </button>
             </div>
-
-            <div className="flex-1 overflow-y-auto px-8 py-8 bg-gray-50/30">
+            <div className="flex-1 overflow-y-auto px-8 py-8 bg-gray-50/20">
               <RewardAnalytics rewardId={analyticsRewardId} />
             </div>
-
-            <div className="border-t border-gray-100 px-8 py-5 bg-white flex justify-end">
-              <button
-                className="px-8 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
-                onClick={() => setShowAnalytics(false)}
-              >
+            <div className="border-t border-gray-50 px-8 py-5 bg-white flex justify-end">
+              <button className="px-8 py-3 bg-gray-800 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-lg shadow-gray-200" onClick={() => setShowAnalytics(false)}>
                 Got it
               </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
+      <Dialog open={isCropModalOpen} onClose={() => setIsCropModalOpen(false)} className="relative z-[60]">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-[2px]" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg flex flex-col overflow-hidden border border-gray-100">
+            <div className="flex justify-between items-center border-b border-gray-50 px-6 py-5 bg-gray-50/30">
+              <h3 className="text-lg font-bold text-gray-800">Adjust Image</h3>
+              <button onClick={() => setIsCropModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <FaTimes size={20} />
+              </button>
+            </div>
+            <div className="relative h-80 w-full bg-gray-900">
+              {imageToCrop && (
+                <Cropper
+                  image={imageToCrop}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  onCropChange={setCrop}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                />
+              )}
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="flex items-center gap-4">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button className="px-6 py-3 text-gray-400 font-bold hover:text-gray-600 transition-colors" onClick={() => setIsCropModalOpen(false)}>
+                  Cancel
+                </button>
+                <button className="px-8 py-3 bg-indigo-500 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-100" onClick={handleCropSave}>
+                  Apply Crop
+                </button>
+              </div>
             </div>
           </Dialog.Panel>
         </div>

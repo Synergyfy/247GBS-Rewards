@@ -138,7 +138,7 @@ const VoucherManagement = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-2xl">Voucher Management</CardTitle>
+        <CardTitle className="text-2xl font-semibold text-gray-500">Voucher Management</CardTitle>
         <CardDescription>Generate and manage redemption codes.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
@@ -254,7 +254,7 @@ const VoucherManagement = () => {
         {/* List Table */}
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Generated Vouchers</h3>
+                <h3 className="text-lg font-semibold text-gray-500">Generated Vouchers</h3>
                 <Button variant="outline" size="sm" onClick={() => refetchVouchers()} disabled={loadingVouchers}>
                     <RefreshCw className={`mr-2 h-4 w-4 ${loadingVouchers ? 'animate-spin' : ''}`} />
                     Refresh

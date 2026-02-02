@@ -5,6 +5,8 @@ import { IoMdBusiness } from 'react-icons/io';
 import {
   MdDelete,
   MdOutlineCancel,
+  MdDownload,
+  MdPrint
 } from 'react-icons/md';
 import { Dialog } from '@headlessui/react';
 import { Bars } from 'react-loader-spinner';
@@ -24,14 +26,13 @@ import { BusinessType } from '@/app/interfaces/business.type';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { GoPlus } from 'react-icons/go';
-import { IoCheckmarkDoneSharp, IoPencil } from 'react-icons/io5';
+import { IoCheckmarkDoneSharp, IoPencil, IoSearchOutline } from 'react-icons/io5';
 import { addGeneral, resetGeneral } from '@/store/features/businessGeneral';
 import { addContact, resetContact } from '@/store/features/businessContact';
 import { addLinks, resetLinks } from '@/store/features/businessLink';
@@ -48,15 +49,28 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaGlobe, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
+import { HiOutlineOfficeBuilding } from 'react-icons/hi';
+import { FiUsers, FiTrendingUp, FiMapPin } from 'react-icons/fi';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/app/helpers/cropImage';
+import Image from 'next/image';
 
 const Businesses = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<
     'GENERAL' | 'CONTACT' | 'SOCIAL' | 'LINKS'
   >('GENERAL');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  // Cropping states
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   const tabs: Array<'GENERAL' | 'CONTACT' | 'SOCIAL' | 'LINKS'> = [
     'GENERAL',
@@ -81,6 +95,12 @@ const Businesses = () => {
   const dispatch = useDispatch();
 
   const { isLoading, data: fetchData, refetch } = useGetBusiness();
+
+  const filteredBusinesses = fetchData?.filter(b => 
+    b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    b.industry.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    b.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const { isPending, isSuccess, isError, error, mutate } = useCreateBusiness();
 
@@ -183,6 +203,7 @@ const Businesses = () => {
         address: businessContact,
         socials: businessSocials,
         links: businessLinks,
+        profileImage: logoPreview || undefined
       };
 
       mutate(business);
@@ -199,7 +220,7 @@ const Businesses = () => {
     );
 
     if (business) {
-      const { name, industry, address, links, socials, email, phoneNumber } =
+      const { name, industry, address, links, socials, email, phoneNumber, profileImage } =
         business;
       dispatch(addGeneral({ name, industry }));
 
@@ -218,6 +239,7 @@ const Businesses = () => {
 
       dispatch(addLinks(links));
       dispatch(addSocial({ ...socials }));
+      setLogoPreview(profileImage || null);
 
       setBusinessId(id);
       setEditMode(true);
@@ -233,6 +255,7 @@ const Businesses = () => {
       address: businessContact,
       socials: businessSocials,
       links: businessLinks,
+      profileImage: logoPreview || undefined
     };
 
     updateMutate({ id: updateBusinessId, business });
@@ -242,8 +265,28 @@ const Businesses = () => {
     const files = e.target.files;
     if (files && files[0]) {
       const reader = new FileReader();
-      reader.onload = () => setLogoPreview(reader.result as string);
+      reader.onload = () => {
+        setImageToCrop(reader.result as string);
+        setIsCropModalOpen(true);
+      };
       reader.readAsDataURL(files[0]);
+    }
+  };
+
+  const onCropComplete = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleCropSave = async () => {
+    try {
+      if (imageToCrop && croppedAreaPixels) {
+        const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
+        setLogoPreview(croppedImage);
+        setIsCropModalOpen(false);
+        setImageToCrop(null);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -251,86 +294,271 @@ const Businesses = () => {
     setLogoPreview(null);
   };
 
+  const isLastTab = activeTab === tabs[tabs.length - 1];
+  const isFirstTab = activeTab === tabs[0];
+
+  const handleNext = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
+      setErrorMsg('');
+    } else {
+      if (editMode) {
+        processUpdate();
+      } else {
+        handleSubmit();
+      }
+    }
+  };
+
+  const handleBack = () => {
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1]);
+      setErrorMsg('');
+    }
+  };
+
+  const stats = [
+    { label: 'Total Businesses', value: fetchData?.length || 0, icon: HiOutlineOfficeBuilding, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Unique Industries', value: new Set(fetchData?.map(b => b.industry)).size || 0, icon: FiTrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Active Regions', value: new Set(fetchData?.map(b => b.address.state)).size || 0, icon: FiMapPin, color: 'text-orange-600', bg: 'bg-orange-50' },
+  ];
+
   return (
-    <section className="bg-white rounded-lg shadow-sm p-6 min-h-[80vh] relative">
-      <div className="flex justify-between items-center mb-6">
-        <div></div>
-        {fetchData && fetchData.length > 0 && (
+    <section className="space-y-8 pb-10">
+      {/* Header & Stats Section */}
+      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Business Directory</h1>
+            <p className="text-gray-500 mt-2 font-medium italic opacity-80">Manage and monitor your business network efficiently.</p>
+          </div>
           <button
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
+            className="bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold shadow-xl shadow-gray-200 hover:bg-black hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
             onClick={handleOpenModal}
           >
-            <GoPlus className="text-xl" />
-            Create Business
+            <div className="bg-white/20 p-1 rounded-lg group-hover:rotate-90 transition-transform">
+              <GoPlus className="text-xl" />
+            </div>
+            Create New Business
           </button>
-        )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {stats.map((stat, i) => (
+            <div key={i} className={`${stat.bg} p-6 rounded-3xl border border-white/50 flex items-center gap-5 transition-transform hover:scale-[1.02]`}>
+              <div className={`p-4 rounded-2xl bg-white shadow-sm`}>
+                <stat.icon className={`text-2xl ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-3xl font-bold text-gray-700 mt-1">{stat.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {!fetchData ||
-        (fetchData?.length < 1 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="bg-blue-50 p-6 rounded-full mb-6">
-                 <IoMdBusiness className="w-20 h-20 text-blue-600" />
+      {/* Main Content Area */}
+      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+        {/* Search & Filters */}
+        <div className="p-6 border-b border-gray-50 bg-gray-50/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:max-w-md group">
+            <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl group-focus-within:text-blue-600 transition-colors" />
+            <input
+              type="text"
+              placeholder="Search by name, industry or email..."
+              className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 focus:border-blue-600 transition-all font-medium text-gray-600 placeholder:text-gray-300"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+             <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest px-4">
+               {filteredBusinesses?.length || 0} Results
+             </span>
+          </div>
+        </div>
+
+        {/* Content State */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-32">
+             <Bars height="50" width="50" color="#94a3b8" />
+             <p className="mt-4 font-semibold text-gray-400 animate-pulse">Fetching your data...</p>
+          </div>
+        ) : (!fetchData || fetchData?.length < 1) ? (
+          <div className="flex flex-col items-center justify-center py-32 text-center px-6">
+            <div className="bg-gray-50 p-10 rounded-[3rem] mb-8 relative">
+                 <HiOutlineOfficeBuilding className="w-24 h-24 text-gray-200" />
+                 <div className="absolute -bottom-2 -right-2 bg-blue-500 p-4 rounded-2xl shadow-xl shadow-blue-100">
+                   <GoPlus className="text-white text-2xl" />
+                 </div>
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Business Found</h2>
-            <p className="text-gray-500 max-w-md mb-8">
-                A Business is an entity to which you can link staff members and loyalty campaigns. Let&apos;s start by setting up a Business.
+            <h2 className="text-3xl font-bold text-gray-700 mb-3">Your directory is empty</h2>
+            <p className="text-gray-400 max-w-sm mb-10 leading-relaxed font-medium">
+                Connect your first business entity to start launching loyalty campaigns and managing staff.
             </p>
 
             <button
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-semibold shadow-2xl shadow-blue-100 hover:bg-blue-700 hover:-translate-y-1 transition-all"
                 onClick={handleOpenModal}
               >
-                <GoPlus className="text-xl"/>
-                Create a Business
+                Get Started Now
               </button>
-
-            {loading && (
-              <div className="flex items-center justify-center mt-6">
-                <Bars
-                  height="40"
-                  width="40"
-                  color="#2D3DFF"
-                  ariaLabel="bars-loading"
-                />
-              </div>
-            )}
           </div>
-        ))}
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-gray-50/50">
+                <TableRow className="border-none">
+                  <TableHead className="py-5 font-semibold text-gray-400 uppercase tracking-widest text-[10px] px-8">Business</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px]">Contact Details</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px]">Location</TableHead>
+                  <TableHead className="font-semibold text-gray-400 uppercase tracking-widest text-[10px] text-right px-8">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredBusinesses?.map((item, i) => {
+                  const { id, email, name, address, phoneNumber, industry, profileImage } = item;
+                  const { street, city, state } = address;
+                  return (
+                    <TableRow key={i} className="group hover:bg-gray-50/50 transition-colors border-b border-gray-50">
+                      <TableCell className="py-5 px-8">
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
+                            {profileImage ? (
+                               <Image src={profileImage} alt={name} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                            ) : (
+                               <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                                 <HiOutlineOfficeBuilding size={24} />
+                               </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-700 text-lg">{name}</p>
+                            <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                              {industry}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-2">
+                           <div className="flex items-center gap-2 text-sm text-gray-500">
+                             <FaEnvelope className="text-gray-200" />
+                             <span className="font-medium">{email}</span>
+                           </div>
+                           <div className="flex items-center gap-2 text-sm text-gray-500">
+                             <FaPhoneAlt className="text-gray-200" />
+                             <span className="font-medium">{phoneNumber}</span>
+                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                           <FiMapPin className="text-gray-200" />
+                           <span className="font-medium">{city}, {state}</span>
+                        </div>
+                        <p className="text-xs text-gray-300 mt-1 pl-6 truncate max-w-[150px] font-medium">{street}</p>
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                          <button
+                              onClick={() => handleEdit(id!)}
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 transition-all shadow-sm"
+                              title="Edit"
+                          >
+                            <IoPencil size={18}/>
+                          </button>
+                          <CNDialog
+                            open={openDeleteModal && businessToDelete === id}
+                            onOpenChange={(open) => {
+                              if(!open) {
+                                setOpenDeleteModal(false);
+                                setBusinessToDelete('');
+                              } else {
+                                handleOpenDeleteModal(id!);
+                              }
+                            }}
+                          >
+                            <DialogTrigger asChild>
+                               <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-red-50 hover:text-red-600 border border-gray-100 transition-all shadow-sm" title="Delete">
+                                  <MdDelete size={20} />
+                               </button>
+                            </DialogTrigger>
+                            <DialogContent className="rounded-[2rem]">
+                              <DialogHeader>
+                                <DialogTitle className="text-2xl font-bold text-gray-800">Delete Business?</DialogTitle>
+                                <DialogDescription className="font-medium text-gray-400">
+                                  This will permanently remove <span className="text-gray-700 font-bold">{name}</span> from your directory. This action is irreversible.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <DialogFooter className="mt-6 gap-3">
+                                <Button
+                                  type="button"
+                                  variant={'outline'}
+                                  onClick={() => setOpenDeleteModal(false)}
+                                  className="rounded-xl font-semibold h-12 text-gray-400"
+                                >
+                                  Keep it
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={'destructive'}
+                                  onClick={handleDelete}
+                                  disabled={deletePending}
+                                  className="rounded-xl font-bold h-12"
+                                >
+                                  {deletePending ? 'Deleting...' : 'Yes, Delete'}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </CNDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
 
       <Dialog
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={handleDialogClose}
         className="relative z-50"
       >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px]" aria-hidden="true" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-             <Dialog.Panel className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div className="flex justify-between items-center border-b px-6 py-4">
+             <Dialog.Panel className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+                <div className="flex justify-between items-center border-b border-gray-50 px-10 py-8 bg-gray-50/30">
                     <div>
-                    <h2 className="text-xl font-bold text-gray-900">{editMode ? 'Edit Business' : 'Create Business'}</h2>
-                    <p className="text-gray-500 text-sm mt-1">
-                        {editMode ? 'Update your business details.' : 'Set up your business profile to get started.'}
+                    <h2 className="text-3xl font-bold text-gray-800 leading-none">{editMode ? 'Update Business' : 'New Business'}</h2>
+                    <p className="text-gray-400 text-sm mt-3 font-medium">
+                        {editMode ? 'Refine your business profile details.' : 'Let&apos;s get your business on the map.'}
                     </p>
                     </div>
-                    <button onClick={handleDialogClose} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100">
+                    <button onClick={handleDialogClose} className="text-gray-300 hover:text-gray-600 transition-colors p-3 rounded-2xl hover:bg-white shadow-sm">
                      <FaTimes size={20} />
                     </button>
                 </div>
 
           <div className="flex-1 overflow-y-auto">
-             <div className="px-6 py-4">
+             <div className="px-10 py-8">
                  {/* Tabs */}
-                 <div className="flex border-b border-gray-200 mb-6 space-x-4">
+                 <div className="flex border-b border-gray-50 mb-10 space-x-8 overflow-x-auto scrollbar-hide">
                     {tabs.map(tab => (
                         <button
                         key={tab}
-                        className={`pb-2 px-1 text-sm font-medium transition-colors border-b-2 ${
+                        className={`pb-4 px-1 text-[10px] font-bold uppercase tracking-[0.2em] transition-all border-b-4 ${
                             activeTab === tab
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            ? 'border-blue-500 text-gray-700'
+                            : 'border-transparent text-gray-200 hover:text-gray-300'
                         }`}
                         onClick={() => setActiveTab(tab)}
                         >
@@ -340,12 +568,13 @@ const Businesses = () => {
                 </div>
 
                 {errorMsg && (
-                    <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md">
-                        <p>{errorMsg}</p>
+                    <div className="bg-red-50 border-l-4 border-red-400 text-red-600 p-5 mb-8 rounded-2xl flex items-center gap-3">
+                        <div className="bg-red-400 p-1 rounded-full"><FaTimes className="text-white text-[8px]" /></div>
+                        <p className="font-semibold text-sm">{errorMsg}</p>
                     </div>
                 )}
 
-                <div className="mt-2">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {activeTab === 'GENERAL' && (
                     <GeneralForm
                     logoPreview={logoPreview}
@@ -360,118 +589,42 @@ const Businesses = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 px-6 py-4 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+          <div className="border-t border-gray-50 px-10 py-6 flex justify-between items-center bg-gray-50/50">
              <button
-                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 text-gray-300 font-bold hover:text-gray-500 transition-colors"
                 onClick={handleDialogClose}
                 disabled={isPending || updatePending}
               >
                 Cancel
               </button>
-             {!editMode ? (
-                 <button
-                 className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                 onClick={handleSubmit}
-                 disabled={isPending}
-               >
-                 {isPending ? 'Creating...' : 'Create Business'}
-               </button>
-             ): (
+             <div className="flex gap-4">
+                {!isFirstTab && (
+                  <button
+                    className="px-8 py-3.5 text-gray-500 font-bold bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
+                    onClick={handleBack}
+                    disabled={isPending || updatePending}
+                  >
+                    Back
+                  </button>
+                )}
                 <button
-                className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70"
-                onClick={processUpdate}
-                disabled={updatePending}
-              >
-                {updatePending ? 'Saving...' : 'Save Changes'}
-              </button>
-             )}
+                  className="px-10 py-3.5 bg-blue-500 text-white font-bold rounded-2xl hover:bg-blue-600 hover:scale-[1.02] transition-all shadow-xl shadow-blue-50 disabled:opacity-70 min-w-[160px]"
+                  onClick={handleNext}
+                  disabled={isPending || updatePending}
+                >
+                  {!isLastTab ? (
+                    'Continue'
+                  ) : editMode ? (
+                    updatePending ? 'Updating...' : 'Save Changes'
+                  ) : (
+                    isPending ? 'Creating...' : 'Launch Business'
+                  )}
+                </button>
+             </div>
           </div>
         </Dialog.Panel>
-        </div>
-      </Dialog>
-
-      {fetchData && fetchData.length > 0 && (
-        <div className="overflow-x-auto">
-        <Table className="text-base">
-          <TableCaption>A list of your registered businesses.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Business Name</TableHead>
-              <TableHead>E-mail</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {!isLoading &&
-              fetchData.map((item, i) => {
-                const { id, email, name, address, phoneNumber } = item;
-                const { street, city, state } = address;
-                return (
-                  <TableRow key={i}>
-                    <TableCell className="font-medium">{name}</TableCell>
-                    <TableCell>{email}</TableCell>
-                    <TableCell>{`${street}, ${city}, ${state}`}</TableCell>
-                    <TableCell>{phoneNumber}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-3">
-                        <button
-                            onClick={() => handleEdit(id)}
-                            className="text-gray-500 hover:text-blue-600 transition-colors p-1"
-                            title="Edit"
-                        >
-                          <IoPencil size={18}/>
-                        </button>
-                        <CNDialog
-                          open={openDeleteModal}
-                          onOpenChange={() => handleOpenDeleteModal(id ?? '')}
-                        >
-                          <DialogTrigger asChild>
-                             <button className="text-gray-500 hover:text-red-600 transition-colors p-1" title="Delete">
-                                <MdDelete size={20} />
-                             </button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>
-                                Delete Business?
-                              </DialogTitle>
-                              <DialogDescription>
-                                Are you sure you want to delete this business? This action cannot be undone.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                              <Button
-                                type="button"
-                                variant={'outline'}
-                                onClick={() => setOpenDeleteModal(false)}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                type="button"
-                                variant={'destructive'}
-                                onClick={handleDelete}
-                                disabled={deletePending}
-                              >
-                                {deletePending ? 'Deleting...' : 'Delete'}
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </CNDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-
-            {isLoading && <TableRow><TableCell colSpan={5} className="text-center py-8">Loading...</TableCell></TableRow>}
-          </TableBody>
-        </Table>
-        </div>
-      )}
-
+      </div>
+    </Dialog>
       <CNDialog
         open={openStepModal}
         onOpenChange={() => setOpenStepModal(!openStepModal)}
@@ -509,6 +662,71 @@ const Businesses = () => {
           </DialogFooter>
         </DialogContent>
       </CNDialog>
+
+      {/* Crop Modal */}
+      <Dialog
+        open={isCropModalOpen}
+        onClose={() => setIsCropModalOpen(false)}
+        className="relative z-[60]"
+      >
+        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center border-b px-6 py-4">
+              <h3 className="text-lg font-bold text-gray-900">Crop Logo</h3>
+              <button onClick={() => setIsCropModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            <div className="relative h-80 w-full bg-gray-100">
+              {imageToCrop && (
+                <Cropper
+                  image={imageToCrop}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  onCropChange={setCrop}
+                  onCropComplete={onCropComplete}
+                  onZoomChange={setZoom}
+                />
+              )}
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-gray-700">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsCropModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  onClick={handleCropSave}
+                >
+                  Save Crop
+                </button>
+              </div>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
     </section>
   );
 };
