@@ -13,7 +13,6 @@ import RewardForm from '../../components/RewardForm';
 import SettingsForm from '../../components/SettingsForm';
 import ContentForm from '../../components/ContentForm';
 import ColorsForm from '../../components/ColorsForm';
-import RewardPageForm from '../../components/RewardPageForm';
 import {
   useCreateCampaign,
   useDeleteCampaign,
@@ -61,7 +60,7 @@ import {
 import html2canvas from 'html2canvas';
 import { MdDownload, MdPrint } from 'react-icons/md';
 
-type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS' | 'REWARD_PAGE';
+type MainTab = 'GENERAL' | 'REWARD' | 'SETTINGS' | 'CONTENT' | 'COLORS';
 
 interface CampaignProps {
   filterProp?: string;
@@ -107,7 +106,6 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
     'SETTINGS',
     'CONTENT',
     'COLORS',
-    'REWARD_PAGE',
   ];
 
   const shareRef = React.useRef<HTMLDivElement>(null);
@@ -440,7 +438,6 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
                   {activeTab === 'SETTINGS' && <SettingsForm />}
                   {activeTab === 'CONTENT' && <ContentForm />}
                   {activeTab === 'COLORS' && <ColorsForm />}
-                  {activeTab === 'REWARD_PAGE' && <RewardPageForm />}
                 </div>
               </div>
             </div>
