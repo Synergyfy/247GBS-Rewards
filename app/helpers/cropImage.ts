@@ -10,7 +10,8 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
   export async function getCroppedImg(
     imageSrc: string,
     pixelCrop: { x: number; y: number; width: number; height: number },
-    rotation = 0
+    rotation = 0,
+    quality = 0.7
   ): Promise<string | null> {
     const image = await createImage(imageSrc);
     const canvas = document.createElement('canvas');
@@ -52,6 +53,6 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
     );
   
     // As Base64 string
-    return canvas.toDataURL('image/jpeg');
+    return canvas.toDataURL('image/jpeg', quality);
   }
   
