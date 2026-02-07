@@ -3,6 +3,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import VoucherManagement from '@/components/VoucherManagement';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const RewardsComponent = dynamic(
   () => import('@/app/dashboard/Content/ProfileManagement/Rewards'),
@@ -12,14 +13,20 @@ const RewardsComponent = dynamic(
 const Page = () => {
   return (
     <div className="sm:w-[80%] mx-auto mt-10 space-y-8">
-      <div>
-        <h1 className="text-3xl font-semibold text-gray-500 mb-5">Rewards</h1>
-        <RewardsComponent />
-      </div>
+      <h1 className="text-3xl font-semibold text-gray-500 mb-5">Rewards</h1>
       
-      <div className="border-t pt-8">
-        <VoucherManagement />
-      </div>
+      <Tabs defaultValue="inventory" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="inventory">Inventory</TabsTrigger>
+          <TabsTrigger value="vouchers">Voucher Management</TabsTrigger>
+        </TabsList>
+        <TabsContent value="inventory" className="mt-6">
+          <RewardsComponent />
+        </TabsContent>
+        <TabsContent value="vouchers" className="mt-6">
+          <VoucherManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
