@@ -49,7 +49,9 @@ export default function RedeemPointsPage() {
         const uniqueCode = data?.uniqueCode;
         const expiryDate = data?.reward?.expires ? format(new Date(data.reward.expires), 'd MMM yyyy') : '';
         const customerName = data?.customer?.fullName || 'Customer';
+        const customerEmail = data?.customer?.email || '';
         const rewardTitle = reward.title;
+        const successMessage = data?.reward?.rewardPageMessage || '';
 
         let activationLink = '';
         if (isMcomLoyaltyReward) {
@@ -63,6 +65,8 @@ export default function RedeemPointsPage() {
         if (expiryDate) params.append('expiryDate', expiryDate);
         if (activationLink) params.append('activationLink', activationLink);
         if (customerName) params.append('customerName', customerName);
+        if (customerEmail) params.append('customerEmail', customerEmail);
+        if (successMessage) params.append('successMessage', successMessage);
 
         router.push(`/redeem/success?${params.toString()}`);
       },

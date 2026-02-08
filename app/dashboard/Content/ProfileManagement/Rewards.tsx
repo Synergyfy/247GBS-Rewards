@@ -56,7 +56,7 @@ const Rewards = () => {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<
-    'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT REWARD PAGE'
+    'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT SUCCESS PAGE'
   >('GENERAL');
 
   // Cropping states
@@ -126,7 +126,7 @@ const Rewards = () => {
 
   const { data: rewardData, isLoading, refetch } = useGetRewards();
 
-  const filteredRewards = rewardData?.filter(r => 
+  const filteredRewards = rewardData?.filter(r =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.pointCost.toString().includes(searchQuery)
@@ -439,8 +439,8 @@ const Rewards = () => {
   const removeAdditionalImage = (key: keyof typeof additionalImagePreviews) =>
     setAdditionalImagePreviews(prev => ({ ...prev, [key]: null }));
 
-  const tabs: Array<'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT REWARD PAGE'> = [
-    'GENERAL', 'DATE RANGE', 'DESCRIPTION', 'IMAGES', 'EDIT REWARD PAGE'
+  const tabs: Array<'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT SUCCESS PAGE'> = [
+    'GENERAL', 'DATE RANGE', 'DESCRIPTION', 'IMAGES', 'EDIT SUCCESS PAGE'
   ];
 
   const handleOpenModal = () => {
@@ -480,10 +480,12 @@ const Rewards = () => {
   const stats = [
     { label: 'Total Rewards', value: rewardData?.length || 0, icon: FaGift, color: 'text-indigo-600', bg: 'bg-indigo-50' },
     { label: 'Active Now', value: rewardData?.filter(r => new Date(r.expires) > new Date()).length || 0, icon: FiActivity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Total Value', value: rewardData?.reduce((acc, curr) => {
-      const val = parseFloat(curr.rewardValue);
-      return acc + (isNaN(val) ? 0 : val);
-    }, 0).toLocaleString() || 0, icon: FaCoins, color: 'text-amber-600', bg: 'bg-amber-50', suffix: ' pts' },
+    {
+      label: 'Total Value', value: rewardData?.reduce((acc, curr) => {
+        const val = parseFloat(curr.rewardValue);
+        return acc + (isNaN(val) ? 0 : val);
+      }, 0).toLocaleString() || 0, icon: FaCoins, color: 'text-amber-600', bg: 'bg-amber-50', suffix: ' pts'
+    },
   ];
 
   return (
@@ -533,35 +535,35 @@ const Rewards = () => {
             />
           </div>
           <div className="flex items-center gap-3">
-             <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest px-4">
-               {filteredRewards?.length || 0} Rewards Found
-             </span>
+            <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest px-4">
+              {filteredRewards?.length || 0} Rewards Found
+            </span>
           </div>
         </div>
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-32">
-             <Bars height="50" width="50" color="#94a3b8" />
-             <p className="mt-4 font-semibold text-gray-400 animate-pulse">Syncing rewards...</p>
+            <Bars height="50" width="50" color="#94a3b8" />
+            <p className="mt-4 font-semibold text-gray-400 animate-pulse">Syncing rewards...</p>
           </div>
         ) : (!rewardData || rewardData.length < 1) ? (
           <div className="flex flex-col items-center justify-center py-32 text-center px-6">
             <div className="bg-gray-50 p-10 rounded-[3rem] mb-8 relative">
-                 <FaGift className="w-24 h-24 text-gray-200" />
-                 <div className="absolute -bottom-2 -right-2 bg-indigo-600 p-4 rounded-2xl shadow-xl shadow-indigo-100">
-                   <GoPlus className="text-white text-2xl" />
-                 </div>
+              <FaGift className="w-24 h-24 text-gray-200" />
+              <div className="absolute -bottom-2 -right-2 bg-indigo-600 p-4 rounded-2xl shadow-xl shadow-indigo-100">
+                <GoPlus className="text-white text-2xl" />
+              </div>
             </div>
             <h2 className="text-3xl font-semibold text-gray-500 mb-3">No rewards yet</h2>
             <p className="text-gray-400 max-w-sm mb-10 leading-relaxed font-medium">
-                Set up your first reward to incentivize customer engagement and increase retention.
+              Set up your first reward to incentivize customer engagement and increase retention.
             </p>
             <button
-                className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-semibold shadow-2xl shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 transition-all"
-                onClick={handleOpenModal}
-              >
-                Create My First Reward
-              </button>
+              className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-semibold shadow-2xl shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 transition-all"
+              onClick={handleOpenModal}
+            >
+              Create My First Reward
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -582,62 +584,62 @@ const Rewards = () => {
                       <TableCell className="py-5 px-8">
                         <div className="flex items-center gap-4">
                           <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
-                             <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                               <FaGift size={24} />
-                             </div>
+                            <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                              <FaGift size={24} />
+                            </div>
                           </div>
                           <div>
                             <p className="font-semibold text-gray-500 text-lg">{title}</p>
                             <span className={`inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-[10px] font-bold uppercase tracking-widest ${type && type !== 'STANDARD' ? 'text-indigo-500 bg-indigo-50' : ''}`}>
-                                {formatVoucherType(type || 'STANDARD')}
+                              {formatVoucherType(type || 'STANDARD')}
                             </span>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="space-y-1">
-                           <div className="flex items-center gap-2">
-                             <div className="bg-amber-50 p-1.5 rounded-lg border border-amber-100/50">
-                               <FaCoins className="text-amber-500 text-xs" />
-                             </div>
-                             <span className="font-semibold text-gray-500">{pointCost} <span className="text-[10px] text-gray-300 uppercase tracking-tighter">Points</span></span>
-                           </div>
-                           <p className="text-[11px] text-gray-400 pl-8 font-medium italic opacity-70">Value: {currency}{rewardValue}</p>
+                          <div className="flex items-center gap-2">
+                            <div className="bg-amber-50 p-1.5 rounded-lg border border-amber-100/50">
+                              <FaCoins className="text-amber-500 text-xs" />
+                            </div>
+                            <span className="font-semibold text-gray-500">{pointCost} <span className="text-[10px] text-gray-300 uppercase tracking-tighter">Points</span></span>
+                          </div>
+                          <p className="text-[11px] text-gray-400 pl-8 font-medium italic opacity-70">Value: {currency}{rewardValue}</p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="space-y-2">
-                           <div className="flex items-center gap-2 text-xs text-gray-400 font-bold opacity-80">
-                             <FaCalendarAlt className="text-gray-200" />
-                             <span>{formatDateShort(activeFrom as string)} — {formatDateShort(expires as string)}</span>
-                           </div>
-                           {new Date(expires) < new Date() ? (
-                             <span className="inline-block px-2 py-0.5 bg-red-50 text-red-400 rounded text-[9px] font-bold uppercase tracking-widest border border-red-100/50">Expired</span>
-                           ) : (
-                             <span className="inline-block px-2 py-0.5 bg-emerald-50 text-emerald-500 rounded text-[9px] font-bold uppercase tracking-widest border border-emerald-100/50">Active</span>
-                           )}
+                          <div className="flex items-center gap-2 text-xs text-gray-400 font-bold opacity-80">
+                            <FaCalendarAlt className="text-gray-200" />
+                            <span>{formatDateShort(activeFrom as string)} — {formatDateShort(expires as string)}</span>
+                          </div>
+                          {new Date(expires) < new Date() ? (
+                            <span className="inline-block px-2 py-0.5 bg-red-50 text-red-400 rounded text-[9px] font-bold uppercase tracking-widest border border-red-100/50">Expired</span>
+                          ) : (
+                            <span className="inline-block px-2 py-0.5 bg-emerald-50 text-emerald-500 rounded text-[9px] font-bold uppercase tracking-widest border border-emerald-100/50">Active</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-right px-8">
                         <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                           <button
-                              onClick={() => handleViewAnalytics(id ?? '')}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-100 transition-all shadow-sm"
-                              title="Analytics"
+                            onClick={() => handleViewAnalytics(id ?? '')}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-100 transition-all shadow-sm"
+                            title="Analytics"
                           >
                             <IoStatsChart size={18} />
                           </button>
                           <button
-                              onClick={() => handleEdit(id ?? '')}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 transition-all shadow-sm"
-                              title="Edit"
+                            onClick={() => handleEdit(id ?? '')}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-blue-50 hover:text-blue-600 border border-gray-100 transition-all shadow-sm"
+                            title="Edit"
                           >
                             <IoPencil size={18} />
                           </button>
                           <CNDialog
                             open={openDeleteModal && rewardToDelete === id}
                             onOpenChange={(open) => {
-                              if(!open) {
+                              if (!open) {
                                 setOpenDeleteModal(false);
                                 setRewardToDelete('');
                               } else {
@@ -646,9 +648,9 @@ const Rewards = () => {
                             }}
                           >
                             <DialogTrigger asChild>
-                               <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-red-50 hover:text-red-600 border border-gray-100 transition-all shadow-sm" title="Delete">
-                                  <MdDelete size={20} />
-                                </button>
+                              <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-red-50 hover:text-red-600 border border-gray-100 transition-all shadow-sm" title="Delete">
+                                <MdDelete size={20} />
+                              </button>
                             </DialogTrigger>
                             <DialogContent className="rounded-[2rem]">
                               <DialogHeader>
@@ -858,7 +860,7 @@ const Rewards = () => {
                       removeAdditionalImage={removeAdditionalImage}
                     />
                   )}
-                  {activeTab === 'EDIT REWARD PAGE' && (
+                  {activeTab === 'EDIT SUCCESS PAGE' && (
                     <RewardPageForm
                       title={rewardPageTitle}
                       message={rewardPageMessage}

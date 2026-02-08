@@ -6,7 +6,8 @@ import React, { useEffect, useState } from 'react';
 
 const SignupForm = () => {
   const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [error, setError] = useState('');
@@ -42,7 +43,7 @@ const SignupForm = () => {
 
   const handleSubmit = () => {
     setError('');
-    if (!fullName || !email || !password || !password2) {
+    if (!firstName || !lastName || !email || !password || !password2) {
       setError('Please fill in all fields');
       return;
     }
@@ -52,22 +53,38 @@ const SignupForm = () => {
       return;
     }
 
+    const fullName = `${firstName} ${lastName}`.trim();
+
     mutate({ fullName, email, password, password2 });
   };
   return (
     <form className="form">
       <h3 className="text-center text-xl font-medium">Create an account</h3>
-      <div className="flex-column">
-        <label>Fullname </label>
-      </div>
-      <div className="inputForm">
-        <input
-          type="text"
-          className="input"
-          placeholder="Enter your name"
-          value={fullName}
-          onChange={e => setFullName(e.target.value)}
-        />
+      <div className="grid grid-cols-2 gap-4 mt-2">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-gray-700">First Name</label>
+          <div className="inputForm">
+            <input
+              type="text"
+              className="input !ml-0"
+              placeholder="First name"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-gray-700">Last Name</label>
+          <div className="inputForm">
+            <input
+              type="text"
+              className="input !ml-0"
+              placeholder="Last name"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
       <div className="flex-column">
         <label>Email </label>
