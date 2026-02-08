@@ -22,9 +22,23 @@ const SuccessNotification = () => {
     const customerName = searchParams.get('customerName');
     const successTitle = searchParams.get('successTitle');
     const successMessage = searchParams.get('successMessage');
+    const customerEmail = searchParams.get('customerEmail') || '';
 
     const isPointsReward = !!points;
     const title = rewardName || campaignName || 'Reward';
+
+    // Placeholder replacement logic
+    const formatMessage = (msg: string) => {
+        if (!msg) return msg;
+        const firstName = customerName ? customerName.split(' ')[0] : 'Customer';
+        return msg
+            .replace(/{{first_name}}/g, firstName)
+            .replace(/{{email}}/g, customerEmail || 'your email');
+    };
+
+    const displayMessage = successMessage
+        ? formatMessage(successMessage)
+        : (isPointsReward ? 'Points added to your balance.' : 'You have a new reward!');
 
     useEffect(() => {
         // Trigger confetti on mount
@@ -87,11 +101,11 @@ const SuccessNotification = () => {
                     {successTitle || (customerName ? `Congratulations, ${customerName}!` : 'Congratulations!')}
                 </motion.h1>
                 <div
-                    className="text-gray-500 text-lg prose prose-sm max-w-none break-words"
+                    className="text-gray-500 mb-6 prose prose-sm max-w-none break-words success-message-content"
                     dangerouslySetInnerHTML={{
                         __html: typeof window !== 'undefined'
-                            ? DOMPurify.sanitize(successMessage || (isPointsReward ? 'Points added to your balance.' : 'You have a new reward!'))
-                            : (successMessage || (isPointsReward ? 'Points added to your balance.' : 'You have a new reward!'))
+                            ? DOMPurify.sanitize(displayMessage)
+                            : displayMessage
                     }}
                 />
 

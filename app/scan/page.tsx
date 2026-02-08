@@ -29,6 +29,7 @@ const ScanPage = () => {
                     message: response.reward.message,
                     campaignName: response.reward.campaignName,
                     customerName: response.reward.customerName || 'Valued Customer',
+                    customerEmail: response.reward.customerEmail || '',
                     successTitle: response.reward.rewardPageTitle || '',
                     successMessage: response.reward.rewardPageMessage || '',
                 });

@@ -51,36 +51,35 @@ const RewardPageForm: React.FC<RewardPageFormProps> = ({ title, message, link, s
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                {/* Title Input */}
-                <div className="space-y-2">
-                    <label htmlFor="rewardPageTitle" className="block text-sm font-medium text-gray-700">
-                        Success Page Title
-                    </label>
-                    <input
-                        type="text"
-                        id="rewardPageTitle"
-                        name="rewardPageTitle"
-                        value={currentTitle || ''}
-                        onChange={handleChange}
-                        placeholder="e.g., Congratulations!"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    />
-                    <p className="text-xs text-gray-500">
-                        The main heading displayed on the success screen.
-                    </p>
-                </div>
-
                 {/* Message Input */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                        Success Page Message
-                    </label>
+                    <div className="flex justify-between items-center">
+                        <label className="block text-sm font-medium text-gray-700">
+                            Success Page Message
+                        </label>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => handleMessageChange(`${currentMessage || ''} {{first_name}}`)}
+                                className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-xs font-bold hover:bg-blue-100 transition-all flex items-center gap-1.5"
+                            >
+                                <span className="text-blue-400 font-mono text-sm">+</span> First Name
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleMessageChange(`${currentMessage || ''} {{email}}`)}
+                                className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-xs font-bold hover:bg-blue-100 transition-all flex items-center gap-1.5"
+                            >
+                                <span className="text-blue-400 font-mono text-sm">+</span> Email
+                            </button>
+                        </div>
+                    </div>
                     <TextEditor
                         value={currentMessage || ''}
                         onChange={handleMessageChange}
                     />
                     <p className="text-xs text-gray-500">
-                        A subtitle or message providing more details. Emojis, links, and images are supported.
+                        Customize the success message. Use the buttons above to personalize with customer data.
                     </p>
                 </div>
 
@@ -113,14 +112,14 @@ const RewardPageForm: React.FC<RewardPageFormProps> = ({ title, message, link, s
                             <span className="text-2xl">🎉</span>
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            {currentTitle || 'Congratulations!'}
+                            Congratulations!
                         </h2>
                         <div
-                            className="text-gray-500 mb-6 prose prose-sm max-w-none break-words"
+                            className="text-gray-500 mb-6 prose prose-sm max-w-none break-words success-message-content"
                             dangerouslySetInnerHTML={{
                                 __html: typeof window !== 'undefined'
-                                    ? DOMPurify.sanitize(currentMessage || 'You have a new reward!')
-                                    : (currentMessage || 'You have a new reward!')
+                                    ? DOMPurify.sanitize((currentMessage || 'You have a new reward!').replace(/{{first_name}}/g, 'John').replace(/{{email}}/g, 'john@example.com'))
+                                    : (currentMessage || 'You have a new reward!').replace(/{{first_name}}/g, 'John').replace(/{{email}}/g, 'john@example.com')
                             }}
                         />
                         {currentLink && (

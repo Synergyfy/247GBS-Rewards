@@ -150,3 +150,13 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
+/* Success Message Hypertext Styling */
+.success-message-content a {
+  color: #2D3DFF !important;
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+}
+
+.success-message-content a:hover {
+  color: #1a27cc !important;
+}
