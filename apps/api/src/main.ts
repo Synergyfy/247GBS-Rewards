@@ -4,15 +4,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  app.use((req, res, next) => {
+// 1. Shared Configuration Function
+// This setup applies to both Local and Vercel environments
+async function configureApp(app: any) {
+  app.use((req: any, res: any, next: any) => {
     if (req.method === 'OPTIONS') {
       res.header('Access-Control-Allow-Origin', '*');
       res.header(
         'Access-Control-Allow-Methods',
-        'GET, POST, PUT,PATCH, DELETE, OPTIONS',
+        'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       );
       res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       res.status(200).send();
@@ -55,10 +55,34 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
-bootstrap();
+// 2. Local Development Bootstrap
+// This only runs if you execute the file directly (e.g., `nest start` or `node dist/main`)
+if (require.main === module) {
+  async function bootstrap() {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-// https://app.getpostman.com/join-team?invite_code=fdcca7058c17b3f90a2552eecbdea456ece9de15db36733ddca5c92746b9d9cf
+    await configureApp(app);
+
+    const port = process.env.PORT ?? 3000;
+    await app.listen(port);
+    console.log(`Application is running on: ${await app.getUrl()}`);
+  }
+  bootstrap();
+}
+
+// 3. Vercel Serverless Handler
+// Vercel imports this file and calls the default export
+let cachedApp: any;
+
+export default async (req: any, res: any) => {
+  if (!cachedApp) {
+    const app = await NestFactory.create(AppModule);
+    await configureApp(app);
+    await app.init();
+    cachedApp = app.getHttpAdapter().getInstance();
+  }
+  return cachedApp(req, res);
+};
+
