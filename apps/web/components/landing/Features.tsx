@@ -108,7 +108,7 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: n
         className="w-full h-full relative"
         initial={false}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, animationDirection: "normal" }}
+        transition={{ duration: 0.6 }}
         style={{ transformStyle: "preserve-3d" }}
       >
         {/* Front Face */}
