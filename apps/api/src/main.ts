@@ -38,7 +38,7 @@ async function configureApp(app: any) {
       'https://stockaudits.netlify.app/',
       'https://loyaltyprogramm.netlify.app/',
       'https://247gbs-rewards.netlify.app/',
-      'https://247gbsrewards.vercel.app/',
+      'https://247gbsrewards.vercel.app',
     ],
     methods: 'GET, HEAD, PUT, PATCH, DELETE, OPTIONS',
     credentials: true,
