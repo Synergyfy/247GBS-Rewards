@@ -11,7 +11,6 @@ import { Bars } from 'react-loader-spinner';
 import GeneralForm from '../../components/GeneralRewardsForm';
 import DateRangeForm from '../../components/DateRangeForm';
 import DescriptionForm from '../../components/DescriptionForm';
-import ImagesForm from '../../components/ImagesForm';
 import RewardPageForm from '../../components/RewardPageForm';
 import { RewardType } from '@/services/hooks/reward/types';
 import {
@@ -48,26 +47,15 @@ import { FiActivity } from 'react-icons/fi';
 import { VoucherType } from '@/services/voucher.service';
 import { useLoyaltyTiers, useMallTiers } from '@/services/hooks/useTiers';
 import { RewardConfig } from '@/services/hooks/reward/types';
-import Cropper from 'react-easy-crop';
-import { getCroppedImg } from '@/app/helpers/cropImage';
 
 const Rewards = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<
-    'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT REWARD PAGE'
+    'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'EDIT REWARD PAGE'
   >('GENERAL');
 
-  // Cropping states
-  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
-  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
-  const [currentCropType, setCurrentCropType] = useState<string | null>(null);
-
-  // States for GENERAL tab
   const [title, setTitle] = useState('');
   const [pointsCost, setPointsCost] = useState<string>('');
   const [rewardValue, setRewardValue] = useState<string>('');
@@ -101,20 +89,6 @@ const Rewards = () => {
   // State for DESCRIPTION tab
   const [description, setDescription] = useState('');
 
-  // States for IMAGES tab
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
-  const [additionalImagePreviews, setAdditionalImagePreviews] = useState<{
-    additional1: string | null;
-    additional2: string | null;
-    additional3: string | null;
-    additional4: string | null;
-  }>({
-    additional1: null,
-    additional2: null,
-    additional3: null,
-    additional4: null,
-  });
-
   const [rewardId, setRewardId] = useState<string>('');
   const [rewardToDelete, setRewardToDelete] = useState<string>('');
   const [editMode, setEditMode] = useState<boolean>(false);
@@ -123,6 +97,7 @@ const Rewards = () => {
   const [openStepModal, setOpenStepModal] = useState<boolean>(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [analyticsRewardId, setAnalyticsRewardId] = useState('');
+  const [analyticsRewardTitle, setAnalyticsRewardTitle] = useState('');
 
   const { data: rewardData, isLoading, refetch } = useGetRewards();
 
@@ -165,13 +140,6 @@ const Rewards = () => {
     setRewardValue('');
     setCurrency('');
     setQuantityAvailable(0);
-    setMainImagePreview(null);
-    setAdditionalImagePreviews({
-      additional1: null,
-      additional2: null,
-      additional3: null,
-      additional4: null,
-    });
     setRewardType('STANDARD');
     setTierId('');
     setDurationDays(30);
@@ -350,8 +318,9 @@ const Rewards = () => {
     }
   };
 
-  const handleViewAnalytics = (id: string) => {
+  const handleViewAnalytics = (id: string, title?: string) => {
     setAnalyticsRewardId(id);
+    setAnalyticsRewardTitle(title || '');
     setShowAnalytics(true);
   };
 
@@ -383,64 +352,8 @@ const Rewards = () => {
     updateMutate({ id: rewardId, reward });
   };
 
-  const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImageToCrop(reader.result as string);
-        setCurrentCropType('main');
-        setIsCropModalOpen(true);
-      };
-      reader.readAsDataURL(files[0]);
-    }
-  };
-
-  const handleAdditionalImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    key: keyof typeof additionalImagePreviews
-  ) => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImageToCrop(reader.result as string);
-        setCurrentCropType(key);
-        setIsCropModalOpen(true);
-      };
-      reader.readAsDataURL(files[0]);
-    }
-  };
-
-  const onCropComplete = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
-
-  const handleCropSave = async () => {
-    try {
-      if (imageToCrop && croppedAreaPixels) {
-        const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
-        if (currentCropType === 'main') {
-          setMainImagePreview(croppedImage);
-        } else if (currentCropType) {
-          setAdditionalImagePreviews(prev => ({
-            ...prev,
-            [currentCropType]: croppedImage,
-          }));
-        }
-        setIsCropModalOpen(false);
-        setImageToCrop(null);
-        setCurrentCropType(null);
-      }
-    } catch (e) { console.error(e); }
-  };
-
-  const removeMainImage = () => setMainImagePreview(null);
-  const removeAdditionalImage = (key: keyof typeof additionalImagePreviews) =>
-    setAdditionalImagePreviews(prev => ({ ...prev, [key]: null }));
-
-  const tabs: Array<'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'IMAGES' | 'EDIT REWARD PAGE'> = [
-    'GENERAL', 'DATE RANGE', 'DESCRIPTION', 'IMAGES', 'EDIT REWARD PAGE'
+  const tabs: Array<'GENERAL' | 'DATE RANGE' | 'DESCRIPTION' | 'EDIT REWARD PAGE'> = [
+    'GENERAL', 'DATE RANGE', 'DESCRIPTION', 'EDIT REWARD PAGE'
   ];
 
   const handleOpenModal = () => {
@@ -621,7 +534,7 @@ const Rewards = () => {
                       <TableCell className="text-right px-8">
                         <div className="flex items-center justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                           <button
-                              onClick={() => handleViewAnalytics(id ?? '')}
+                              onClick={() => handleViewAnalytics(id ?? '', title)}
                               className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-100 transition-all shadow-sm"
                               title="Analytics"
                           >
@@ -848,16 +761,6 @@ const Rewards = () => {
                       setDescription={setDescription}
                     />
                   )}
-                  {activeTab === 'IMAGES' && (
-                    <ImagesForm
-                      mainImagePreview={mainImagePreview}
-                      additionalImagePreviews={additionalImagePreviews}
-                      handleMainImageUpload={handleMainImageUpload}
-                      handleAdditionalImageUpload={handleAdditionalImageUpload}
-                      removeMainImage={removeMainImage}
-                      removeAdditionalImage={removeAdditionalImage}
-                    />
-                  )}
                   {activeTab === 'EDIT REWARD PAGE' && (
                     <RewardPageForm
                       title={rewardPageTitle}
@@ -949,7 +852,7 @@ const Rewards = () => {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-8 py-8 bg-gray-50/20">
-              <RewardAnalytics rewardId={analyticsRewardId} />
+              <RewardAnalytics rewardId={analyticsRewardId} rewardTitle={analyticsRewardTitle} />
             </div>
             <div className="border-t border-gray-50 px-8 py-5 bg-white flex justify-end">
               <button className="px-8 py-3 bg-gray-800 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-lg shadow-gray-200" onClick={() => setShowAnalytics(false)}>
@@ -960,54 +863,6 @@ const Rewards = () => {
         </div>
       </Dialog>
 
-      <Dialog open={isCropModalOpen} onClose={() => setIsCropModalOpen(false)} className="relative z-[60]">
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-[2px]" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg flex flex-col overflow-hidden border border-gray-100">
-            <div className="flex justify-between items-center border-b border-gray-50 px-6 py-5 bg-gray-50/30">
-              <h3 className="text-lg font-bold text-gray-800">Adjust Image</h3>
-              <button onClick={() => setIsCropModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                <FaTimes size={20} />
-              </button>
-            </div>
-            <div className="relative h-80 w-full bg-gray-900">
-              {imageToCrop && (
-                <Cropper
-                  image={imageToCrop}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  onCropChange={setCrop}
-                  onCropComplete={onCropComplete}
-                  onZoomChange={setZoom}
-                />
-              )}
-            </div>
-            <div className="p-8 space-y-6">
-              <div className="flex items-center gap-4">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Zoom</span>
-                <input
-                  type="range"
-                  value={zoom}
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  onChange={(e) => setZoom(Number(e.target.value))}
-                  className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                />
-              </div>
-              <div className="flex justify-end gap-3">
-                <button className="px-6 py-3 text-gray-400 font-bold hover:text-gray-600 transition-colors" onClick={() => setIsCropModalOpen(false)}>
-                  Cancel
-                </button>
-                <button className="px-8 py-3 bg-indigo-500 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-100" onClick={handleCropSave}>
-                  Apply Crop
-                </button>
-              </div>
-            </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
     </section>
   );
 };

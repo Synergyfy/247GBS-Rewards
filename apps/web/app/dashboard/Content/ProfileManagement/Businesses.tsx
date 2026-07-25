@@ -38,6 +38,7 @@ import { addContact, resetContact } from '@/store/features/businessContact';
 import { addLinks, resetLinks } from '@/store/features/businessLink';
 import { addSocial, resetSocial } from '@/store/features/businessSocials';
 import { errorType } from '@/services/hooks/auth/hook';
+import { uploadToCloudinary } from '@/services/cloudinary';
 
 import {
   Dialog as CNDialog,
@@ -88,6 +89,7 @@ const Businesses = () => {
 
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openStepModal, setOpenStepModal] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const { businessContact, businessGeneral, businessLinks, businessSocials } =
     useSelector((state: RootState) => state);
@@ -113,6 +115,8 @@ const Businesses = () => {
   const {
     isSuccess: updateSuccess,
     isPending: updatePending,
+    isError: updateIsError,
+    error: updateError,
     mutate: updateMutate,
   } = useUpdateBusiness();
 
@@ -128,10 +132,12 @@ const Businesses = () => {
     setIsOpen(false);
     setEditMode(false);
     setErrorMsg('');
+    setSubmitting(false);
   }, [clearBusinessStore]);
 
   useEffect(() => {
     if (isSuccess) {
+      setSubmitting(false);
       refetch();
       clearBusinessStore();
       handleDialogClose();
@@ -142,6 +148,7 @@ const Businesses = () => {
     }
 
     if (isError) {
+      setSubmitting(false);
       const errorData = error as unknown as errorType;
       const errMsg = errorData.response.data.error;
       setErrorMsg(errMsg);
@@ -158,10 +165,17 @@ const Businesses = () => {
 
   useEffect(() => {
     if (updateSuccess) {
+      setSubmitting(false);
       refetch();
       handleDialogClose();
     }
-  }, [updateSuccess, refetch, handleDialogClose]);
+    if (updateIsError) {
+      setSubmitting(false);
+      const errorData = updateError as unknown as errorType;
+      const errMsg = errorData.response.data.error;
+      setErrorMsg(errMsg);
+    }
+  }, [updateSuccess, updateIsError, updateError, refetch, handleDialogClose]);
 
   const handleOpenDeleteModal = (id: string) => {
     if (!openDeleteModal) {
@@ -178,13 +192,15 @@ const Businesses = () => {
     }, 500);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setSubmitting(true);
     const { industry, name } = businessGeneral;
     const { phoneNumber, email, city, postalCode, state, street } =
       businessContact;
     if (!industry || !name) {
       setActiveTab('GENERAL');
       setErrorMsg('Please fill in business name and industry');
+      setSubmitting(false);
     } else if (
       !phoneNumber ||
       !email ||
@@ -195,7 +211,19 @@ const Businesses = () => {
     ) {
       setActiveTab('CONTACT');
       setErrorMsg('Fill in contact details');
+      setSubmitting(false);
     } else {
+      let logoUrl: string | undefined;
+      if (logoPreview) {
+        try {
+          logoUrl = await uploadToCloudinary(logoPreview);
+        } catch (e) {
+          setErrorMsg('Failed to upload logo. Please try again.');
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const business: BusinessType = {
         ...businessGeneral,
         phoneNumber: businessContact.phoneNumber,
@@ -203,7 +231,7 @@ const Businesses = () => {
         address: businessContact,
         socials: businessSocials,
         links: businessLinks,
-        profileImage: logoPreview || undefined
+        logo: logoUrl
       };
 
       mutate(business);
@@ -220,7 +248,7 @@ const Businesses = () => {
     );
 
     if (business) {
-      const { name, industry, address, links, socials, email, phoneNumber, profileImage } =
+      const { name, industry, address, links, socials, email, phoneNumber, logo } =
         business;
       dispatch(addGeneral({ name, industry }));
 
@@ -239,7 +267,7 @@ const Businesses = () => {
 
       dispatch(addLinks(links));
       dispatch(addSocial({ ...socials }));
-      setLogoPreview(profileImage || null);
+      setLogoPreview(logo || null);
 
       setBusinessId(id);
       setEditMode(true);
@@ -247,7 +275,21 @@ const Businesses = () => {
     }
   };
 
-  const processUpdate = () => {
+  const processUpdate = async () => {
+    setSubmitting(true);
+    let logoUrl: string | undefined;
+    if (logoPreview && logoPreview.startsWith('data:')) {
+      try {
+        logoUrl = await uploadToCloudinary(logoPreview);
+      } catch (e) {
+        setErrorMsg('Failed to upload logo. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+    } else if (logoPreview) {
+      logoUrl = logoPreview;
+    }
+
     const business: BusinessType = {
       ...businessGeneral,
       phoneNumber: businessContact.phoneNumber,
@@ -255,7 +297,7 @@ const Businesses = () => {
       address: businessContact,
       socials: businessSocials,
       links: businessLinks,
-      profileImage: logoPreview || undefined
+      logo: logoUrl
     };
 
     updateMutate({ id: updateBusinessId, business });
@@ -421,15 +463,15 @@ const Businesses = () => {
               </TableHeader>
               <TableBody>
                 {filteredBusinesses?.map((item, i) => {
-                  const { id, email, name, address, phoneNumber, industry, profileImage } = item;
+                  const { id, email, name, address, phoneNumber, industry, logo } = item;
                   const { street, city, state } = address;
                   return (
                     <TableRow key={i} className="group hover:bg-gray-50/50 transition-colors border-b border-gray-50">
                       <TableCell className="py-5 px-8">
                         <div className="flex items-center gap-4">
                           <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
-                            {profileImage ? (
-                               <Image src={profileImage} alt={name} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                            {logo ? (
+                               <Image src={logo} alt={name} fill className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                             ) : (
                                <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
                                  <HiOutlineOfficeBuilding size={24} />
@@ -602,7 +644,7 @@ const Businesses = () => {
                   <button
                     className="px-8 py-3.5 text-gray-500 font-bold bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all shadow-sm"
                     onClick={handleBack}
-                    disabled={isPending || updatePending}
+                    disabled={isPending || updatePending || submitting}
                   >
                     Back
                   </button>
@@ -610,14 +652,14 @@ const Businesses = () => {
                 <button
                   className="px-10 py-3.5 bg-blue-500 text-white font-bold rounded-2xl hover:bg-blue-600 hover:scale-[1.02] transition-all shadow-xl shadow-blue-50 disabled:opacity-70 min-w-[160px]"
                   onClick={handleNext}
-                  disabled={isPending || updatePending}
+                  disabled={isPending || updatePending || submitting}
                 >
                   {!isLastTab ? (
                     'Continue'
                   ) : editMode ? (
-                    updatePending ? 'Updating...' : 'Save Changes'
+                    updatePending || submitting ? 'Updating...' : 'Save Changes'
                   ) : (
-                    isPending ? 'Creating...' : 'Launch Business'
+                    isPending || submitting ? 'Creating...' : 'Launch Business'
                   )}
                 </button>
              </div>

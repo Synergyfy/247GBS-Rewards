@@ -27,7 +27,7 @@ const DateRangeForm: React.FC<DateRangeFormProps> = ({
           <ToolTip content="When is the starting date for this reward?" />
         </label>
         <div className="border border-gray-300 rounded-md p-1 focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500">
-            <DateTimePicker date={activeFrom} setDate={setActiveFrom} />
+            <DateTimePicker date={activeFrom} setDate={setActiveFrom} minDate={new Date()} />
         </div>
       </div>
 

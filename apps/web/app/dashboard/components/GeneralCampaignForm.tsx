@@ -129,6 +129,7 @@ const GeneralForm: React.FC = () => {
               date={startDate ? new Date(startDate) : new Date()} 
               setDate={(date) => handleDateChange('startDate', date)} 
               showTime={false}
+              minDate={new Date()}
             />
           </div>
         </div>
