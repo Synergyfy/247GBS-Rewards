@@ -390,7 +390,7 @@ const Campaign: React.FC<CampaignProps> = ({ filterProp }) => {
 
       <Dialog
         open={isOpen}
-        onClose={handleClose}
+        onClose={() => {}}
         className="relative z-50"
       >
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />

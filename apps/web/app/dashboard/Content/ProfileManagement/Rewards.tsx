@@ -602,7 +602,7 @@ const Rewards = () => {
         )}
       </div>
 
-      <Dialog open={isOpen} onClose={handleCloseModal} className="relative z-50">
+      <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
         <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px]" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
@@ -625,7 +625,7 @@ const Rewards = () => {
                       key={tab}
                       className={`pb-4 px-1 text-[10px] font-bold uppercase tracking-[0.2em] transition-all border-b-4 ${activeTab === tab
                         ? 'border-indigo-500 text-gray-700'
-                        : 'border-transparent text-gray-200 hover:text-gray-300'
+                        : 'border-transparent text-gray-400 hover:text-gray-600'
                         }`}
                       onClick={() => setActiveTab(tab)}
                     >

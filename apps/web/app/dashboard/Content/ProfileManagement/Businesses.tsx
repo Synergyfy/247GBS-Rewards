@@ -571,7 +571,7 @@ const Businesses = () => {
 
       <Dialog
         open={isOpen}
-        onClose={handleDialogClose}
+        onClose={() => {}}
         className="relative z-50"
       >
         <div className="fixed inset-0 bg-black/20 backdrop-blur-[2px]" aria-hidden="true" />
@@ -600,7 +600,7 @@ const Businesses = () => {
                         className={`pb-4 px-1 text-[10px] font-bold uppercase tracking-[0.2em] transition-all border-b-4 ${
                             activeTab === tab
                             ? 'border-blue-500 text-gray-700'
-                            : 'border-transparent text-gray-200 hover:text-gray-300'
+                            : 'border-transparent text-gray-400 hover:text-gray-600'
                         }`}
                         onClick={() => setActiveTab(tab)}
                         >
