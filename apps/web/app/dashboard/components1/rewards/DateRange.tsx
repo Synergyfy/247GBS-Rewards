@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-export function DatePicker() {
+export function DatePicker({ disablePast }: { disablePast?: boolean }) {
   const [date, setDate] = React.useState<Date>();
 
   return (
@@ -37,6 +37,7 @@ export function DatePicker() {
           selected={date}
           onSelect={setDate}
           initialFocus
+          disabled={disablePast ? { before: new Date() } : undefined}
         />
       </PopoverContent>
     </Popover>
@@ -49,7 +50,7 @@ const DateRange = () => {
       <div className="grid w-full max-w-sm items-center gap-1.5">
         <Label htmlFor="active-from">Active From</Label>
 
-        <DatePicker />
+        <DatePicker disablePast />
       </div>
       <div className="grid w-full max-w-sm items-center gap-1.5">
         <Label htmlFor="expires">Expires</Label>

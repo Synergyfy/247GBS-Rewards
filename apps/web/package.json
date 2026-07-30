@@ -37,6 +37,7 @@
     "axios": "^1.7.9",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",

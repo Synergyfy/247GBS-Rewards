@@ -3,6 +3,14 @@ export interface ActivityData {
     count: number;
 }
 
+export interface RewardStats {
+  totalRedeemed: number;
+  uniqueCustomers: number;
+  totalUniqueUsers: number;
+  avgConversionRate: number;
+  totalPointsSpent: number;
+}
+
 export interface CampaignAnalytics {
     campaignName: string;
     isActive: boolean;

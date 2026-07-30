@@ -158,9 +158,9 @@ export default function CampaignsPage() {
                         {/* Business Logo Circle Overlay */}
                         <div className="absolute -top-10 left-8">
                           <div className="relative h-16 w-16 rounded-3xl overflow-hidden border-4 border-white shadow-xl bg-white transition-transform group-hover:-translate-y-1 duration-500">
-                            {campaign.business?.profileImage ? (
+                            {campaign.business?.logo ? (
                               <Image
-                                src={campaign.business.profileImage}
+                                src={campaign.business.logo}
                                 alt={campaign.business.name || 'Business'}
                                 layout="fill"
                                 objectFit="cover"
