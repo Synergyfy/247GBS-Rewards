@@ -4,8 +4,6 @@ import * as path from 'path';
 
 dotenv.config();
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-
 const dataSource = new DataSource({
   type: 'postgres',
   port: process.env.POSTGRES_PORT ? +process.env.POSTGRES_PORT : 5432,
@@ -16,8 +14,7 @@ const dataSource = new DataSource({
   entities: [path.resolve(__dirname, '..') + '/**/*.entity{.ts,.js}'],
   migrations: [path.resolve(__dirname, 'migrations') + '/*{.ts,.js}'],
   synchronize: false,
-  //   migrationsTableName: 'migrations',
-  //   ssl: process.env.DB_SSL === 'true',
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 export async function initializeDataSource() {
