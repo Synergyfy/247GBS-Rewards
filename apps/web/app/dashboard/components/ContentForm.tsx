@@ -7,12 +7,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { updateCampaignField } from '@/store/features/campaign';
 import ToolTip from './ToolTip';
+import { uploadToCloudinary } from '@/services/cloudinary';
+import Image from 'next/image';
+import { FaTimes } from 'react-icons/fa';
 
 type SubTab = 'TOP BAR' | 'HOME' | 'EARN' | 'REDEEM' | 'CONTACT';
 
 const ContentForm: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('TOP BAR');
-  // For simplicity, we keep local state for the rich text fields as strings.
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   const {
     topTitle,
@@ -32,6 +35,13 @@ const ContentForm: React.FC = () => {
     redeemTitle,
     contactText,
     contactTitle,
+    headerImg,
+    col1Img,
+    col2Img,
+    col3Img,
+    earnImg,
+    redeemImg,
+    contactImg,
   } = useSelector((state: RootState) => state.createCampaign);
 
   const dispatch = useDispatch();
@@ -45,28 +55,68 @@ const ContentForm: React.FC = () => {
     dispatch(updateCampaignField({ [name]: value }));
   };
 
-  // A helper to render an “upload field” similar to previous examples.
-  const renderImageInput = (placeholder: string, tooltip: string) => (
+  const handleImageUpload = async (fieldName: string, file: File) => {
+    setUploadingField(fieldName);
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const url = await uploadToCloudinary(reader.result as string);
+        dispatch(updateCampaignField({ [fieldName]: url }));
+        setUploadingField(null);
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setUploadingField(null);
+    }
+  };
+
+  const handleRemoveImage = (fieldName: string) => {
+    dispatch(updateCampaignField({ [fieldName]: '' }));
+  };
+
+  const renderImageInput = (fieldName: string, imageUrl: string | undefined, placeholder: string, tooltip: string) => (
     <div className="mt-4">
       <label className="mb-2 flex items-center gap-2 font-medium text-gray-700 text-sm">
         {placeholder}
         <ToolTip content={tooltip} />
       </label>
-      <label className="flex items-center justify-center cursor-pointer w-full p-3 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 hover:bg-gray-50 transition-all">
-        <IoMdAttach className="mr-2 text-gray-500" />
-        <span className="text-sm text-gray-600">Upload Image</span>
-        <input
-          type="file"
-          className="hidden"
-        // Add onChange handler here if implemented
-        />
-      </label>
+      {imageUrl ? (
+        <div className="relative w-full h-40 border rounded-lg overflow-hidden">
+          <Image src={imageUrl} alt={placeholder} fill style={{ objectFit: 'cover' }} />
+          <button
+            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors"
+            onClick={() => handleRemoveImage(fieldName)}
+          >
+            <FaTimes size={12} />
+          </button>
+        </div>
+      ) : (
+        <label className="flex items-center justify-center cursor-pointer w-full p-3 border-2 border-dashed border-gray-300 rounded-md hover:border-blue-500 hover:bg-gray-50 transition-all">
+          {uploadingField === fieldName ? (
+            <span className="text-sm text-gray-500">Uploading...</span>
+          ) : (
+            <>
+              <IoMdAttach className="mr-2 text-gray-500" />
+              <span className="text-sm text-gray-600">Upload Image</span>
+            </>
+          )}
+          <input
+            type="file"
+            className="hidden"
+            accept="image/*"
+            disabled={uploadingField !== null}
+            onChange={e => {
+              const file = e.target.files?.[0];
+              if (file) handleImageUpload(fieldName, file);
+            }}
+          />
+        </label>
+      )}
     </div>
   );
 
   return (
     <div>
-      {/* Sub-tabs */}
       <div className="flex border-b border-gray-200 mb-6 space-x-2 overflow-x-auto">
         {(['TOP BAR', 'HOME', 'EARN', 'REDEEM', 'CONTACT'] as SubTab[]).map(
           tab => (
@@ -145,7 +195,7 @@ const ContentForm: React.FC = () => {
             />
           </div>
           <div>
-            {renderImageInput('Header image', 'The header image for the home section.')}
+            {renderImageInput('headerImg', headerImg, 'Header image', 'The header image for the home section.')}
           </div>
 
           <div className="border-t pt-4 mt-6">
@@ -195,7 +245,7 @@ const ContentForm: React.FC = () => {
                 onChange={html => handleTextEditorChange('col1Text', html)}
               />
             </div>
-            <div>{renderImageInput('Column one image', 'Image for the first column.')}</div>
+            <div>{renderImageInput('col1Img', col1Img, 'Column one image', 'Image for the first column.')}</div>
           </div>
 
           <div className="space-y-4 border p-4 rounded-md bg-gray-50">
@@ -224,7 +274,7 @@ const ContentForm: React.FC = () => {
                 onChange={html => handleTextEditorChange('col2Text', html)}
               />
             </div>
-            <div>{renderImageInput('Column two image', 'Image for the second column.')}</div>
+            <div>{renderImageInput('col2Img', col2Img, 'Column two image', 'Image for the second column.')}</div>
           </div>
 
           <div className="space-y-4 border p-4 rounded-md bg-gray-50">
@@ -253,7 +303,7 @@ const ContentForm: React.FC = () => {
                 onChange={html => handleTextEditorChange('col3Text', html)}
               />
             </div>
-            <div>{renderImageInput('Column three image', 'Image for the third column.')}</div>
+            <div>{renderImageInput('col3Img', col3Img, 'Column three image', 'Image for the third column.')}</div>
           </div>
         </div>
       )}
@@ -285,7 +335,7 @@ const ContentForm: React.FC = () => {
             />
           </div>
           <div>
-            {renderImageInput('Header image', 'Header image for the Earn section.')}
+            {renderImageInput('earnImg', earnImg, 'Header image', 'Header image for the Earn section.')}
           </div>
         </div>
       )}
@@ -317,7 +367,7 @@ const ContentForm: React.FC = () => {
             />
           </div>
           <div>
-            {renderImageInput('Header image', 'Header image for the Redeem section.')}
+            {renderImageInput('redeemImg', redeemImg, 'Header image', 'Header image for the Redeem section.')}
           </div>
         </div>
       )}
@@ -349,7 +399,7 @@ const ContentForm: React.FC = () => {
             />
           </div>
           <div>
-            {renderImageInput('Header image', 'Header image for the Contact section.')}
+            {renderImageInput('contactImg', contactImg, 'Header image', 'Header image for the Contact section.')}
           </div>
         </div>
       )}

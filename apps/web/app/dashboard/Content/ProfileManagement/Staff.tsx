@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
@@ -15,7 +15,9 @@ import {
     Shield,
     Loader2,
     Camera,
-    Info
+    Info,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 import Image from 'next/image';
 import {
@@ -40,6 +42,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { uploadToCloudinary } from '@/services/cloudinary';
 
 // --- Modal Component ---
 const StaffModal = ({
@@ -56,6 +59,9 @@ const StaffModal = ({
     isLoading: boolean;
 }) => {
     const { data: businesses } = useGetBusiness();
+    const [showPassword, setShowPassword] = useState(false);
+    const [uploadLoading, setUploadLoading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState<StaffType>({
         businessId: '',
         name: '',
@@ -80,6 +86,26 @@ const StaffModal = ({
         }
     }, [initialData, isOpen]);
 
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setUploadLoading(true);
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const dataUrl = event.target?.result as string;
+                const url = await uploadToCloudinary(dataUrl, 'staff-avatars');
+                setFormData(prev => ({ ...prev, avatar: url }));
+                setUploadLoading(false);
+            };
+            reader.readAsDataURL(file);
+        } catch {
+            toast.error('Avatar upload failed');
+            setUploadLoading(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -100,11 +126,16 @@ const StaffModal = ({
                 </div>
 
                 <div className="p-6 space-y-4">
-                    {/* Avatar Upload Placeholder */}
+                    {/* Avatar Upload */}
                     <div className="flex justify-center mb-6">
-                        <div className="relative group cursor-pointer">
+                        <div
+                            className="relative group cursor-pointer"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
                             <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden">
-                                {formData.avatar ? (
+                                {uploadLoading ? (
+                                    <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+                                ) : formData.avatar ? (
                                     <Image src={formData.avatar} alt="Avatar" width={96} height={96} className="object-cover w-full h-full" />
                                 ) : (
                                     <Users className="w-10 h-10 text-slate-400" />
@@ -114,6 +145,13 @@ const StaffModal = ({
                                 <Camera className="w-6 h-6 text-white" />
                             </div>
                         </div>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleAvatarChange}
+                        />
                     </div>
 
                     <div className="space-y-4">
@@ -202,13 +240,22 @@ const StaffModal = ({
                                             </TooltipContent>
                                         </Tooltip>
                                     </div>
-                                    <input
-                                        type="password"
-                                        placeholder="••••••••"
-                                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="••••••••"
+                                            className="w-full px-4 py-2 pr-12 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
