@@ -12,7 +12,7 @@ import GeneralForm from '../../components/GeneralRewardsForm';
 import DateRangeForm from '../../components/DateRangeForm';
 import DescriptionForm from '../../components/DescriptionForm';
 import RewardPageForm from '../../components/RewardPageForm';
-import { RewardType } from '@/services/hooks/reward/types';
+import { RewardConfig, RewardKind, RewardType } from '@/services/hooks/reward/types';
 import {
   useCreateRewards,
   useDeleteReward,
@@ -44,9 +44,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { FaTimes, FaGift, FaCoins, FaCalendarAlt, FaTag } from 'react-icons/fa';
 import { FiActivity } from 'react-icons/fi';
-import { VoucherType } from '@/services/voucher.service';
-import { useLoyaltyTiers, useMallTiers } from '@/services/hooks/useTiers';
-import { RewardConfig } from '@/services/hooks/reward/types';
 
 const Rewards = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,9 +60,7 @@ const Rewards = () => {
   const [quantityAvailable, setQuantityAvailable] = useState<number>(0);
 
   // States for Reward Type & Config
-  const [rewardType, setRewardType] = useState<string>('STANDARD');
-  const [tierId, setTierId] = useState('');
-  const [durationDays, setDurationDays] = useState(30);
+  const [rewardType, setRewardType] = useState<string>(RewardKind.STANDARD);
   const [url, setUrl] = useState('');
   const [site, setSite] = useState('');
   const [username, setUsername] = useState('');
@@ -75,10 +70,6 @@ const Rewards = () => {
   const [rewardPageTitle, setRewardPageTitle] = useState('');
   const [rewardPageMessage, setRewardPageMessage] = useState('');
   const [rewardPageLink, setRewardPageLink] = useState('');
-
-  // Data Hooks
-  const { data: loyaltyTiers = [] } = useLoyaltyTiers();
-  const { data: mallTiers = [] } = useMallTiers();
 
   // States for DATE RANGE tab
   const [activeFrom, setActiveFrom] = useState<Date>(new Date());
@@ -140,9 +131,7 @@ const Rewards = () => {
     setRewardValue('');
     setCurrency('');
     setQuantityAvailable(0);
-    setRewardType('STANDARD');
-    setTierId('');
-    setDurationDays(30);
+    setRewardType(RewardKind.STANDARD);
     setUrl('');
     setSite('');
     setUsername('');
@@ -198,19 +187,13 @@ const Rewards = () => {
       setErrorMsg('Select your preferred currency');
     }
 
-    if (rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) {
-      if (!tierId) {
-        setActiveTab('GENERAL');
-        setErrorMsg('Please select a tier');
-        return;
-      }
-    } else if (rewardType === VoucherType.LINK) {
+    if (rewardType === RewardKind.LINK) {
       if (!url) {
         setActiveTab('GENERAL');
         setErrorMsg('Please enter a URL');
         return;
       }
-    } else if (rewardType === VoucherType.CREDENTIALS) {
+    } else if (rewardType === RewardKind.CREDENTIALS) {
       if (!site || !username || !password) {
         setActiveTab('GENERAL');
         setErrorMsg('Please fill in all credential fields');
@@ -224,11 +207,9 @@ const Rewards = () => {
       setErrorMsg(dateRange as string);
     } else {
       let config: RewardConfig = {};
-      if (rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) {
-        config = { tierId, durationDays: Number(durationDays) };
-      } else if (rewardType === VoucherType.LINK) {
+      if (rewardType === RewardKind.LINK) {
         config = { url };
-      } else if (rewardType === VoucherType.CREDENTIALS) {
+      } else if (rewardType === RewardKind.CREDENTIALS) {
         config = { site, username, password };
       }
 
@@ -242,7 +223,7 @@ const Rewards = () => {
         currency,
         quantityAvailable: Number(quantityAvailable),
         type: rewardType,
-        config: rewardType === 'STANDARD' ? undefined : config,
+        config: rewardType === RewardKind.STANDARD ? undefined : config,
         rewardPageTitle,
         rewardPageMessage,
         rewardPageLink,
@@ -292,16 +273,13 @@ const Rewards = () => {
       setCurrency(currency ?? '');
       setQuantityAvailable(quantityAvailable ?? 0);
 
-      const rType = type || 'STANDARD';
+      const rType = type || RewardKind.STANDARD;
       setRewardType(rType);
 
       if (config) {
-        if (rType === VoucherType.MCOM_LOYALTY_TIER || rType === VoucherType.MCOM_MALL_TIER) {
-          setTierId(config.tierId || '');
-          setDurationDays(config.durationDays || 30);
-        } else if (rType === VoucherType.LINK) {
+        if (rType === RewardKind.LINK) {
           setUrl(config.url || '');
-        } else if (rType === VoucherType.CREDENTIALS) {
+        } else if (rType === RewardKind.CREDENTIALS) {
           setSite(config.site || '');
           setUsername(config.username || '');
           setPassword(config.password || '');
@@ -326,11 +304,9 @@ const Rewards = () => {
 
   const processUpdate = () => {
     let config: RewardConfig = {};
-    if (rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) {
-      config = { tierId, durationDays: Number(durationDays) };
-    } else if (rewardType === VoucherType.LINK) {
+    if (rewardType === RewardKind.LINK) {
       config = { url };
-    } else if (rewardType === VoucherType.CREDENTIALS) {
+    } else if (rewardType === RewardKind.CREDENTIALS) {
       config = { site, username, password };
     }
 
@@ -344,7 +320,7 @@ const Rewards = () => {
       currency,
       quantityAvailable: Number(quantityAvailable),
       type: rewardType,
-      config: rewardType === 'STANDARD' ? undefined : config,
+      config: rewardType === RewardKind.STANDARD ? undefined : config,
       rewardPageTitle,
       rewardPageMessage,
       rewardPageLink,
@@ -385,8 +361,8 @@ const Rewards = () => {
     }
   };
 
-  const formatVoucherType = (t: string) => {
-    if (t === 'STANDARD') return 'Standard';
+  const formatRewardType = (t: string) => {
+    if (t === RewardKind.STANDARD) return 'Standard';
     return t.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace('Mcom', 'MCom');
   };
 
@@ -502,7 +478,7 @@ const Rewards = () => {
                           <div>
                             <p className="font-semibold text-gray-500 text-lg">{title}</p>
                             <span className={`inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-[10px] font-bold uppercase tracking-widest ${type && type !== 'STANDARD' ? 'text-indigo-500 bg-indigo-50' : ''}`}>
-                                {formatVoucherType(type || 'STANDARD')}
+                                {formatRewardType(type || RewardKind.STANDARD)}
                             </span>
                           </div>
                         </div>
@@ -649,43 +625,14 @@ const Rewards = () => {
                         <select
                           className="block w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
                           value={rewardType}
-                          onChange={e => { setRewardType(e.target.value); setTierId(''); }}
+                          onChange={e => setRewardType(e.target.value)}
                         >
-                          <option value="STANDARD">Standard Reward</option>
-                          <option value={VoucherType.MCOM_LOYALTY_TIER}>MCom Loyalty Tier</option>
-                          <option value={VoucherType.MCOM_MALL_TIER}>MCom Mall Tier</option>
-                          <option value={VoucherType.LINK}>Download/Access Link</option>
-                          <option value={VoucherType.CREDENTIALS}>Account Credentials</option>
+                          <option value={RewardKind.STANDARD}>Standard Reward</option>
+                          <option value={RewardKind.LINK}>Download/Access Link</option>
+                          <option value={RewardKind.CREDENTIALS}>Account Credentials</option>
                         </select>
                       </div>
-                      {(rewardType === VoucherType.MCOM_LOYALTY_TIER || rewardType === VoucherType.MCOM_MALL_TIER) && (
-                        <div className="p-6 bg-indigo-50/30 rounded-[2rem] border border-indigo-100/50 space-y-6">
-                          <h4 className="font-bold text-[10px] text-indigo-400 uppercase tracking-widest">Tier Configuration</h4>
-                          <div>
-                            <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Target Tier</label>
-                            <select
-                              className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
-                              value={tierId}
-                              onChange={e => setTierId(e.target.value)}
-                            >
-                              <option value="">Select Tier</option>
-                              {(rewardType === VoucherType.MCOM_LOYALTY_TIER ? loyaltyTiers : mallTiers).map((t: { id: string; name: string }) => (
-                                <option key={t.id} value={t.id}>{t.name}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Duration (Days)</label>
-                            <input
-                              type="number"
-                              className="block w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-50 focus:border-indigo-400 transition-all font-medium text-gray-600"
-                              value={durationDays}
-                              onChange={e => setDurationDays(Number(e.target.value))}
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {rewardType === VoucherType.LINK && (
+                      {rewardType === RewardKind.LINK && (
                         <div className="p-6 bg-indigo-50/30 rounded-[2rem] border border-indigo-100/50 space-y-4">
                           <div>
                             <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Target URL</label>
@@ -699,7 +646,7 @@ const Rewards = () => {
                           </div>
                         </div>
                       )}
-                      {rewardType === VoucherType.CREDENTIALS && (
+                      {rewardType === RewardKind.CREDENTIALS && (
                         <div className="p-6 bg-indigo-50/30 rounded-[2rem] border border-indigo-100/50 space-y-6">
                           <div>
                             <label className="mb-2 block font-bold text-gray-500 text-[10px] uppercase tracking-[0.15em]">Site URL</label>

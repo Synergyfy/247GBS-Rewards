@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSegmentDto } from './dto/create-segment.dto';
+import { CreateSegmentDto } from './dto/create-segment.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Segment } from './entities/segment.entity';
+import { Segment } from './entities/segment.entity.js';
 import { Repository } from 'typeorm';
-import { Business } from '../business/entities/business.entity';
-import { UpdateSegmentDto } from './dto/update-segment.dto';
+import { Business } from '../business/entities/business.entity.js';
+import { UpdateSegmentDto } from './dto/update-segment.dto.js';
 
 @Injectable()
 export class SegmentService {

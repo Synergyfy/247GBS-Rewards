@@ -1,5 +1,6 @@
-import { Campaign } from '../../../modules/campaign/entities/campaign.entity';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Campaign } from '../../../modules/campaign/entities/campaign.entity.js';
+import type { Relation } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -10,7 +11,7 @@ export class Customer extends AbstractBaseEntity {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  campaign: Campaign;
+  campaign: Relation<Campaign>;
 
   @ApiProperty({ example: 'John' })
   @Column()

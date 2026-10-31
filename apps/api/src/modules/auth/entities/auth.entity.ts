@@ -1,4 +1,4 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity } from 'typeorm';
 
 @Entity('SSO Auth')

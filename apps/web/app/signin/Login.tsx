@@ -1,62 +1,54 @@
-import React, { useEffect, useState } from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowLeft, Loader2, Sparkles, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { errorType, useAuth } from '@/services/hooks/auth/hook';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Building2,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
+
+const ERROR_MESSAGES: Record<string, string> = {
+  central_denied:
+    'Central Hub denied access for this account. Please contact MCOM if you believe this is a mistake.',
+  missing_code:
+    'Central Hub did not return an authorization code. Please try signing in again.',
+  invalid_state:
+    'Your sign-in attempt expired or could not be verified. Please try again.',
+  business_only:
+    'Central Hub sign-in is available to business accounts only.',
+  not_granted:
+    'This business has not been granted access to 247GBS Rewards yet. Please contact MCOM to request access.',
+  exchange_failed:
+    'We could not complete the Central Hub sign-in. Please try again.',
+  session_failed:
+    'Central Hub verified your account, but we could not start your session. Please try again.',
+};
 
 const Login = () => {
-  const router = useRouter();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const {
-    data,
-    isSuccess,
-    isPending,
-    isError,
-    error: respError,
-    mutate,
-  } = useAuth();
+  const searchParams = useSearchParams();
+  const ssoError = searchParams.get('sso_error');
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  useEffect(() => {
-    if (isError) {
-      const error = respError as unknown as errorType;
-      // Safety check for error response structure
-      const errorMsg = error?.response?.data?.error || 'Authentication failed. Please try again.';
-      setError(errorMsg);
-    } else if (isSuccess) {
-      if (data?.accessToken) {
-        document.cookie = `token=${data.accessToken}; max-age=86400; path=/; secure;`;
-        localStorage.setItem('username', data.name || 'User');
-        router.push('/loyalty-admin');
-      }
-    }
-  }, [respError, isError, isSuccess, data, router]);
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setError('');
-    if (!email || !password) {
-      setError('Please provide both email and password.');
-      return;
-    }
-    mutate({ email, password });
-  };
+  const errorMessage = ssoError
+    ? ERROR_MESSAGES[ssoError] ||
+      'We could not sign you in with Central Hub. Please try again.'
+    : null;
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 text-slate-900 overflow-hidden relative selection:bg-blue-500/10 p-4">
-      {/* Background decoration */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-100/40 blur-[120px] rounded-full" />
         <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-indigo-100/40 blur-[120px] rounded-full" />
       </div>
 
       <div className="w-full max-w-[480px] relative z-20">
-        {/* Login Form Card */}
         <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 p-8 sm:p-12 relative overflow-hidden">
-          {/* Back Button */}
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors text-sm font-bold group mb-10"
@@ -66,7 +58,6 @@ const Login = () => {
           </Link>
 
           <div className="w-full space-y-8 relative">
-            {/* Header */}
             <div className="space-y-4 text-center">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -89,93 +80,69 @@ const Login = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="text-slate-600 text-lg font-medium"
+                className="text-slate-500 text-sm leading-relaxed"
               >
-                Log in to your 247GBS dashboard.
+                Sign in with your MCOM Central Hub business account to manage
+                your rewards programme.
               </motion.p>
             </div>
 
-            {/* Form */}
-            <motion.form
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-bold flex items-center gap-3"
-                >
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  {error}
-                </motion.div>
-              )}
-
-              <div className="space-y-4">
-                <div className="relative group">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email Address"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-12 py-4 text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all duration-300"
-                  />
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                </div>
-
-                <div className="relative group">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-12 py-4 text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all duration-300"
-                  />
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors focus:outline-none"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input type="checkbox" className="w-4 h-4 rounded border-slate-300 bg-white text-blue-600 focus:ring-blue-500/20 transition-all" />
-                  <span className="text-slate-600 font-medium group-hover:text-slate-900 transition-colors">Remember me</span>
-                </label>
-                <button type="button" className="text-blue-600 hover:text-blue-700 font-bold transition-colors">
-                  Forgot Password?
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isPending}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            {errorMessage && (
+              <div
+                role="alert"
+                className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700"
               >
-                {isPending ? (
+                <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <a
+                href="/api/auth/sso/start"
+                onClick={() => setIsRedirecting(true)}
+                aria-disabled={isRedirecting}
+                className={`w-full inline-flex items-center justify-center gap-3 rounded-2xl bg-blue-600 px-6 py-4 text-white font-bold shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-blue-600/30 ${
+                  isRedirecting ? 'pointer-events-none opacity-80' : ''
+                }`}
+              >
+                {isRedirecting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Authenticating...
+                    Connecting to Central Hub...
                   </>
                 ) : (
-                  'Sign In'
+                  <>
+                    <Building2 className="w-5 h-5" />
+                    Login with MCOM Central Hub
+                  </>
                 )}
-              </button>
-            </motion.form>
-          </div>
-        </div>
+              </a>
 
-        {/* Footer info */}
-        <div className="mt-8 text-center w-full text-xs text-slate-400 font-bold uppercase tracking-widest">
-          &copy; 2026 247GBS Inc. All rights reserved.
+              <div className="flex items-center gap-2 justify-center text-xs text-slate-400">
+                <ShieldCheck className="w-4 h-4" />
+                <span>
+                  Authentication and access are managed by MCOM Central Hub.
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 text-center text-xs text-slate-400 space-y-2">
+              <p>
+                Staff and customer sign-in is still available from the campaign
+                and staff portals.
+              </p>
+              <p>
+                Need help?{' '}
+                <Link
+                  href="/support"
+                  className="font-semibold text-blue-600 hover:underline"
+                >
+                  Contact support
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

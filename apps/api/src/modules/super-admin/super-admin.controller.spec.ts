@@ -1,11 +1,12 @@
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SuperAdminController } from './super-admin.controller';
-import { UserService } from '../user/user.service';
-import { BusinessService } from '../business/business.service';
-import { StaffService } from '../staff/staff.service';
-import { AnalyticsService } from '../analytics/analytics.service';
-import { CampaignService } from '../campaign/campaign.service';
-import { Role } from '../../core/enums/roles';
+import { SuperAdminController } from './super-admin.controller.js';
+import { UserService } from '../user/user.service.js';
+import { BusinessService } from '../business/business.service.js';
+import { StaffService } from '../staff/staff.service.js';
+import { AnalyticsService } from '../analytics/analytics.service.js';
+import { CampaignService } from '../campaign/campaign.service.js';
+import { Role } from '../../core/enums/roles.js';
 
 describe('SuperAdminController', () => {
   let controller: SuperAdminController;

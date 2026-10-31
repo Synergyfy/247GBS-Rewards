@@ -1,13 +1,14 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
+import type { Relation } from 'typeorm';
 import { Column, Entity, OneToOne } from 'typeorm';
-import { Business } from './business.entity';
+import { Business } from './business.entity.js';
 
 @Entity('Socials')
 export class Social extends AbstractBaseEntity {
   @OneToOne(() => Business, (business) => business.socials, {
     onDelete: 'CASCADE',
   })
-  business: Business;
+  business: Relation<Business>;
   @Column({ default: 'Check out our social media' })
   socialText: string;
   @Column({ nullable: true })

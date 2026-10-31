@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Season } from './entities/season.entity';
-import { CreateSeasonDto } from './dto/create-season.dto';
-import { UpdateSeasonDto } from './dto/update-season.dto';
-import { BusinessService } from '../business/business.service';
+import { Season } from './entities/season.entity.js';
+import { CreateSeasonDto } from './dto/create-season.dto.js';
+import { UpdateSeasonDto } from './dto/update-season.dto.js';
+import { BusinessService } from '../business/business.service.js';
 
 @Injectable()
 export class SeasonService {
@@ -40,7 +40,9 @@ export class SeasonService {
   async findOne(id: string) {
     const season = await this.seasonRepository.findOne({
       where: { id },
-      relations: ['business'],
+      relations: {
+  business: true,
+},
     });
 
     if (!season) {

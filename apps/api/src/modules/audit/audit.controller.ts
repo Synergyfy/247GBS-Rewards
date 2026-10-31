@@ -8,14 +8,14 @@ import {
   Delete,
   Req,
 } from '@nestjs/common';
-import { AuditService } from './audit.service';
+import { AuditService } from './audit.service.js';
 import {
   CreateAuditDto,
   CreateAuditPaymentHistoryDto,
-} from './dto/create-audit.dto';
-import { UpdateAuditDto } from './dto/update-audit.dto';
-import { UserService } from '../user/user.service';
-import { UserDoesNotExistException } from '../../httpErrors/userErrors';
+} from './dto/create-audit.dto.js';
+import { UpdateAuditDto } from './dto/update-audit.dto.js';
+import { UserService } from '../user/user.service.js';
+import { UserDoesNotExistException } from '../../httpErrors/userErrors.js';
 import {
   ApiTags,
   ApiOperation,

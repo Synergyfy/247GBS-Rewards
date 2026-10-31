@@ -1,27 +1,21 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
-import { Address } from './address.entity';
-import { User } from '../../../modules/user/entities/user.entity';
-import { Social } from './socials.entity';
-import { Link } from './link.entity';
-import { Segment } from '../../../modules/segment/entities/segment.entity';
-import { Staff } from '../../../modules/staff/entities/staff.entity';
-import { Campaign } from '../../../modules/campaign/entities/campaign.entity';
-import { Season } from '../../campaign/entities/season.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
+import type { Relation } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Address } from './address.entity.js';
+import { User } from '../../../modules/user/entities/user.entity.js';
+import { Social } from './socials.entity.js';
+import { Link } from './link.entity.js';
+import { Segment } from '../../../modules/segment/entities/segment.entity.js';
+import { Staff } from '../../../modules/staff/entities/staff.entity.js';
+import { Campaign } from '../../../modules/campaign/entities/campaign.entity.js';
+import { Season } from '../../campaign/entities/season.entity.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('Business')
 export class Business extends AbstractBaseEntity {
   @ManyToOne(() => User, (user) => user.businesses)
   @JoinColumn()
-  user: User;
+  user: Relation<User>;
 
   @ApiProperty({ example: 'My Business', description: 'The name of the business' })
   @Column()
@@ -46,11 +40,11 @@ export class Business extends AbstractBaseEntity {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  address: Address;
+  address: Relation<Address>;
 
   @OneToOne(() => Social, (social) => social.business, { cascade: true })
   @JoinColumn()
-  socials: Social;
+  socials: Relation<Social>;
 
   @OneToMany(() => Link, (link) => link.business, { cascade: true })
   links: Link[];

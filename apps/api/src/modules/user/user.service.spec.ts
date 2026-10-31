@@ -1,8 +1,9 @@
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { UserService } from './user.service.js';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { Role } from '../../core/enums/roles';
+import { User } from './entities/user.entity.js';
+import { Role } from '../../core/enums/roles.js';
 
 describe('UserService', () => {
   let service: UserService;

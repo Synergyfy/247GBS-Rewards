@@ -10,21 +10,21 @@ import {
   BadRequestException,
   Query,
 } from '@nestjs/common';
-import { CampaignService } from './campaign.service';
-import { CampaignPayload, CreateCampaignDto } from './dto/create-campaign.dto';
-import { UpdateCampaignDto } from './dto/update-campaign.dto';
-import { BusinessService } from '../business/business.service';
-import { RewardService } from '../reward/reward.service';
-import { BusinessDoesNotExistException } from '../../httpErrors/bussiness.error';
-import { RewardDoesntExistException } from '../../httpErrors/reward.error';
-import { CampaignDoesntExistException } from '../../httpErrors/campaign.error';
-import { SkipAuth } from '../../core/decorators/skipAuth.decorator';
-import { Reward } from '../reward/entities/reward.entity';
-import { CreateSeasonDto } from './dto/create-season.dto';
-import { SeasonService } from './season.service';
-import { UpdateSeasonDto } from './dto/update-season.dto';
-import { CampaignType } from '../../core/enums/campaignType';
-import { Season } from './entities/season.entity';
+import { CampaignService } from './campaign.service.js';
+import { CampaignPayload, CreateCampaignDto } from './dto/create-campaign.dto.js';
+import { UpdateCampaignDto } from './dto/update-campaign.dto.js';
+import { BusinessService } from '../business/business.service.js';
+import { RewardService } from '../reward/reward.service.js';
+import { BusinessDoesNotExistException } from '../../httpErrors/bussiness.error.js';
+import { RewardDoesntExistException } from '../../httpErrors/reward.error.js';
+import { CampaignDoesntExistException } from '../../httpErrors/campaign.error.js';
+import { SkipAuth } from '../../core/decorators/skipAuth.decorator.js';
+import { Reward } from '../reward/entities/reward.entity.js';
+import { CreateSeasonDto } from './dto/create-season.dto.js';
+import { SeasonService } from './season.service.js';
+import { UpdateSeasonDto } from './dto/update-season.dto.js';
+import { CampaignType } from '../../core/enums/campaignType.js';
+import { Season } from './entities/season.entity.js';
 import {
   ApiTags,
   ApiOperation,
@@ -32,12 +32,12 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
-import { Campaign } from './entities/campaign.entity';
+import { Campaign } from './entities/campaign.entity.js';
 import { 
   CampaignStatsResponseDto, 
   CampaignRedemptionsResponseDto,
   CampaignCustomersResponseDto 
-} from './dto/campaign-stats.dto';
+} from './dto/campaign-stats.dto.js';
 
 @ApiTags('campaign')
 @Controller('campaign')

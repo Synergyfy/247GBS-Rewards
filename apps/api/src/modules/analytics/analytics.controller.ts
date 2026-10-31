@@ -1,11 +1,11 @@
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
-import { AnalyticsService } from './analytics.service';
-import { AuthGuard } from '../../core/guards/auth.guard';
+import { AnalyticsService } from './analytics.service.js';
+import { AuthGuard } from '../../core/guards/auth.guard.js';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import {
   OverallAnalyticsResponseDto,
   CampaignAnalyticsResponseDto,
-} from './dto/analytics-response.dto';
+} from './dto/analytics-response.dto.js';
 
 @ApiTags('analytics')
 @ApiBearerAuth()

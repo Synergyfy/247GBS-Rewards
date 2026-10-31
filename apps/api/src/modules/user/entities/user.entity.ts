@@ -1,11 +1,11 @@
-import { Business } from '../../../modules/business/entities/business.entity';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Business } from '../../../modules/business/entities/business.entity.js';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity, OneToMany } from 'typeorm';
-import { SignupSource } from '../../../core/enums/signupSource';
-import { Role } from '../../../core/enums/roles';
-import { Audit } from '../../audit/entities/audit.entity';
-import { AuditBalance } from '../../audit/entities/auditBalance.entity';
-import { AuditPaymentHistory } from '../../audit/entities/payment.entity';
+import { SignupSource } from '../../../core/enums/signupSource.js';
+import { Role } from '../../../core/enums/roles.js';
+import { Audit } from '../../audit/entities/audit.entity.js';
+import { AuditBalance } from '../../audit/entities/auditBalance.entity.js';
+import { AuditPaymentHistory } from '../../audit/entities/payment.entity.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('Users')

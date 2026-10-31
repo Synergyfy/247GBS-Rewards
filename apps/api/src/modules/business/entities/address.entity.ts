@@ -1,6 +1,7 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
+import type { Relation } from 'typeorm';
 import { Column, Entity, OneToOne } from 'typeorm';
-import { Business } from './business.entity';
+import { Business } from './business.entity.js';
 
 @Entity('Address')
 export class Address extends AbstractBaseEntity {
@@ -15,5 +16,5 @@ export class Address extends AbstractBaseEntity {
   @OneToOne(() => Business, (business) => business.address, {
     onDelete: 'CASCADE',
   })
-  business: Business;
+  business: Relation<Business>;
 }

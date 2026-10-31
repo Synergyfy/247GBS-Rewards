@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CustomersReward } from '../entities/customerRewards.entity';
+import { CustomersReward } from '../entities/customerRewards.entity.js';
 
 export class RewardStatsResponseDto {
   @ApiProperty({ example: 150, description: 'Total number of times this reward has been redeemed' })

@@ -9,15 +9,15 @@ import {
   Req,
   Query,
 } from '@nestjs/common';
-import { RewardService } from './reward.service';
-import { CreateRewardDto } from './dto/create-reward.dto';
-import { UserService } from '../user/user.service';
-import { UpdateRewardDto } from './dto/update-reward.dto';
+import { RewardService } from './reward.service.js';
+import { CreateRewardDto } from './dto/create-reward.dto.js';
+import { UserService } from '../user/user.service.js';
+import { UpdateRewardDto } from './dto/update-reward.dto.js';
 import {
   CodeDoesntExistException,
   InsufficientBalanceException,
   RewardDoesntExistException,
-} from '../../httpErrors/reward.error';
+} from '../../httpErrors/reward.error.js';
 import {
   CreateCustomerNumberDto,
   CreateGenerateCodeDto,
@@ -26,14 +26,14 @@ import {
   ValidateCustomerRedeemNumberDto,
   verifyCodeDto,
   CreateBulkPointCodesDto,
-} from './dto/create-gen-code.dto';
-import { StaffService } from '../staff/staff.service';
-import { StaffDoesntExistException } from '../../httpErrors/staff.error';
-import { CampaignService } from '../campaign/campaign.service';
-import { CampaignDoesntExistException } from '../../httpErrors/campaign.error';
-import { CustomerService } from '../customer/customer.service';
-import { UserDoesNotExistException } from '../../httpErrors/userErrors';
-import { CampaignInactiveException } from '../../httpErrors/campaign-inactive.error';
+} from './dto/create-gen-code.dto.js';
+import { StaffService } from '../staff/staff.service.js';
+import { StaffDoesntExistException } from '../../httpErrors/staff.error.js';
+import { CampaignService } from '../campaign/campaign.service.js';
+import { CampaignDoesntExistException } from '../../httpErrors/campaign.error.js';
+import { CustomerService } from '../customer/customer.service.js';
+import { UserDoesNotExistException } from '../../httpErrors/userErrors.js';
+import { CampaignInactiveException } from '../../httpErrors/campaign-inactive.error.js';
 import {
   ApiTags,
   ApiOperation,
@@ -41,8 +41,8 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import { RedeemRewardDto } from './dto/redeem-reward.dto';
-import { RewardStatsResponseDto, RewardRedemptionsResponseDto } from './dto/reward-stats.dto';
+import { RedeemRewardDto } from './dto/redeem-reward.dto.js';
+import { RewardStatsResponseDto, RewardRedemptionsResponseDto } from './dto/reward-stats.dto.js';
 
 @ApiTags('Reward')
 @ApiBearerAuth()

@@ -45,7 +45,7 @@ export default function CampaignsPage() {
   const processedCampaigns = useMemo(() => {
     if (!campaigns) return [];
 
-    let filtered = campaigns.filter(campaign =>
+    const filtered = campaigns.filter(campaign =>
       campaign.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
       campaign.business?.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
     );

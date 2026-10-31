@@ -1,16 +1,16 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
-import { CampaignPayload } from './dto/create-campaign.dto';
-import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { CampaignPayload } from './dto/create-campaign.dto.js';
+import { UpdateCampaignDto } from './dto/update-campaign.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Campaign } from './entities/campaign.entity';
+import { Campaign } from './entities/campaign.entity.js';
 import { Repository } from 'typeorm';
-import { ErrorCreatingCampaign, CampaignDoesntExistException } from '../../httpErrors/campaign.error';
-import { formatString, generateRandomCharsFromUUID } from '../../core/helpers/uniquecode';
-import { Reward } from '../reward/entities/reward.entity';
-import { CampaignType } from '../../core/enums/campaignType';
-import { CustomersReward } from '../reward/entities/customerRewards.entity';
-import { Customer } from '../customer/entities/customer.entity';
-import { CustomerPoint } from '../reward/entities/customerPoints.entity';
+import { ErrorCreatingCampaign, CampaignDoesntExistException } from '../../httpErrors/campaign.error.js';
+import { formatString, generateRandomCharsFromUUID } from '../../core/helpers/uniquecode.js';
+import { Reward } from '../reward/entities/reward.entity.js';
+import { CampaignType } from '../../core/enums/campaignType.js';
+import { CustomersReward } from '../reward/entities/customerRewards.entity.js';
+import { Customer } from '../customer/entities/customer.entity.js';
+import { CustomerPoint } from '../reward/entities/customerPoints.entity.js';
 
 @Injectable()
 export class CampaignService {
@@ -47,21 +47,33 @@ export class CampaignService {
 
     const campaigns = await this.campaignRepository.find({
       where: whereCondition,
-      relations: ['business', 'rewards', 'season'],
+      relations: {
+  business: true,
+  rewards: true,
+  season: true,
+},
     });
     return campaigns;
   }
 
   async findAll() {
     return await this.campaignRepository.find({
-      relations: ['business', 'rewards', 'season'],
+      relations: {
+  business: true,
+  rewards: true,
+  season: true,
+},
     });
   }
 
   async findOneByCode(code: string) {
     const campaign = await this.campaignRepository.findOne({
       where: { uniqueCode: code },
-      relations: ['rewards', 'business', 'season'],
+      relations: {
+  rewards: true,
+  business: true,
+  season: true,
+},
     });
     return campaign;
   }
@@ -69,7 +81,11 @@ export class CampaignService {
   async findOne(id: string) {
     const campaign = await this.campaignRepository.findOne({
       where: { id },
-      relations: ['rewards', 'business', 'season'],
+      relations: {
+  rewards: true,
+  business: true,
+  season: true,
+},
     });
     return campaign;
   }
@@ -123,7 +139,11 @@ export class CampaignService {
   async getCampaignStats(id: string, userId: string) {
     const campaign = await this.campaignRepository.findOne({
       where: { id },
-      relations: ['business', 'business.user'],
+      relations: {
+  business: {
+    user: true,
+  },
+},
     });
 
     if (!campaign) throw new CampaignDoesntExistException();
@@ -159,7 +179,11 @@ export class CampaignService {
   ) {
     const campaign = await this.campaignRepository.findOne({
       where: { id },
-      relations: ['business', 'business.user'],
+      relations: {
+  business: {
+    user: true,
+  },
+},
     });
 
     if (!campaign) throw new CampaignDoesntExistException();
@@ -214,7 +238,11 @@ export class CampaignService {
   ) {
     const campaign = await this.campaignRepository.findOne({
       where: { id },
-      relations: ['business', 'business.user'],
+      relations: {
+  business: {
+    user: true,
+  },
+},
     });
 
     if (!campaign) throw new CampaignDoesntExistException();
@@ -225,7 +253,10 @@ export class CampaignService {
 
     const [data, total] = await this.customerRewardRepo.findAndCount({
       where: { campaign: { id } },
-      relations: ['customer', 'reward'],
+      relations: {
+  customer: true,
+  reward: true,
+},
       take: limit,
       skip: (page - 1) * limit,
       order: { created_at: 'DESC' },

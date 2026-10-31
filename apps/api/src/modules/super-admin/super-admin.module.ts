@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { SuperAdminController } from './super-admin.controller';
-import { UserModule } from '../user/user.module';
-import { BusinessModule } from '../business/business.module';
-import { StaffModule } from '../staff/staff.module';
-import { AnalyticsModule } from '../analytics/analytics.module';
-import { CampaignModule } from '../campaign/campaign.module';
+import { SuperAdminController } from './super-admin.controller.js';
+import { UserModule } from '../user/user.module.js';
+import { BusinessModule } from '../business/business.module.js';
+import { StaffModule } from '../staff/staff.module.js';
+import { AnalyticsModule } from '../analytics/analytics.module.js';
+import { CampaignModule } from '../campaign/campaign.module.js';
 
 @Module({
   imports: [UserModule, BusinessModule, StaffModule, AnalyticsModule, CampaignModule],

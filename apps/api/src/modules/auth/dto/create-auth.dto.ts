@@ -1,5 +1,5 @@
-import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAuthDto {
   @ApiProperty({
@@ -48,4 +48,20 @@ export class SSOLoginDto {
   @IsString()
   @IsNotEmpty()
   ssoId: string;
+}
+
+export class McomSsoLoginDto {
+  @ApiProperty({
+    description: 'MCOM Central Hub SSO access token',
+  })
+  @IsString()
+  @IsNotEmpty()
+  accessToken: string;
+
+  @ApiPropertyOptional({
+    description: 'MCOM Central Hub SSO refresh token',
+  })
+  @IsString()
+  @IsOptional()
+  refreshToken?: string;
 }

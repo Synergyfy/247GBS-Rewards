@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CreateBusinessDto } from './dto/create-business.dto';
-import { UpdateBusinessDto } from './dto/update-business.dto';
+import { CreateBusinessDto } from './dto/create-business.dto.js';
+import { UpdateBusinessDto } from './dto/update-business.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Business } from './entities/business.entity';
-import { Address } from './entities/address.entity';
-import { Social } from './entities/socials.entity';
-import { Link } from './entities/link.entity';
-import { User } from '../user/entities/user.entity';
+import { Business } from './entities/business.entity.js';
+import { Address } from './entities/address.entity.js';
+import { Social } from './entities/socials.entity.js';
+import { Link } from './entities/link.entity.js';
+import { User } from '../user/entities/user.entity.js';
 
 @Injectable()
 export class BusinessService {
@@ -49,7 +49,11 @@ export class BusinessService {
   async findAllBusinessByUser(id: string) {
     const businesses = await this.businessRepository.find({
       where: { user: { id } },
-      relations: ['address', 'socials', 'links'],
+      relations: {
+  address: true,
+  socials: true,
+  links: true,
+},
     });
     return businesses;
   }
@@ -59,9 +63,14 @@ export class BusinessService {
   }
 
   async findOne(id: string) {
-    const business = await this.businessRepository.findOne({ 
+    const business = await this.businessRepository.findOne({
       where: { id },
-      relations: ['user', 'address', 'socials', 'links'] 
+      relations: {
+  user: true,
+  address: true,
+  socials: true,
+  links: true,
+}
     });
     return business;
   }
@@ -82,7 +91,11 @@ export class BusinessService {
   async update(id: string, updateBusinessDto: UpdateBusinessDto, user: User) {
     const business = await this.businessRepository.findOne({
       where: { id },
-      relations: ['address', 'socials', 'links'],
+      relations: {
+  address: true,
+  socials: true,
+  links: true,
+},
     });
 
     if (!business) {

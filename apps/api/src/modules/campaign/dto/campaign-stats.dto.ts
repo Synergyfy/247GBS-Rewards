@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CustomersReward } from '../../reward/entities/customerRewards.entity';
-import { Customer } from '../../customer/entities/customer.entity';
+import { CustomersReward } from '../../reward/entities/customerRewards.entity.js';
+import { Customer } from '../../customer/entities/customer.entity.js';
 
 export class CampaignStatsResponseDto {
   @ApiProperty({ example: 300, description: 'Total number of redemptions in this campaign' })

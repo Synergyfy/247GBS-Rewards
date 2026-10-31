@@ -1,11 +1,12 @@
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RewardController } from './reward.controller';
-import { RewardService } from './reward.service';
-import { UserService } from '../user/user.service';
-import { StaffService } from '../staff/staff.service';
-import { CampaignService } from '../campaign/campaign.service';
-import { CustomerService } from '../customer/customer.service';
-import { CreateBulkPointCodesDto } from './dto/create-gen-code.dto';
+import { RewardController } from './reward.controller.js';
+import { RewardService } from './reward.service.js';
+import { UserService } from '../user/user.service.js';
+import { StaffService } from '../staff/staff.service.js';
+import { CampaignService } from '../campaign/campaign.service.js';
+import { CustomerService } from '../customer/customer.service.js';
+import { CreateBulkPointCodesDto } from './dto/create-gen-code.dto.js';
 import { NotFoundException } from '@nestjs/common';
 
 describe('RewardController', () => {

@@ -1,20 +1,22 @@
 import { Controller, Post, Body, Req } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth.service.js';
 import {
   CreateAuthDto,
   CreateCustomerAuthDto,
+  McomSsoLoginDto,
   SSOLoginDto,
-} from './dto/create-auth.dto';
-import { UserService } from '../user/user.service';
+} from './dto/create-auth.dto.js';
+import { McomSsoService } from './mcom-sso.service.js';
+import { UserService } from '../user/user.service.js';
 import {
   PasswordFieldsDontMatch,
   SSOEntryDoesNotExistException,
   UserDoesNotExistException,
-} from '../../httpErrors/userErrors';
-import { comparePasswords } from '../../bcypt/bcrypt';
-import { SkipAuth } from '../../core/decorators/skipAuth.decorator';
-import { CustomerService } from '../customer/customer.service';
-import { StaffService } from '../staff/staff.service';
+} from '../../httpErrors/userErrors.js';
+import { comparePasswords } from '../../bcypt/bcrypt.js';
+import { SkipAuth } from '../../core/decorators/skipAuth.decorator.js';
+import { CustomerService } from '../customer/customer.service.js';
+import { StaffService } from '../staff/staff.service.js';
 import {
   ApiTags,
   ApiOperation,
@@ -31,6 +33,7 @@ export class AuthController {
     private readonly userService: UserService,
     private readonly customerService: CustomerService,
     private readonly staffService: StaffService,
+    private readonly mcomSsoService: McomSsoService,
   ) {}
 
   @SkipAuth()
@@ -106,6 +109,27 @@ export class AuthController {
     const payload = { sub: user.id, email: user.email };
 
     return await this.authService.login(payload);
+  }
+
+  @SkipAuth()
+  @Post('/mcom-sso')
+  @ApiOperation({ summary: 'Login via MCOM Central Hub SSO' })
+  @ApiResponse({ status: 201, description: 'Central Hub SSO login successful.' })
+  @ApiResponse({ status: 403, description: 'White-label access was not granted.' })
+  @ApiResponse({ status: 401, description: 'Invalid Central Hub session.' })
+  @ApiBody({ type: McomSsoLoginDto })
+  async loginWithMcomSso(@Body() dto: McomSsoLoginDto) {
+    const user = await this.mcomSsoService.authenticate(dto.accessToken);
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const token = await this.authService.login(payload);
+
+    return {
+      ...token,
+      name: user.fullName,
+      email: user.email,
+      role: user.role,
+    };
   }
 
   @Post('/sso-business')

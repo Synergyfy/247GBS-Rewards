@@ -1,6 +1,7 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
+import type { Relation } from 'typeorm';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Business } from './business.entity';
+import { Business } from './business.entity.js';
 
 @Entity('Links')
 export class Link extends AbstractBaseEntity {
@@ -8,7 +9,7 @@ export class Link extends AbstractBaseEntity {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  business: Business;
+  business: Relation<Business>;
   @Column()
   url: string;
   @Column()

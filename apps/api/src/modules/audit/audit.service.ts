@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuditDto } from './dto/create-audit.dto';
-import { UpdateAuditDto } from './dto/update-audit.dto';
+import { CreateAuditDto } from './dto/create-audit.dto.js';
+import { UpdateAuditDto } from './dto/update-audit.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Audit } from './entities/audit.entity';
+import { Audit } from './entities/audit.entity.js';
 import { Repository } from 'typeorm';
-import { User } from '../user/entities/user.entity';
-import { AuditPaymentHistory } from './entities/payment.entity';
-import { PaymentStatus, PaymentType, Seasons } from './types/payment.enum';
+import { User } from '../user/entities/user.entity.js';
+import { AuditPaymentHistory } from './entities/payment.entity.js';
+import { PaymentStatus, PaymentType, Seasons } from './types/payment.enum.js';
 
 @Injectable()
 export class AuditService {

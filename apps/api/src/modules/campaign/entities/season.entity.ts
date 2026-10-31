@@ -1,7 +1,8 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
+import type { Relation } from 'typeorm';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Business } from '../../business/entities/business.entity';
-import { Campaign } from './campaign.entity';
+import { Business } from '../../business/entities/business.entity.js';
+import { Campaign } from './campaign.entity.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('Season')
@@ -20,7 +21,7 @@ export class Season extends AbstractBaseEntity {
 
   @ManyToOne(() => Business, (business) => business.id, { onDelete: 'CASCADE' })
   @JoinColumn()
-  business: Business;
+  business: Relation<Business>;
 
   @OneToMany(() => Campaign, (campaign) => campaign.season)
   campaigns: Campaign[];

@@ -1,5 +1,6 @@
-import { AbstractBaseEntity } from '../../../entities/base.entity';
-import { Business } from '../../business/entities/business.entity';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
+import type { Relation } from 'typeorm';
+import { Business } from '../../business/entities/business.entity.js';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -9,7 +10,7 @@ export class Staff extends AbstractBaseEntity {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  business: Business;
+  business: Relation<Business>;
 
   @ApiProperty({ example: 'Staff Name', description: 'The name of the staff member' })
   @Column()
