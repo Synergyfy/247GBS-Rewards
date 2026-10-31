@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
+import { getPublicOrigin } from './lib/public-url';
 // import { getCookieValue } from './services/getCookieValue';
 
 export default function proxy(req: NextRequest) {
@@ -9,7 +10,7 @@ export default function proxy(req: NextRequest) {
     const token = req.cookies.get('token')?.value;
 
     if (!token) {
-      return NextResponse.redirect(new URL('/signin', req.url));
+      return NextResponse.redirect(new URL('/signin', getPublicOrigin(req)));
     }
   }
 
@@ -38,7 +39,7 @@ export default function proxy(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
     const token = req.cookies.get('token')?.value;
     if (!token) {
-      return NextResponse.redirect(new URL('/landing', req.url));
+      return NextResponse.redirect(new URL('/landing', getPublicOrigin(req)));
     }
   }
 
