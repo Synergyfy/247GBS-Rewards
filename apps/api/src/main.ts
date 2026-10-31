@@ -28,6 +28,7 @@ async function configureApp(app: any) {
       'https://loyaltyprogramm.netlify.app/',
       'https://247gbs-rewards.netlify.app/',
       'https://247gbsrewards.vercel.app',
+      'https://247gbsrewards.centralhubsolution.com',
     ],
     methods: 'GET, HEAD, PUT, PATCH, DELETE, OPTIONS',
     credentials: true,
@@ -62,9 +63,11 @@ const entryCandidates = entryPath
   ? [pathToFileURL(entryPath).href, pathToFileURL(`${entryPath}.js`).href]
   : [];
 const isMainModule =
-  entryCandidates.includes(import.meta.url) && !process.env.VERCEL;
+  entryCandidates.includes(import.meta.url) ||
+  !!process.env.pm_id ||
+  !!process.env.PM2_HOME;
 
-if (isMainModule) {
+if (isMainModule && !process.env.VERCEL) {
   async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -100,6 +103,7 @@ const ALLOWED_ORIGINS = [
   'https://loyaltyprogramm.netlify.app',
   'https://247gbs-rewards.netlify.app',
   'https://247gbsrewards.vercel.app',
+  'https://247gbsrewards.centralhubsolution.com',
 ];
 
 function getCorsHeaders(origin: string | undefined) {

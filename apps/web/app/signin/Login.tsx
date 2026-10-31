@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
+import LocalLoginForm from './LocalLoginForm';
 
 const ERROR_MESSAGES: Record<string, string> = {
   central_denied:
@@ -34,6 +35,8 @@ const Login = () => {
   const searchParams = useSearchParams();
   const ssoError = searchParams.get('sso_error');
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const localLoginEnabled =
+    process.env.NEXT_PUBLIC_LOCAL_LOGIN_ENABLED === 'true';
 
   const errorMessage = ssoError
     ? ERROR_MESSAGES[ssoError] ||
@@ -125,6 +128,17 @@ const Login = () => {
                   Authentication and access are managed by MCOM Central Hub.
                 </span>
               </div>
+
+              {localLoginEnabled && (
+                <div className="space-y-4 pt-2">
+                  <div className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    <div className="h-px flex-1 bg-slate-100" />
+                    <span>or sign in with email</span>
+                    <div className="h-px flex-1 bg-slate-100" />
+                  </div>
+                  <LocalLoginForm />
+                </div>
+              )}
             </div>
 
             <div className="pt-2 text-center text-xs text-slate-400 space-y-2">
