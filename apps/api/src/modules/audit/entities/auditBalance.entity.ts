@@ -1,13 +1,14 @@
-import { User } from '../../user/entities/user.entity';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { User } from '../../user/entities/user.entity.js';
+import type { Relation } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { BalanceType } from '../types/payment.enum';
-import { Audit } from './audit.entity';
+import { BalanceType } from '../types/payment.enum.js';
+import { Audit } from './audit.entity.js';
 
 @Entity('Audits Balance')
 export class AuditBalance extends AbstractBaseEntity {
   @ManyToOne(() => User, (user) => user.audits, { onDelete: 'CASCADE' })
-  user: User;
+  user: Relation<User>;
 
   @Column({ type: 'enum', enum: BalanceType })
   type: BalanceType;
@@ -28,5 +29,5 @@ export class AuditBalance extends AbstractBaseEntity {
     onDelete: 'CASCADE',
     nullable: true,
   })
-  audit: Audit; // Optional relationship to Audit entity
+  audit: Relation<Audit>; // Optional relationship to Audit entity
 }

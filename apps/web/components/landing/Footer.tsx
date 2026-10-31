@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, MapPin, Phone, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Mail, MapPin, Phone, ArrowUpRight, Sparkles } from 'lucide-react';
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter } from 'react-icons/fa6';
 
 const footerLinks = {
   Product: [
@@ -86,7 +87,7 @@ const Footer = () => {
               tools, and support — everything to grow your business.
             </p>
             <div className="flex gap-3">
-              {[Twitter, Facebook, Instagram, Linkedin].map((Icon, idx) => (
+              {[FaXTwitter, FaFacebookF, FaInstagram, FaLinkedinIn].map((Icon, idx) => (
                 <motion.a
                   key={idx}
                   href="#"

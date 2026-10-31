@@ -1,26 +1,24 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
-import { CreateRewardDto } from './dto/create-reward.dto';
-import { UpdateRewardDto } from './dto/update-reward.dto';
-import { User } from '../user/entities/user.entity';
+import { CreateRewardDto } from './dto/create-reward.dto.js';
+import { UpdateRewardDto } from './dto/update-reward.dto.js';
+import { User } from '../user/entities/user.entity.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Reward } from './entities/reward.entity';
+import { Reward } from './entities/reward.entity.js';
 import { In, MoreThan, Repository } from 'typeorm';
-import { Campaign } from '../campaign/entities/campaign.entity';
-import { Staff } from '../staff/entities/staff.entity';
-import { CodeGeneratedByStaffs } from './entities/generateCode.entity';
-import { calculateExpirationDate } from '../../core/helpers/expiryDate';
-import { generateRandomCode } from '../../core/helpers/uniquecode';
-import { CustomerPoint } from './entities/customerPoints.entity';
-import { Customer } from '../customer/entities/customer.entity';
-import { CustomerNumber } from './entities/customerNumber.entity';
-import { GeneratedRewardCode } from './entities/generateRewardCode.entity';
-import { CustomersReward } from './entities/customerRewards.entity';
-import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity';
-import { RewardMethod } from '../../core/enums/rewardMethod';
-import { CampaignService } from '../campaign/campaign.service';
-import { VoucherService } from '../voucher/voucher.service';
-import { VoucherType } from '../voucher/entities/voucher.entity';
-import { RewardDoesntExistException } from '../../httpErrors/reward.error';
+import { Campaign } from '../campaign/entities/campaign.entity.js';
+import { Staff } from '../staff/entities/staff.entity.js';
+import { CodeGeneratedByStaffs } from './entities/generateCode.entity.js';
+import { calculateExpirationDate } from '../../core/helpers/expiryDate.js';
+import { generateRandomCode } from '../../core/helpers/uniquecode.js';
+import { CustomerPoint } from './entities/customerPoints.entity.js';
+import { Customer } from '../customer/entities/customer.entity.js';
+import { CustomerNumber } from './entities/customerNumber.entity.js';
+import { GeneratedRewardCode } from './entities/generateRewardCode.entity.js';
+import { CustomersReward } from './entities/customerRewards.entity.js';
+import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity.js';
+import { RewardMethod } from '../../core/enums/rewardMethod.js';
+import { CampaignService } from '../campaign/campaign.service.js';
+import { RewardDoesntExistException } from '../../httpErrors/reward.error.js';
 
 @Injectable()
 export class RewardService {
@@ -42,7 +40,6 @@ export class RewardService {
     @InjectRepository(Customer)
     private customerRepo: Repository<Customer>,
     private readonly campaignService: CampaignService,
-    private readonly voucherService: VoucherService,
   ) {}
 
   async create(createRewardDto: CreateRewardDto, user: User) {
@@ -216,7 +213,10 @@ export class RewardService {
   ) {
     const customerNumber = await this.customerNumberRepo.findOne({
       where: { code },
-      relations: ['campaign', 'customer'],
+      relations: {
+  campaign: true,
+  customer: true,
+},
     });
 
     if (!customerNumber) return false;
@@ -302,7 +302,12 @@ export class RewardService {
   ) {
     const customerNumber = await this.rewardCustomerNumberRepo.findOne({
       where: { code },
-      relations: ['campaign', 'campaign.rewards', 'customer'],
+      relations: {
+  campaign: {
+    rewards: true,
+  },
+  customer: true,
+},
     });
 
     if (!customerNumber) return false;
@@ -357,7 +362,9 @@ export class RewardService {
         campaign: { id: campaign.id },
         expiry: MoreThan(currentDate),
       },
-      relations: ['reward'],
+      relations: {
+  reward: true,
+},
     });
     if (!redeem) return false;
 
@@ -408,7 +415,9 @@ export class RewardService {
   async getCampaignRewardHistory(campaignId: string) {
     const rewards = await this.customerRewardRepo.find({
       where: { campaign: { id: campaignId } },
-      relations: ['reward'],
+      relations: {
+  reward: true,
+},
       order: { created_at: 'DESC' },
     });
 
@@ -418,7 +427,9 @@ export class RewardService {
   async getCustomerRewardHistory(campaignId: string, customerId: string) {
     const rewards = await this.customerRewardRepo.find({
       where: { customer: { id: customerId }, campaign: { id: campaignId } },
-      relations: ['reward'],
+      relations: {
+  reward: true,
+},
       order: { created_at: 'DESC' },
     });
 
@@ -434,7 +445,9 @@ export class RewardService {
 
     const reward = await this.customerRewardRepo.find({
       where: { campaign: { id: campaignId }, customer: { id: customerId } },
-      relations: ['reward'],
+      relations: {
+  reward: true,
+},
     });
 
     const totalRewards = reward.reduce(
@@ -472,29 +485,11 @@ export class RewardService {
 
     const description = 'Redeemed by customer (self-service).';
 
-    // Check if dynamic voucher generation is needed
-    let uniqueCode: string | null = null;
-    if (reward.type && reward.type !== 'STANDARD') {
-        try {
-            // Map reward type to VoucherType if they match directly
-            const voucher = await this.voucherService.generateSingle(
-                reward.type as VoucherType,
-                reward.config
-            );
-            uniqueCode = voucher.code;
-        } catch (error) {
-            // Log error but maybe fail redemption? 
-            // For now, let's fail redemption if provisioning fails.
-            return 'failed to provision reward';
-        }
-    }
-
     const customerReward = this.customerRewardRepo.create({
       campaign,
       customer,
       description,
       reward,
-      uniqueCode,
     });
 
     // Transactional consistency would be better here, but following existing pattern
@@ -509,7 +504,9 @@ export class RewardService {
   async getRewardStats(id: string, userId: string) {
     const reward = await this.rewardRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: {
+  user: true,
+},
     });
 
     if (!reward) throw new RewardDoesntExistException();
@@ -528,7 +525,9 @@ export class RewardService {
          totalCampaignCustomers = await this.customerRepo.count({ where: { campaign: { id: campaignId } } });
     } else {
         // Fallback if campaign relation isn't loaded, fetch reward with campaign
-        const r = await this.rewardRepository.findOne({ where: { id }, relations: ['campaign'] });
+        const r = await this.rewardRepository.findOne({ where: { id }, relations: {
+  campaign: true,
+} });
         if (r && r.campaign) {
              totalCampaignCustomers = await this.customerRepo.count({ where: { campaign: { id: r.campaign.id } } });
         }
@@ -570,7 +569,9 @@ export class RewardService {
   ) {
     const reward = await this.rewardRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: {
+  user: true,
+},
     });
 
     if (!reward) throw new RewardDoesntExistException();
@@ -581,7 +582,9 @@ export class RewardService {
 
     const [data, total] = await this.customerRewardRepo.findAndCount({
       where: { reward: { id } },
-      relations: ['customer'],
+      relations: {
+  customer: true,
+},
       take: limit,
       skip: (page - 1) * limit,
       order: { created_at: 'DESC' },

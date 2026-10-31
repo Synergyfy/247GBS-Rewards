@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CampaignService } from '../campaign/campaign.service';
-import { CustomerService } from '../customer/customer.service';
-import { RewardService } from '../reward/reward.service';
+import { CampaignService } from '../campaign/campaign.service.js';
+import { CustomerService } from '../customer/customer.service.js';
+import { RewardService } from '../reward/reward.service.js';
 
 @Injectable()
 export class AnalyticsService {
@@ -24,7 +24,7 @@ export class AnalyticsService {
   async getOverallAnalytics(userId: string) {
     const campaigns = await this.campaignService.findAllByUser(userId);
 
-    let totalCampaigns = campaigns.length;
+    const totalCampaigns = campaigns.length;
     let totalCustomers = 0;
     let totalPointsIssued = 0;
     let totalRewardsRedeemed = 0;

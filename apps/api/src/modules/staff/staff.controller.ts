@@ -17,13 +17,13 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { StaffService } from './staff.service';
-import { CreateStaffDto } from './dto/create-staff.dto';
-import { UpdateStaffDto } from './dto/update-staff.dto';
-import { BusinessService } from '../business/business.service';
-import { BusinessDoesNotExistException } from '../../httpErrors/bussiness.error';
-import { Staff } from './entities/staff.entity';
-import { StaffEmailException } from '../../httpErrors/staff.error';
+import { StaffService } from './staff.service.js';
+import { CreateStaffDto } from './dto/create-staff.dto.js';
+import { UpdateStaffDto } from './dto/update-staff.dto.js';
+import { BusinessService } from '../business/business.service.js';
+import { BusinessDoesNotExistException } from '../../httpErrors/bussiness.error.js';
+import { Staff } from './entities/staff.entity.js';
+import { StaffEmailException } from '../../httpErrors/staff.error.js';
 
 @ApiTags('staff')
 @ApiBearerAuth()

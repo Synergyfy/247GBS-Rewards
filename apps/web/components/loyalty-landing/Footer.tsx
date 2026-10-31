@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Facebook, Twitter, Instagram } from 'lucide-react';
+import { FaFacebookF, FaInstagram, FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   return (
@@ -20,9 +20,9 @@ const Footer = () => {
               Your gateway to exclusive rewards and experiences. Join the community today.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-purple-600 transition-colors"><Twitter size={20} /></a>
-              <a href="#" className="text-gray-400 hover:text-purple-600 transition-colors"><Facebook size={20} /></a>
-              <a href="#" className="text-gray-400 hover:text-purple-600 transition-colors"><Instagram size={20} /></a>
+              <a href="#" className="text-gray-400 hover:text-purple-600 transition-colors"><FaXTwitter size={20} /></a>
+              <a href="#" className="text-gray-400 hover:text-purple-600 transition-colors"><FaFacebookF size={20} /></a>
+              <a href="#" className="text-gray-400 hover:text-purple-600 transition-colors"><FaInstagram size={20} /></a>
             </div>
           </div>
 

@@ -1,8 +1,11 @@
 import { DataSource } from 'typeorm';
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -11,8 +14,8 @@ const dataSource = new DataSource({
   password: process.env.POSTGRES_PASSWORD || 'password',
   database: process.env.POSTGRES_NAME || 'dbname',
   host: process.env.POSTGRES_HOST || 'localhost',
-  entities: [path.resolve(__dirname, '..') + '/**/*.entity{.ts,.js}'],
-  migrations: [path.resolve(__dirname, 'migrations') + '/*{.ts,.js}'],
+  entities: [path.resolve(currentDir, '..') + '/**/*.entity{.ts,.js}'],
+  migrations: [path.resolve(currentDir, 'migrations') + '/*{.ts,.js}'],
   synchronize: false,
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });

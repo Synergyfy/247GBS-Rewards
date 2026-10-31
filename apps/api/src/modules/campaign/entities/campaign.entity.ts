@@ -1,17 +1,18 @@
-import { Business } from '../../../modules/business/entities/business.entity';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { Business } from '../../../modules/business/entities/business.entity.js';
+import type { Relation } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Reward } from '../../../modules/reward/entities/reward.entity';
-import { Customer } from '../../../modules/customer/entities/customer.entity';
-import { CampaignType } from '../../../core/enums/campaignType';
-import { Season } from './season.entity';
+import { Reward } from '../../../modules/reward/entities/reward.entity.js';
+import { Customer } from '../../../modules/customer/entities/customer.entity.js';
+import { CampaignType } from '../../../core/enums/campaignType.js';
+import { Season } from './season.entity.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('Campaign')
 export class Campaign extends AbstractBaseEntity {
   @ManyToOne(() => Business, (business) => business.id, { onDelete: 'CASCADE' })
   @JoinColumn()
-  business: Business;
+  business: Relation<Business>;
 
   @OneToMany(() => Reward, (reward) => reward.campaign, { cascade: true })
   @JoinColumn()
@@ -28,7 +29,7 @@ export class Campaign extends AbstractBaseEntity {
   @ApiProperty({ type: () => Season, description: 'The season this campaign belongs to', nullable: true })
   @ManyToOne(() => Season, (season) => season.campaigns, { nullable: true })
   @JoinColumn()
-  season: Season;
+  season: Relation<Season>;
 
   @ApiProperty({ description: 'Name of the campaign', example: 'Winter Sale 2024' })
   @Column()

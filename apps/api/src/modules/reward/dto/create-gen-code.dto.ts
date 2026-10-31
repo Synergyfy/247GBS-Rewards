@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsEnum, IsNumber } from 'class-validator';
-import { RewardMethod } from '../../../core/enums/rewardMethod';
+import { RewardMethod } from '../../../core/enums/rewardMethod.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum ExpirationOption {

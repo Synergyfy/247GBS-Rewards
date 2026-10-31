@@ -8,12 +8,12 @@ import {
   Delete,
   Req,
 } from '@nestjs/common';
-import { SegmentService } from './segment.service';
-import { CreateSegmentDto } from './dto/create-segment.dto';
-import { UpdateSegmentDto } from './dto/update-segment.dto';
-import { BusinessService } from '../business/business.service';
-import { BusinessDoesNotExistException } from '../../httpErrors/bussiness.error';
-import { SegmentDoesntExistException } from '../../httpErrors/segment.error';
+import { SegmentService } from './segment.service.js';
+import { CreateSegmentDto } from './dto/create-segment.dto.js';
+import { UpdateSegmentDto } from './dto/update-segment.dto.js';
+import { BusinessService } from '../business/business.service.js';
+import { BusinessDoesNotExistException } from '../../httpErrors/bussiness.error.js';
+import { SegmentDoesntExistException } from '../../httpErrors/segment.error.js';
 import {
   ApiTags,
   ApiOperation,

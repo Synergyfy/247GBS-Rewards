@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateStaffDto } from './dto/create-staff.dto';
-import { UpdateStaffDto } from './dto/update-staff.dto';
+import { CreateStaffDto } from './dto/create-staff.dto.js';
+import { UpdateStaffDto } from './dto/update-staff.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Staff } from './entities/staff.entity';
+import { Staff } from './entities/staff.entity.js';
 import { Repository } from 'typeorm';
-import { Business } from '../business/entities/business.entity';
-import { hashPassword } from '../../bcypt/bcrypt';
+import { Business } from '../business/entities/business.entity.js';
+import { hashPassword } from '../../bcypt/bcrypt.js';
 
 @Injectable()
 export class StaffService {

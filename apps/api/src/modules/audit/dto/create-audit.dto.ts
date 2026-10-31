@@ -6,7 +6,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
-import { PaymentStatus, PaymentType } from '../types/payment.enum';
+import { PaymentStatus, PaymentType } from '../types/payment.enum.js';
 
 export class CreateAuditDto {
   @ApiPropertyOptional({

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto.js';
+import { UpdateCustomerDto } from './dto/update-customer.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Customer } from './entities/customer.entity';
+import { Customer } from './entities/customer.entity.js';
 import { Repository } from 'typeorm';
-import { hashPassword } from '../../bcypt/bcrypt';
-import { Campaign } from '../campaign/entities/campaign.entity';
-import { CustomerPoint } from '../reward/entities/customerPoints.entity';
+import { hashPassword } from '../../bcypt/bcrypt.js';
+import { Campaign } from '../campaign/entities/campaign.entity.js';
+import { CustomerPoint } from '../reward/entities/customerPoints.entity.js';
 
 @Injectable()
 export class CustomerService {

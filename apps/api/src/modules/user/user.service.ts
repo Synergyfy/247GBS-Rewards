@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto.js';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User } from './entities/user.entity.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { hashPassword } from '../../bcypt/bcrypt';
-import { Role } from '../../core/enums/roles';
+import { hashPassword } from '../../bcypt/bcrypt.js';
+import { Role } from '../../core/enums/roles.js';
 
 @Injectable()
 export class UserService {

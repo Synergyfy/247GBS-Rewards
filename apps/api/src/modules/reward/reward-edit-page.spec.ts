@@ -1,18 +1,19 @@
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RewardService } from './reward.service';
+import { RewardService } from './reward.service.js';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CreateRewardDto } from './dto/create-reward.dto';
-import { UpdateRewardDto } from './dto/update-reward.dto';
-import { Reward } from './entities/reward.entity';
-import { User } from '../user/entities/user.entity';
-import { CodeGeneratedByStaffs } from './entities/generateCode.entity';
-import { CustomerPoint } from './entities/customerPoints.entity';
-import { CustomersReward } from './entities/customerRewards.entity';
-import { CustomerNumber } from './entities/customerNumber.entity';
-import { GeneratedRewardCode } from './entities/generateRewardCode.entity';
-import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity';
-import { CampaignService } from '../campaign/campaign.service';
-import { VoucherService } from '../voucher/voucher.service';
+import { CreateRewardDto } from './dto/create-reward.dto.js';
+import { UpdateRewardDto } from './dto/update-reward.dto.js';
+import { Reward } from './entities/reward.entity.js';
+import { User } from '../user/entities/user.entity.js';
+import { CodeGeneratedByStaffs } from './entities/generateCode.entity.js';
+import { CustomerPoint } from './entities/customerPoints.entity.js';
+import { CustomersReward } from './entities/customerRewards.entity.js';
+import { CustomerNumber } from './entities/customerNumber.entity.js';
+import { GeneratedRewardCode } from './entities/generateRewardCode.entity.js';
+import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity.js';
+import { Customer } from '../customer/entities/customer.entity.js';
+import { CampaignService } from '../campaign/campaign.service.js';
 
 describe('RewardService - Edit Reward Page Fields', () => {
   let service: RewardService;
@@ -38,8 +39,8 @@ describe('RewardService - Edit Reward Page Fields', () => {
         { provide: getRepositoryToken(GeneratedRewardCode), useValue: {} },
         { provide: getRepositoryToken(CustomersReward), useValue: {} },
         { provide: getRepositoryToken(RewardCustomerNumber), useValue: {} },
+        { provide: getRepositoryToken(Customer), useValue: {} },
         { provide: CampaignService, useValue: {} },
-        { provide: VoucherService, useValue: {} },
       ],
     }).compile();
 

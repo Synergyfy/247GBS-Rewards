@@ -1,9 +1,9 @@
 // campaign.dto.ts
 import { IsString, IsBoolean, IsOptional, IsNotEmpty, IsEnum, IsDateString } from 'class-validator';
-import { Business } from '../../../modules/business/entities/business.entity';
-import { Reward } from '../../../modules/reward/entities/reward.entity';
-import { CampaignType } from '../../../core/enums/campaignType';
-import { Season } from '../entities/season.entity';
+import { Business } from '../../../modules/business/entities/business.entity.js';
+import { Reward } from '../../../modules/reward/entities/reward.entity.js';
+import { CampaignType } from '../../../core/enums/campaignType.js';
+import { Season } from '../entities/season.entity.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCampaignDto {

@@ -1,8 +1,9 @@
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AnalyticsService } from './analytics.service';
-import { CampaignService } from '../campaign/campaign.service';
-import { CustomerService } from '../customer/customer.service';
-import { RewardService } from '../reward/reward.service';
+import { AnalyticsService } from './analytics.service.js';
+import { CampaignService } from '../campaign/campaign.service.js';
+import { CustomerService } from '../customer/customer.service.js';
+import { RewardService } from '../reward/reward.service.js';
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;

@@ -16,16 +16,16 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { BusinessService } from './business.service';
-import { CreateBusinessDto } from './dto/create-business.dto';
-import { UpdateBusinessDto } from './dto/update-business.dto';
-import { UserService } from '../user/user.service';
-import { Business } from './entities/business.entity';
+import { BusinessService } from './business.service.js';
+import { CreateBusinessDto } from './dto/create-business.dto.js';
+import { UpdateBusinessDto } from './dto/update-business.dto.js';
+import { UserService } from '../user/user.service.js';
+import { Business } from './entities/business.entity.js';
 import {
   EmailExistException,
   PhoneNumberExistException,
   UserDoesNotExistException,
-} from '../../httpErrors/userErrors';
+} from '../../httpErrors/userErrors.js';
 
 @ApiTags('business')
 @ApiBearerAuth()

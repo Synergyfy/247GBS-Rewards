@@ -9,18 +9,18 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { CustomerService } from './customer.service';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { JoinCampaignDto } from './dto/join-campaign.dto';
-import { CustomerEmailExistException } from '../../httpErrors/customer.error';
-import { SkipAuth } from '../../core/decorators/skipAuth.decorator';
-import { PasswordFieldsDontMatch, UserDoesNotExistException } from '../../httpErrors/userErrors';
-import { CampaignService } from '../campaign/campaign.service';
-import { CampaignDoesntExistException } from '../../httpErrors/campaign.error';
-import { CampaignInactiveException } from '../../httpErrors/campaign-inactive.error';
+import { CustomerService } from './customer.service.js';
+import { CreateCustomerDto } from './dto/create-customer.dto.js';
+import { UpdateCustomerDto } from './dto/update-customer.dto.js';
+import { JoinCampaignDto } from './dto/join-campaign.dto.js';
+import { CustomerEmailExistException } from '../../httpErrors/customer.error.js';
+import { SkipAuth } from '../../core/decorators/skipAuth.decorator.js';
+import { PasswordFieldsDontMatch, UserDoesNotExistException } from '../../httpErrors/userErrors.js';
+import { CampaignService } from '../campaign/campaign.service.js';
+import { CampaignDoesntExistException } from '../../httpErrors/campaign.error.js';
+import { CampaignInactiveException } from '../../httpErrors/campaign-inactive.error.js';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../auth/auth.service.js';
 
 @ApiTags('Customer')
 @Controller('customer')

@@ -1,7 +1,8 @@
-import { User } from '../../../modules/user/entities/user.entity';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { User } from '../../../modules/user/entities/user.entity.js';
+import type { Relation } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Campaign } from '../../../modules/campaign/entities/campaign.entity';
+import { Campaign } from '../../../modules/campaign/entities/campaign.entity.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('Rewards')
@@ -9,7 +10,7 @@ export class Reward extends AbstractBaseEntity {
   @ApiProperty({ type: () => User })
   @ManyToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn()
-  user: User;
+  user: Relation<User>;
 
   @ApiProperty()
   @Column()
@@ -71,5 +72,5 @@ export class Reward extends AbstractBaseEntity {
   @ManyToOne(() => Campaign, (campaign) => campaign.rewards, {
     onDelete: 'CASCADE',
   })
-  campaign: Campaign;
+  campaign: Relation<Campaign>;
 }

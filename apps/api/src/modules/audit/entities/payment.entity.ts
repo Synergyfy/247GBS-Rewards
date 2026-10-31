@@ -1,12 +1,13 @@
-import { User } from '../../user/entities/user.entity';
-import { AbstractBaseEntity } from '../../../entities/base.entity';
+import { User } from '../../user/entities/user.entity.js';
+import type { Relation } from 'typeorm';
+import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { PaymentStatus, PaymentType } from '../types/payment.enum';
+import { PaymentStatus, PaymentType } from '../types/payment.enum.js';
 
 @Entity('Audits Payment History')
 export class AuditPaymentHistory extends AbstractBaseEntity {
   @ManyToOne(() => User, (user) => user.audits, { onDelete: 'CASCADE' })
-  user: User;
+  user: Relation<User>;
 
   @Column({ type: 'enum', enum: PaymentStatus })
   status: PaymentStatus;

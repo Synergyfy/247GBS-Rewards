@@ -1,12 +1,14 @@
+export enum RewardKind {
+  STANDARD = 'STANDARD',
+  LINK = 'LINK',
+  CREDENTIALS = 'CREDENTIALS',
+}
+
 export interface RewardConfig {
-  tierId?: string;
-  durationDays?: number;
   url?: string;
   site?: string;
   username?: string;
   password?: string;
-  loyalty?: { tierId: string; durationDays: number };
-  mall?: { tierId: string; durationDays: number };
 }
 
 export interface RewardType {

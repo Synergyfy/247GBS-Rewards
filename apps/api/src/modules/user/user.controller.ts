@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UserService } from './user.service.js';
+import { CreateUserDto } from './dto/create-user.dto.js';
 import {
   EmailExistException,
   PasswordFieldsDontMatch,
   PhoneNumberExistException,
-} from '../../httpErrors/userErrors';
-import { User } from './entities/user.entity';
-import { SkipAuth } from '../../core/decorators/skipAuth.decorator';
-import { SignupSource } from '../../core/enums/signupSource';
+} from '../../httpErrors/userErrors.js';
+import { User } from './entities/user.entity.js';
+import { SkipAuth } from '../../core/decorators/skipAuth.decorator.js';
+import { SignupSource } from '../../core/enums/signupSource.js';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('User')

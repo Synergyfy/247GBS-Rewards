@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { pathToFileURL } from 'url';
 
 // 1. Shared Configuration Function
 // This setup applies to both Local and Vercel environments
@@ -13,10 +14,12 @@ async function configureApp(app: any) {
       'http://127.0.0.1:3001',
       'http://127.0.0.1:3009',
       'http://127.0.0.1:7000',
+      'http://127.0.0.1:8078',
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3009',
       'http://localhost:7000',
+      'http://localhost:8078',
       'https://mcom-api-psi.vercel.app',
       'https://mcom-az.netlify.app',
       'https://stockaudit.netlify.app',
@@ -53,8 +56,15 @@ async function configureApp(app: any) {
 }
 
 // 2. Local Development Bootstrap
-// This only runs if you execute the file directly (e.g., `nest start` or `node dist/main`)
-if (require.main === module) {
+// This only runs if you execute the file directly (e.g., `nest start` or `node dist/main.js`)
+const entryPath = process.argv[1];
+const entryCandidates = entryPath
+  ? [pathToFileURL(entryPath).href, pathToFileURL(`${entryPath}.js`).href]
+  : [];
+const isMainModule =
+  entryCandidates.includes(import.meta.url) && !process.env.VERCEL;
+
+if (isMainModule) {
   async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -76,10 +86,12 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:3001',
   'http://127.0.0.1:3009',
   'http://127.0.0.1:7000',
+  'http://127.0.0.1:8078',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3009',
   'http://localhost:7000',
+  'http://localhost:8078',
   'https://mcom-api-psi.vercel.app',
   'https://mcom-az.netlify.app',
   'https://stockaudit.netlify.app',

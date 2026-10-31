@@ -1,21 +1,22 @@
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RewardService } from './reward.service';
+import { RewardService } from './reward.service.js';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CreateRewardDto } from './dto/create-reward.dto';
-import { Reward } from './entities/reward.entity';
-import { CodeGeneratedByStaffs } from './entities/generateCode.entity';
-import { CustomerPoint } from './entities/customerPoints.entity';
-import { CustomerNumber } from './entities/customerNumber.entity';
-import { GeneratedRewardCode } from './entities/generateRewardCode.entity';
-import { CustomersReward } from './entities/customerRewards.entity';
-import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity';
-import { CampaignService } from '../campaign/campaign.service';
+import { CreateRewardDto } from './dto/create-reward.dto.js';
+import { Reward } from './entities/reward.entity.js';
+import { CodeGeneratedByStaffs } from './entities/generateCode.entity.js';
+import { CustomerPoint } from './entities/customerPoints.entity.js';
+import { CustomerNumber } from './entities/customerNumber.entity.js';
+import { GeneratedRewardCode } from './entities/generateRewardCode.entity.js';
+import { CustomersReward } from './entities/customerRewards.entity.js';
+import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity.js';
+import { CampaignService } from '../campaign/campaign.service.js';
 import { Repository } from 'typeorm';
-import { Campaign } from '../campaign/entities/campaign.entity';
-import { Staff } from '../staff/entities/staff.entity';
-import { User } from '../user/entities/user.entity';
-import { Customer } from '../customer/entities/customer.entity';
-import { VoucherService } from '../voucher/voucher.service';
+import { Campaign } from '../campaign/entities/campaign.entity.js';
+import { Staff } from '../staff/entities/staff.entity.js';
+import { User } from '../user/entities/user.entity.js';
+import { Customer } from '../customer/entities/customer.entity.js';
+import { RewardTypeValue } from '../../core/enums/rewardType.js';
 
 describe('RewardService', () => {
   let service: RewardService;
@@ -89,14 +90,12 @@ describe('RewardService', () => {
           useValue: {},
         },
         {
-          provide: CampaignService,
-          useValue: mockCampaignService,
+          provide: getRepositoryToken(Customer),
+          useValue: {},
         },
         {
-          provide: VoucherService,
-          useValue: {
-            generateSingle: jest.fn(),
-          },
+          provide: CampaignService,
+          useValue: mockCampaignService,
         },
       ],
     }).compile();
@@ -126,7 +125,7 @@ describe('RewardService', () => {
         rewardValue: '10',
         activeFrom: '2023-01-01',
         expires: '2023-12-31',
-        type: 'LINK',
+        type: RewardTypeValue.LINK,
         config: { url: 'https://example.com' },
       };
 

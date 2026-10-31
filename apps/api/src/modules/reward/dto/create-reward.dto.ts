@@ -1,5 +1,6 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { RewardTypeValue } from '../../../core/enums/rewardType.js';
 
 export class CreateRewardDto {
   @ApiProperty({ description: 'Title of the reward' })
@@ -42,10 +43,10 @@ export class CreateRewardDto {
   @IsOptional()
   quantityAvailable?: number;
 
-  @ApiProperty({ description: 'Type of reward' })
-  @IsString()
+  @ApiProperty({ description: 'Type of reward', enum: RewardTypeValue })
+  @IsEnum(RewardTypeValue)
   @IsOptional()
-  type?: string;
+  type?: RewardTypeValue;
 
   @ApiProperty({ description: 'Success Page Title' })
   @IsString()

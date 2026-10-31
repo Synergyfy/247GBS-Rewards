@@ -14,7 +14,7 @@ const DateTimePicker: React.FC<DateTimePickerType> = ({ date, setDate, showTime 
     <div>
       <DatePicker
         selected={date}
-        onChange={date => {
+        onChange={(date: Date | null) => {
           if (date) setDate(date);
         }}
         showTimeSelect={showTime}

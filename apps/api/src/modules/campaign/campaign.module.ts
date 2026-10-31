@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { CampaignService } from './campaign.service';
-import { CampaignController } from './campaign.controller';
+import { CampaignService } from './campaign.service.js';
+import { CampaignController } from './campaign.controller.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Campaign } from './entities/campaign.entity';
-import { BusinessModule } from '../business/business.module';
-import { RewardModule } from '../reward/reward.module';
-import { Season } from './entities/season.entity';
-import { SeasonService } from './season.service';
-import { CustomersReward } from '../reward/entities/customerRewards.entity';
-import { Customer } from '../customer/entities/customer.entity';
-import { CustomerPoint } from '../reward/entities/customerPoints.entity';
+import { Campaign } from './entities/campaign.entity.js';
+import { BusinessModule } from '../business/business.module.js';
+import { RewardModule } from '../reward/reward.module.js';
+import { Season } from './entities/season.entity.js';
+import { SeasonService } from './season.service.js';
+import { CustomersReward } from '../reward/entities/customerRewards.entity.js';
+import { Customer } from '../customer/entities/customer.entity.js';
+import { CustomerPoint } from '../reward/entities/customerPoints.entity.js';
 
 @Module({
   imports: [

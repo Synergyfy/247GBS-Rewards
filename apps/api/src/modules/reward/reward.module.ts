@@ -1,20 +1,19 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { RewardService } from './reward.service';
-import { RewardController } from './reward.controller';
+import { RewardService } from './reward.service.js';
+import { RewardController } from './reward.controller.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Reward } from './entities/reward.entity';
-import { UserModule } from '../user/user.module';
-import { CodeGeneratedByStaffs } from './entities/generateCode.entity';
-import { StaffModule } from '../staff/staff.module';
-import { CampaignModule } from '../campaign/campaign.module';
-import { CustomerModule } from '../customer/customer.module';
-import { CustomerPoint } from './entities/customerPoints.entity';
-import { CustomerNumber } from './entities/customerNumber.entity';
-import { GeneratedRewardCode } from './entities/generateRewardCode.entity';
-import { CustomersReward } from './entities/customerRewards.entity';
-import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity';
-import { VoucherModule } from '../voucher/voucher.module';
-import { Customer } from '../customer/entities/customer.entity';
+import { Reward } from './entities/reward.entity.js';
+import { UserModule } from '../user/user.module.js';
+import { CodeGeneratedByStaffs } from './entities/generateCode.entity.js';
+import { StaffModule } from '../staff/staff.module.js';
+import { CampaignModule } from '../campaign/campaign.module.js';
+import { CustomerModule } from '../customer/customer.module.js';
+import { CustomerPoint } from './entities/customerPoints.entity.js';
+import { CustomerNumber } from './entities/customerNumber.entity.js';
+import { GeneratedRewardCode } from './entities/generateRewardCode.entity.js';
+import { CustomersReward } from './entities/customerRewards.entity.js';
+import { RewardCustomerNumber } from './entities/rewardCustomerNumber.entity.js';
+import { Customer } from '../customer/entities/customer.entity.js';
 
 @Module({
   imports: [
@@ -30,7 +29,6 @@ import { Customer } from '../customer/entities/customer.entity';
     ]),
     UserModule,
     StaffModule,
-    VoucherModule,
     forwardRef(() => CampaignModule),
     forwardRef(() => CustomerModule),
   ],

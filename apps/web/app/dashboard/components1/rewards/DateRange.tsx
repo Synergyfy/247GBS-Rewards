@@ -36,7 +36,7 @@ export function DatePicker({ disablePast }: { disablePast?: boolean }) {
           mode="single"
           selected={date}
           onSelect={setDate}
-          initialFocus
+          autoFocus
           disabled={disablePast ? { before: new Date() } : undefined}
         />
       </PopoverContent>

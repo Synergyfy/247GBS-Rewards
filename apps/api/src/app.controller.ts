@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
-import { SkipAuth } from './core/decorators/skipAuth.decorator';
+import { AppService } from './app.service.js';
+import { SkipAuth } from './core/decorators/skipAuth.decorator.js';
 
 @Controller()
 export class AppController {

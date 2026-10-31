@@ -1,2 +1,3 @@
-const main = require('../dist/src/main');
-module.exports = main.default || main;
+import main from '../dist/main.js';
+
+export default main;

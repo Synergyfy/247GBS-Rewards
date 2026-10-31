@@ -1,7 +1,7 @@
 import { IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { SignupSource } from '../../../core/enums/signupSource';
-import { Role } from '../../../core/enums/roles';
+import { SignupSource } from '../../../core/enums/signupSource.js';
+import { Role } from '../../../core/enums/roles.js';
 
 export class CreateUserDto {
   @ApiProperty({
