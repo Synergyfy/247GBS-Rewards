@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Req,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Role } from '../../core/enums/roles.js';
+import { Roles } from '../../core/decorators/roles.decorator.js';
 import { UserService } from './user.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import {
@@ -48,9 +60,11 @@ export class UserController {
 
     if (phoneNumberExists) throw new PhoneNumberExistException();
 
-    return await this.userService.create(createUserDto);
+    // Public signup must never let the caller pick their role (e.g. super_admin)
+    return await this.userService.create({ ...createUserDto, role: Role.ADMIN });
   }
 
+  @Roles(Role.SUPER_ADMIN)
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({
@@ -70,10 +84,20 @@ export class UserController {
     type: User,
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @Req() req: { user: { userId: string; role: Role } },
+  ) {
+    // Users may read their own record; only super admins may read anyone's
+    if (req.user.role !== Role.SUPER_ADMIN && req.user.userId !== id) {
+      throw new ForbiddenException();
+    }
+    const user = await this.userService.findOne(id);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
+  @Roles(Role.SUPER_ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user by ID' })
   @ApiResponse({

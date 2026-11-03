@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CampaignService } from '../campaign/campaign.service.js';
 import { CustomerService } from '../customer/customer.service.js';
 import { RewardService } from '../reward/reward.service.js';
@@ -59,7 +59,7 @@ export class AnalyticsService {
   async getCampaignAnalytics(campaignId: string) {
     const campaign = await this.campaignService.findOne(campaignId);
     if (!campaign) {
-      throw new Error('Campaign not found');
+      throw new NotFoundException('Campaign not found');
     }
 
     const customers = await this.customerService.findAllByCampaign(campaign.id);
