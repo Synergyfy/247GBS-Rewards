@@ -1,18 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { Building2, KeyRound, Trash2, UserRoundCog } from 'lucide-react';
+import { Building2, KeyRound, Power, PowerOff, Trash2, UserRoundCog } from 'lucide-react';
 import { PageHeader, KpiStrip } from '@/components/display/PageHeader';
 import { QueryState } from '@/components/display/QueryState';
 import { StatusBadge } from '@/components/display/States';
 import { Properties } from '@/components/display/Properties';
 import { DetailTabs } from '@/components/display/DetailTabs';
 import { DangerZone } from '@/components/display/DangerZone';
-import { ConfirmActionDialog } from '@/components/dialogs/ConfirmActionDialog';
-import { ResetPasswordResultDialog } from '@/components/dialogs/ResetPasswordResultDialog';
+import { useAdminActions } from '@/components/features/admins/useAdminActions';
 import { DataTable, type Column } from '@/components/data/DataTable';
-import { superAdminApi } from '@/services';
 import {
   useAuditLogs,
   useCampaignsForBusinesses,
@@ -24,7 +20,6 @@ import {
   useUserPayments,
 } from '@/services/hooks';
 import { compact, currency, shortDate } from '@/lib/format';
-import { appEnv } from '@/lib/env';
 import { useBreadcrumbs } from '@/lib/breadcrumb-context';
 import type {
   AuditBalance,
@@ -85,7 +80,12 @@ function ScopeSelect({
         <label className="cell-muted" htmlFor={`scope-${label}`}>
           {label}
         </label>
-        <select id={`scope-${label}`} className="select" value={value} onChange={(event) => onChange(event.target.value)}>
+        <select
+          id={`scope-${label}`}
+          className="select"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        >
           {options.map((option) => (
             <option key={option.id} value={option.id}>
               {option.name}
@@ -101,7 +101,12 @@ function CampaignsTab({ businesses }: { businesses: Business[] }) {
   const query = useCampaignsForBusinesses(businesses.map((business) => business.id));
   return (
     <QueryState loading={query.isLoading} error={query.error} retry={query.refetch} section="campaigns">
-      <DataTable columns={campaignColumns} rows={query.data} rowId={(row) => row.id} emptyTitle="No campaigns yet" />
+      <DataTable
+        columns={campaignColumns}
+        rows={query.data}
+        rowId={(row) => row.id}
+        emptyTitle="No campaigns yet"
+      />
     </QueryState>
   );
 }
@@ -125,7 +130,8 @@ function CustomersTab({ businesses }: { businesses: Business[] }) {
     { key: 'campaign', label: 'Campaign', render: (row) => row.campaign?.name ?? '—' },
     { key: 'created_at', label: 'Joined', render: (row) => shortDate(row.created_at) },
   ];
-  if (!businesses.length) return <div className="panel-body cell-muted">This admin has no businesses yet.</div>;
+  if (!businesses.length)
+    return <div className="panel-body cell-muted">This admin has no businesses yet.</div>;
   return (
     <>
       <ScopeSelect
@@ -137,7 +143,12 @@ function CustomersTab({ businesses }: { businesses: Business[] }) {
           setPage(1);
         }}
       />
-      <QueryState loading={query.isLoading} error={query.error as Error | null} retry={() => void query.refetch()} section="customers">
+      <QueryState
+        loading={query.isLoading}
+        error={query.error as Error | null}
+        retry={() => void query.refetch()}
+        section="customers"
+      >
         <DataTable
           columns={columns}
           rows={query.data?.data ?? []}
@@ -233,24 +244,52 @@ function PaymentsTab({ userId }: { userId: string }) {
     { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
     { key: 'status', label: 'Status', render: (row) => <StatusBadge value={row.status} /> },
     { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
-    { key: 'amount', label: 'Amount', render: (row) => <span className="tabular">{currency(row.amount)}</span> },
+    {
+      key: 'amount',
+      label: 'Amount',
+      render: (row) => <span className="tabular">{currency(row.amount)}</span>,
+    },
   ];
   const seasons = (row: AuditBalance) => `${row.spring} / ${row.summer} / ${row.autumn} / ${row.winter}`;
   const balanceColumns: Column<AuditBalance>[] = [
     { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
     { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
-    { key: 'seasons', label: 'Spring / Summer / Autumn / Winter', render: (row) => <span className="tabular">{seasons(row)}</span> },
+    {
+      key: 'seasons',
+      label: 'Spring / Summer / Autumn / Winter',
+      render: (row) => <span className="tabular">{seasons(row)}</span>,
+    },
   ];
   return (
     <>
-      <QueryState loading={payments.isLoading} error={payments.error as Error | null} retry={() => void payments.refetch()} section="payments">
-        <DataTable columns={paymentColumns} rows={payments.data ?? []} rowId={(row) => row.id} emptyTitle="No payments" />
+      <QueryState
+        loading={payments.isLoading}
+        error={payments.error as Error | null}
+        retry={() => void payments.refetch()}
+        section="payments"
+      >
+        <DataTable
+          columns={paymentColumns}
+          rows={payments.data ?? []}
+          rowId={(row) => row.id}
+          emptyTitle="No payments"
+        />
       </QueryState>
       <h3 className="panel-title" style={{ padding: '10px 11px 0' }}>
         Balances
       </h3>
-      <QueryState loading={balances.isLoading} error={balances.error as Error | null} retry={() => void balances.refetch()} section="balances">
-        <DataTable columns={balanceColumns} rows={balances.data ?? []} rowId={(row) => row.id} emptyTitle="No balances" />
+      <QueryState
+        loading={balances.isLoading}
+        error={balances.error as Error | null}
+        retry={() => void balances.refetch()}
+        section="balances"
+      >
+        <DataTable
+          columns={balanceColumns}
+          rows={balances.data ?? []}
+          rowId={(row) => row.id}
+          emptyTitle="No balances"
+        />
       </QueryState>
     </>
   );
@@ -261,13 +300,31 @@ function ActivityTab({ userId }: { userId: string }) {
   const query = useAuditLogs({ targetId: userId, page: 1, limit: 50 });
   const columns: Column<AuditLogEntry>[] = [
     { key: 'created_at', label: 'Timestamp', render: (row) => shortDate(row.created_at) },
-    { key: 'actor', label: 'Actor', render: (row) => <span title={row.actor.email}>{row.actor.fullName}</span> },
+    {
+      key: 'actor',
+      label: 'Actor',
+      render: (row) => <span title={row.actor.email}>{row.actor.fullName}</span>,
+    },
     { key: 'action', label: 'Action', render: (row) => row.action.replaceAll('.', ' ') },
-    { key: 'note', label: 'Note', render: (row) => <span className="cell-muted">{String(row.payload?.note ?? '—')}</span> },
+    {
+      key: 'note',
+      label: 'Note',
+      render: (row) => <span className="cell-muted">{String(row.payload?.note ?? '—')}</span>,
+    },
   ];
   return (
-    <QueryState loading={query.isLoading} error={query.error as Error | null} retry={() => void query.refetch()} section="activity">
-      <DataTable columns={columns} rows={query.data?.data ?? []} rowId={(row) => row.id} emptyTitle="No activity recorded" />
+    <QueryState
+      loading={query.isLoading}
+      error={query.error as Error | null}
+      retry={() => void query.refetch()}
+      section="activity"
+    >
+      <DataTable
+        columns={columns}
+        rows={query.data?.data ?? []}
+        rowId={(row) => row.id}
+        emptyTitle="No activity recorded"
+      />
     </QueryState>
   );
 }
@@ -276,38 +333,19 @@ export function AdminDetail() {
   const { id = '' } = useParams();
   const query = useUser(id);
   const analytics = useUserAnalytics(id);
-  const [danger, setDanger] = useState<'delete' | 'reset' | 'impersonate' | null>(null);
-  const [resetResult, setResetResult] = useState<string | null>(null);
-  const client = useQueryClient();
+  const actions = useAdminActions();
   const navigate = useNavigate();
   const user = query.data;
 
   useBreadcrumbs(user ? [{ label: 'Admins', to: '/admins' }, { label: user.fullName }] : null);
 
-  async function confirm(reason: string) {
-    if (danger === 'delete') {
-      await superAdminApi.deleteUser(id, reason);
-      toast.success('Admin deleted');
-      navigate('/admins');
-    }
-    if (danger === 'reset') {
-      const result = await superAdminApi.resetPassword(id, reason);
-      setResetResult(result.temporaryPassword);
-    }
-    if (danger === 'impersonate' && user) {
-      const result = await superAdminApi.impersonate(id, reason);
-      window.open(
-        `${appEnv.WEB_APP_URL}/auth/impersonate#token=${encodeURIComponent(result.accessToken)}&expiresIn=${result.expiresIn}`,
-        '_blank',
-        'noopener,noreferrer',
-      );
-      toast.success(`Support session opened for ${user.fullName}`);
-    }
-    await client.invalidateQueries({ queryKey: ['admins'] });
-  }
-
   return (
-    <QueryState loading={query.isLoading} error={query.error as Error | null} retry={() => void query.refetch()} section="admin detail">
+    <QueryState
+      loading={query.isLoading}
+      error={query.error as Error | null}
+      retry={() => void query.refetch()}
+      section="admin detail"
+    >
       {user && (
         <>
           <PageHeader
@@ -317,11 +355,18 @@ export function AdminDetail() {
               <>
                 <StatusBadge value={user.role} />
                 <StatusBadge value={user.isActive ?? true} />
-                <button className="button" onClick={() => setDanger('reset')}>
+                <button
+                  className="button"
+                  onClick={() => void actions.setStatus([user], !(user.isActive ?? true))}
+                >
+                  {user.isActive === false ? <Power /> : <PowerOff />}
+                  {user.isActive === false ? 'Activate' : 'Deactivate'}
+                </button>
+                <button className="button" onClick={() => actions.requestReset(user)}>
                   <KeyRound />
                   Reset password
                 </button>
-                <button className="button" onClick={() => setDanger('impersonate')}>
+                <button className="button" onClick={() => actions.requestImpersonate(user)}>
                   <UserRoundCog />
                   Impersonate
                 </button>
@@ -351,19 +396,43 @@ export function AdminDetail() {
                       <>
                         <div className="toolbar" style={{ borderBottom: '1px solid var(--border)' }}>
                           <span className="cell-muted">Businesses owned by this admin</span>
-                          <button className="button" onClick={() => navigate(`/businesses?ownerId=${user.id}`)}>
+                          <button
+                            className="button"
+                            onClick={() => navigate(`/businesses?ownerId=${user.id}`)}
+                          >
                             <Building2 />
                             Add business
                           </button>
                         </div>
-                        <DataTable columns={businessColumns} rows={user.businesses} rowId={(row) => row.id} emptyTitle="No businesses yet" />
+                        <DataTable
+                          columns={businessColumns}
+                          rows={user.businesses}
+                          rowId={(row) => row.id}
+                          emptyTitle="No businesses yet"
+                        />
                       </>
                     ),
                   },
-                  { value: 'campaigns', label: 'Campaigns', content: <CampaignsTab businesses={user.businesses} /> },
-                  { value: 'customers', label: 'Customers', content: <CustomersTab businesses={user.businesses} /> },
-                  { value: 'transactions', label: 'Transactions', content: <TransactionsTab businesses={user.businesses} /> },
-                  { value: 'payments', label: 'Payments & balances', content: <PaymentsTab userId={user.id} /> },
+                  {
+                    value: 'campaigns',
+                    label: 'Campaigns',
+                    content: <CampaignsTab businesses={user.businesses} />,
+                  },
+                  {
+                    value: 'customers',
+                    label: 'Customers',
+                    content: <CustomersTab businesses={user.businesses} />,
+                  },
+                  {
+                    value: 'transactions',
+                    label: 'Transactions',
+                    content: <TransactionsTab businesses={user.businesses} />,
+                  },
+                  {
+                    value: 'payments',
+                    label: 'Payments & balances',
+                    content: <PaymentsTab userId={user.id} />,
+                  },
                   { value: 'activity', label: 'Activity', content: <ActivityTab userId={user.id} /> },
                 ]}
               />
@@ -381,10 +450,8 @@ export function AdminDetail() {
                   ['Status', user.isActive === false ? 'Inactive' : 'Active'],
                 ]}
               />
-              <DangerZone
-                description="Deleting an account is permanent. Related business data may remain depending on backend cascade rules."
-              >
-                <button className="button danger" onClick={() => setDanger('delete')}>
+              <DangerZone description="Deleting an account is permanent. Related business data may remain depending on backend cascade rules.">
+                <button className="button danger" onClick={() => actions.requestDelete(user)}>
                   <Trash2 />
                   Delete admin
                 </button>
@@ -395,22 +462,7 @@ export function AdminDetail() {
               </details>
             </div>
           </div>
-          <ConfirmActionDialog
-            open={danger !== null}
-            onOpenChange={(open) => !open && setDanger(null)}
-            title={danger === 'delete' ? 'Delete admin account' : danger === 'reset' ? 'Reset password' : 'Impersonate account'}
-            description={
-              danger === 'delete'
-                ? 'This permanently deletes the account. Enter the email and a reason for the audit log.'
-                : danger === 'reset'
-                  ? 'A temporary password is issued once. Provide a reason for the audit log.'
-                  : 'This opens a limited support session in the business web app. Provide a reason.'
-            }
-            requiredText={danger === 'delete' ? user.email : undefined}
-            confirmLabel={danger === 'delete' ? 'Delete account' : danger === 'reset' ? 'Reset password' : 'Open support session'}
-            onConfirm={(reason) => void confirm(reason)}
-          />
-          <ResetPasswordResultDialog password={resetResult} onClose={() => setResetResult(null)} />
+          {actions.dialogs}
         </>
       )}
     </QueryState>

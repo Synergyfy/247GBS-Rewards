@@ -1,4 +1,5 @@
-import { Link } from 'react-router';
+import { Eye, Megaphone } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { FilterBar } from '@/components/data/FilterBar';
 import { PageHeader } from '@/components/display/PageHeader';
@@ -9,11 +10,13 @@ import { useCustomers } from '@/services/hooks';
 import type { Customer } from '@/services/types';
 
 export function CustomersList() {
+  const navigate = useNavigate();
   const state = useUrlState();
   const query = useCustomers(state.listParams);
   const columns: Column<Customer>[] = [
     {
-      key: 'name',
+      key: 'firstName',
+      sortable: true,
       label: 'Customer',
       render: (row) => (
         <Link className="cell-link" to={`/customers/${row.id}`}>
@@ -21,9 +24,10 @@ export function CustomersList() {
         </Link>
       ),
     },
-    { key: 'email', label: 'Email', render: (row) => row.email },
+    { key: 'email', sortable: true, mobile: false, label: 'Email', render: (row) => row.email },
     {
       key: 'campaign',
+      mobile: false,
       label: 'Campaign',
       render: (row) =>
         row.campaign ? (
@@ -36,10 +40,18 @@ export function CustomersList() {
     },
     {
       key: 'balance',
+      sortable: true,
+      align: 'right',
       label: 'Balance',
       render: (row) => <span className="tabular">{(row.balance ?? 0).toLocaleString()} pts</span>,
     },
-    { key: 'created_at', label: 'Joined', render: (row) => shortDate(row.created_at) },
+    {
+      key: 'created_at',
+      sortable: true,
+      mobile: false,
+      label: 'Joined',
+      render: (row) => shortDate(row.created_at),
+    },
   ];
   return (
     <>
@@ -52,14 +64,25 @@ export function CustomersList() {
         section="customers"
       >
         <DataTable
+          tableId="customers"
           columns={columns}
           rows={query.data?.data ?? []}
           rowId={(row) => row.id}
           total={query.data?.total ?? 0}
-          page={state.page}
-          pageSize={state.limit}
-          onPageChange={(page) => state.setParam('page', String(page))}
-          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+          {...state.tableProps}
+          loading={query.isFetching}
+          rowActions={(row) => [
+            { label: 'View details', icon: <Eye />, onSelect: () => navigate(`/customers/${row.id}`) },
+            ...(row.campaign
+              ? [
+                  {
+                    label: 'View campaign',
+                    icon: <Megaphone />,
+                    onSelect: () => navigate(`/campaigns/${row.campaign!.id}`),
+                  },
+                ]
+              : []),
+          ]}
         />
       </QueryState>
     </>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { useHotkeys } from '@/hooks/useHotkeys';
 import { BreadcrumbContext, type Crumb } from '@/lib/breadcrumb-context';
@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { CommandPalette } from './CommandPalette';
 import { QuickLookSheet } from './QuickLookSheet';
+import { ShortcutsSheet } from './ShortcutsSheet';
 
 const COLLAPSED_KEY = 'sa_sidebar_collapsed';
 
@@ -25,7 +26,10 @@ export function RootLayout() {
   const breadcrumbs = useMemo(() => ({ crumbs, setCrumbs }), [crumbs]);
   const location = useLocation();
 
-  useHotkeys(() => setPaletteOpen(true));
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const openSearch = useCallback(() => setPaletteOpen(true), []);
+  const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
+  useHotkeys({ onSearch: openSearch, onShortcuts: openShortcuts });
 
   // DataTable rows announce quick-look requests on window
   useEffect(() => {
@@ -67,6 +71,7 @@ export function RootLayout() {
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <QuickLookSheet row={quickLook} onClose={() => setQuickLook(null)} />
+      <ShortcutsSheet open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
     </BreadcrumbContext.Provider>
   );

@@ -1,6 +1,7 @@
 import { http } from './http';
 import { ENDPOINTS } from './endpoints';
 import { NotImplementedError } from '@/lib/errors';
+import { sortByField } from '@/lib/sort';
 import type { SuperAdminApi } from './api';
 import type { ListParams, Paginated, PlatformAnalytics, User, UserRow } from './types';
 
@@ -14,7 +15,7 @@ function pageOf<T>(items: T[], params: ListParams = {}): Paginated<T> {
   }
   const total = rows.length;
   const field = params.sort;
-  if (field) rows.sort((a, b) => String((a as Record<string, unknown>)[field] ?? '').localeCompare(String((b as Record<string, unknown>)[field] ?? '')) * (params.order === 'DESC' ? -1 : 1));
+  if (field) rows = sortByField(rows, field, params.order);
   return { data: rows.slice((page - 1) * limit, page * limit), total, page, limit };
 }
 function userRow(user: User): UserRow { return { ...user, businessCount: user.businesses?.length ?? 0, campaignCount: 0, customerCount: 0 }; }

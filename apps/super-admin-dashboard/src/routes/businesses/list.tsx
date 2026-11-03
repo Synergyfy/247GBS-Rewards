@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Building2 } from 'lucide-react';
+import { Building2, Eye, ShieldCheck } from 'lucide-react';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { FilterBar } from '@/components/data/FilterBar';
 import { PageHeader } from '@/components/display/PageHeader';
@@ -56,6 +56,7 @@ export function BusinessesList() {
   const columns: Column<Business>[] = [
     {
       key: 'name',
+      sortable: true,
       label: 'Business',
       render: (row) => (
         <span className="identity">
@@ -70,6 +71,7 @@ export function BusinessesList() {
     },
     {
       key: 'user',
+      mobile: false,
       label: 'Owner',
       render: (row) =>
         row.user ? (
@@ -80,13 +82,20 @@ export function BusinessesList() {
           '—'
         ),
     },
-    { key: 'email', label: 'Email', render: (row) => row.email },
+    { key: 'email', sortable: true, mobile: false, label: 'Email', render: (row) => row.email },
     {
       key: 'campaigns',
+      align: 'right',
       label: 'Campaigns',
       render: (row) => <span className="tabular">{row.campaigns?.length ?? '—'}</span>,
     },
-    { key: 'created_at', label: 'Created', render: (row) => shortDate(row.created_at) },
+    {
+      key: 'created_at',
+      sortable: true,
+      mobile: false,
+      label: 'Created',
+      render: (row) => shortDate(row.created_at),
+    },
   ];
   return (
     <>
@@ -107,14 +116,25 @@ export function BusinessesList() {
         section="businesses"
       >
         <DataTable
+          tableId="businesses"
           columns={columns}
           rows={query.data?.data ?? []}
           rowId={(row) => row.id}
           total={query.data?.total ?? 0}
-          page={state.page}
-          pageSize={state.limit}
-          onPageChange={(page) => state.setParam('page', String(page))}
-          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+          {...state.tableProps}
+          loading={query.isFetching}
+          rowActions={(row) => [
+            { label: 'View details', icon: <Eye />, onSelect: () => navigate(`/businesses/${row.id}`) },
+            ...(row.user
+              ? [
+                  {
+                    label: 'View owner',
+                    icon: <ShieldCheck />,
+                    onSelect: () => navigate(`/admins/${row.user!.id}`),
+                  },
+                ]
+              : []),
+          ]}
         />
       </QueryState>
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

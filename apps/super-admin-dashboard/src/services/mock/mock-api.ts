@@ -1,5 +1,6 @@
 import { appEnv } from '@/lib/env';
 import { createMockToken } from '@/lib/session';
+import { sortByField } from '@/lib/sort';
 import type { SuperAdminApi } from '../api';
 import { createFixtures } from './fixtures';
 import type {
@@ -26,7 +27,7 @@ function page<T>(items: T[], params: ListParams = {}): Paginated<T> {
   }
   if (params.sort) {
     const key = params.sort;
-    rows.sort((a, b) => String((a as Record<string, unknown>)[key] ?? '').localeCompare(String((b as Record<string, unknown>)[key] ?? '')) * (params.order === 'DESC' ? -1 : 1));
+    rows = sortByField(rows, key, params.order);
   }
   const current = Math.max(1, Number(params.page ?? 1));
   const limit = Math.max(1, Number(params.limit ?? 25));

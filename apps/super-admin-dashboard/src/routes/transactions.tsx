@@ -1,4 +1,5 @@
-import { Link } from 'react-router';
+import { Megaphone, UserRound } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { FilterBar } from '@/components/data/FilterBar';
 import { PageHeader } from '@/components/display/PageHeader';
@@ -9,11 +10,12 @@ import { useTransactions } from '@/services/hooks';
 import type { PointsLedgerEntry } from '@/services/types';
 
 export function TransactionsList() {
+  const navigate = useNavigate();
   const state = useUrlState();
   const kind = state.params.get('kind') as 'earn' | 'redeem' | null;
   const query = useTransactions({ ...state.listParams, kind: kind ?? undefined });
   const columns: Column<PointsLedgerEntry>[] = [
-    { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
+    { key: 'created_at', sortable: true, label: 'Date', render: (row) => shortDate(row.created_at) },
     {
       key: 'customer',
       label: 'Customer',
@@ -26,10 +28,18 @@ export function TransactionsList() {
           '—'
         ),
     },
-    { key: 'campaign', label: 'Campaign', render: (row) => row.campaign?.name ?? '—' },
-    { key: 'description', label: 'Description', render: (row) => row.description },
+    { key: 'campaign', mobile: false, label: 'Campaign', render: (row) => row.campaign?.name ?? '—' },
+    {
+      key: 'description',
+      sortable: true,
+      mobile: false,
+      label: 'Description',
+      render: (row) => row.description,
+    },
     {
       key: 'points',
+      sortable: true,
+      align: 'right',
       label: 'Points',
       render: (row) => (
         <span className="tabular" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
@@ -61,14 +71,33 @@ export function TransactionsList() {
         section="transactions"
       >
         <DataTable
+          tableId="transactions"
           columns={columns}
           rows={query.data?.data ?? []}
           rowId={(row) => row.id}
           total={query.data?.total ?? 0}
-          page={state.page}
-          pageSize={state.limit}
-          onPageChange={(page) => state.setParam('page', String(page))}
-          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+          {...state.tableProps}
+          loading={query.isFetching}
+          rowActions={(row) => [
+            ...(row.customer
+              ? [
+                  {
+                    label: 'View customer',
+                    icon: <UserRound />,
+                    onSelect: () => navigate(`/customers/${row.customer!.id}`),
+                  },
+                ]
+              : []),
+            ...(row.campaign
+              ? [
+                  {
+                    label: 'View campaign',
+                    icon: <Megaphone />,
+                    onSelect: () => navigate(`/campaigns/${row.campaign!.id}`),
+                  },
+                ]
+              : []),
+          ]}
         />
       </QueryState>
     </>

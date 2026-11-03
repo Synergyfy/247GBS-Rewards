@@ -1,4 +1,7 @@
-import { Link } from 'react-router';
+import { useCampaignActions } from '@/components/features/campaigns/useCampaignActions';
+import { appEnv } from '@/lib/env';
+import { ExternalLink, Eye, Power, PowerOff } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { FilterBar } from '@/components/data/FilterBar';
 import { PageHeader } from '@/components/display/PageHeader';
@@ -10,6 +13,8 @@ import { useCampaigns } from '@/services/hooks';
 import type { Campaign, CampaignType } from '@/services/types';
 
 export function CampaignsList() {
+  const navigate = useNavigate();
+  const campaignActions = useCampaignActions();
   const state = useUrlState();
   const type = state.params.get('type') as CampaignType | null;
   const query = useCampaigns({
@@ -20,6 +25,7 @@ export function CampaignsList() {
   const columns: Column<Campaign>[] = [
     {
       key: 'name',
+      sortable: true,
       label: 'Campaign',
       render: (row) => (
         <Link className="cell-link" to={`/campaigns/${row.id}`}>
@@ -29,6 +35,7 @@ export function CampaignsList() {
     },
     {
       key: 'business',
+      mobile: false,
       label: 'Business',
       render: (row) =>
         row.business ? (
@@ -39,10 +46,27 @@ export function CampaignsList() {
           '—'
         ),
     },
-    { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
-    { key: 'isActive', label: 'Status', render: (row) => <StatusBadge value={row.isActive} /> },
-    { key: 'uniqueCode', label: 'Code', render: (row) => <span className="tabular">{row.uniqueCode}</span> },
-    { key: 'created_at', label: 'Created', render: (row) => shortDate(row.created_at) },
+    { key: 'type', sortable: true, label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
+    {
+      key: 'isActive',
+      sortable: true,
+      label: 'Status',
+      render: (row) => <StatusBadge value={row.isActive} />,
+    },
+    {
+      key: 'uniqueCode',
+      sortable: true,
+      mobile: false,
+      label: 'Code',
+      render: (row) => <span className="tabular">{row.uniqueCode}</span>,
+    },
+    {
+      key: 'created_at',
+      sortable: true,
+      mobile: false,
+      label: 'Created',
+      render: (row) => shortDate(row.created_at),
+    },
   ];
   return (
     <>
@@ -77,14 +101,49 @@ export function CampaignsList() {
         section="campaigns"
       >
         <DataTable
+          tableId="campaigns"
           columns={columns}
           rows={query.data?.data ?? []}
           rowId={(row) => row.id}
           total={query.data?.total ?? 0}
-          page={state.page}
-          pageSize={state.limit}
-          onPageChange={(page) => state.setParam('page', String(page))}
-          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+          {...state.tableProps}
+          loading={query.isFetching}
+          rowActions={(row) => [
+            { label: 'View details', icon: <Eye />, onSelect: () => navigate(`/campaigns/${row.id}`) },
+            {
+              label: 'Open public page',
+              icon: <ExternalLink />,
+              onSelect: () =>
+                window.open(
+                  `${appEnv.WEB_APP_URL}/campaign/${row.uniqueCode}`,
+                  '_blank',
+                  'noopener,noreferrer',
+                ),
+            },
+            {
+              label: row.isActive === false ? 'Activate' : 'Deactivate',
+              icon: row.isActive === false ? <Power /> : <PowerOff />,
+              onSelect: () => void campaignActions.setStatus([row], row.isActive === false),
+            },
+          ]}
+          bulkActions={(selected, clear) => (
+            <>
+              <button
+                className="button"
+                onClick={() => void campaignActions.setStatus(selected, true).then(clear)}
+              >
+                <Power />
+                Activate
+              </button>
+              <button
+                className="button"
+                onClick={() => void campaignActions.setStatus(selected, false).then(clear)}
+              >
+                <PowerOff />
+                Deactivate
+              </button>
+            </>
+          )}
         />
       </QueryState>
     </>

@@ -1,4 +1,5 @@
-import { Link } from 'react-router';
+import { ShieldCheck } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { FilterBar } from '@/components/data/FilterBar';
 import { PageHeader } from '@/components/display/PageHeader';
@@ -10,6 +11,7 @@ import { usePayments } from '@/services/hooks';
 import type { PaymentHistory } from '@/services/types';
 
 export function PaymentsList() {
+  const navigate = useNavigate();
   const state = useUrlState();
   const status = state.params.get('status') as PaymentHistory['status'] | null;
   const query = usePayments({ ...state.listParams, status: status ?? undefined });
@@ -26,14 +28,28 @@ export function PaymentsList() {
           '—'
         ),
     },
-    { key: 'status', label: 'Status', render: (row) => <StatusBadge value={row.status} /> },
-    { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
+    { key: 'status', sortable: true, label: 'Status', render: (row) => <StatusBadge value={row.status} /> },
+    {
+      key: 'type',
+      sortable: true,
+      mobile: false,
+      label: 'Type',
+      render: (row) => <StatusBadge value={row.type} />,
+    },
     {
       key: 'amount',
+      sortable: true,
+      align: 'right',
       label: 'Amount',
       render: (row) => <span className="tabular">{currency(row.amount)}</span>,
     },
-    { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
+    {
+      key: 'created_at',
+      sortable: true,
+      mobile: false,
+      label: 'Date',
+      render: (row) => shortDate(row.created_at),
+    },
   ];
   return (
     <>
@@ -58,14 +74,24 @@ export function PaymentsList() {
         section="payments"
       >
         <DataTable
+          tableId="payments"
           columns={columns}
           rows={query.data?.data ?? []}
           rowId={(row) => row.id}
           total={query.data?.total ?? 0}
-          page={state.page}
-          pageSize={state.limit}
-          onPageChange={(page) => state.setParam('page', String(page))}
-          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+          {...state.tableProps}
+          loading={query.isFetching}
+          rowActions={(row) =>
+            row.user
+              ? [
+                  {
+                    label: 'View account',
+                    icon: <ShieldCheck />,
+                    onSelect: () => navigate(`/admins/${row.user!.id}`),
+                  },
+                ]
+              : []
+          }
         />
       </QueryState>
     </>

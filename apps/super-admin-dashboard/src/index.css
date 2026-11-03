@@ -267,3 +267,19 @@ tbody tr:last-child td { border-bottom: 0; }
 .detail-sheet { position: absolute; inset: 0 0 0 auto; width: min(480px, 100vw); background: var(--card); border-left: 1px solid var(--border); animation: sheetIn 240ms var(--ease-out-ui); }
 @keyframes sheetIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 @media (max-width: 900px) { .app-shell.collapsed { display: block; } .sidebar.collapsed { width: 260px; } .sidebar.collapsed .brand-copy, .sidebar.collapsed .nav-caption, .sidebar.collapsed .nav-link span, .sidebar.collapsed .sidebar-footer > span { display: revert; } .sidebar.collapsed .nav-link { justify-content: flex-start; padding: 0 9px; } }
+
+/* §9A data table: density toggle (36px compact / 44px comfortable rows) */
+[data-density="comfortable"] td { height: 44px; }
+/* §9A motion: 2px indeterminate bar while a table refetches (previous rows stay visible, dimmed) */
+.table-progress { position: relative; height: 2px; margin-top: -2px; overflow: hidden; background: transparent; }
+.table-progress::after { content: ''; position: absolute; inset: 0 auto 0 0; width: 30%; background: var(--primary); animation: table-progress 1.1s var(--ease-out-ui) infinite; }
+@keyframes table-progress { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+/* §9A motion: one-time highlight on a changed row, fading out over 1.2s */
+tr.row-highlight td { animation: row-highlight 1.2s var(--ease-out-ui) 1; }
+@keyframes row-highlight { from { background: var(--primary-tint); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .table-progress::after { animation: none; width: 100%; opacity: .5; }
+  tr.row-highlight td { animation: none; background: var(--primary-tint); }
+}
+/* §9A: selected row bg-primary-tint/50 */
+tr.selected-row td, .sticky-first tr.selected-row td:first-child { background: color-mix(in srgb, var(--primary-tint) 50%, var(--card)); }

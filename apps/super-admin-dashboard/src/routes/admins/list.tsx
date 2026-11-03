@@ -2,12 +2,13 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { UserRoundPlus } from 'lucide-react';
+import { Eye, KeyRound, Power, PowerOff, Trash2, UserRoundCog, UserRoundPlus } from 'lucide-react';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { FilterBar } from '@/components/data/FilterBar';
 import { PageHeader } from '@/components/display/PageHeader';
 import { QueryState } from '@/components/display/QueryState';
 import { StatusBadge } from '@/components/display/States';
+import { useAdminActions } from '@/components/features/admins/useAdminActions';
 import { useUrlState } from '@/hooks/useUrlState';
 import { shortDate } from '@/lib/format';
 import { superAdminApi } from '@/services';
@@ -15,47 +16,85 @@ import { useAdmins } from '@/services/hooks';
 import type { UserRow } from '@/services/types';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
-function AdminActions({ user }: { user: UserRow }) {
-  const client = useQueryClient();
-  const active = user.isActive ?? true;
-  async function toggle() {
-    try {
-      await superAdminApi.setUserStatus(user.id, !active);
-      await client.invalidateQueries({ queryKey: ['admins'] });
-      toast.success(active ? 'Account deactivated' : 'Account activated', {
-        description: 'Undo is available for 6 seconds.',
-        duration: 6000,
-        action: {
-          label: 'Undo',
-          onClick: async () => {
-            await superAdminApi.setUserStatus(user.id, active);
-            await client.invalidateQueries({ queryKey: ['admins'] });
-            toast.success('Previous status restored');
-          },
-        },
-      });
-    } catch {
-      toast.error('Could not update account status.');
-    }
-  }
-  return (
-    <button
-      className="button"
-      onClick={toggle}
-      aria-label={`${active ? 'Deactivate' : 'Activate'} ${user.fullName}`}
-    >
-      {active ? 'Deactivate' : 'Activate'}
-    </button>
-  );
-}
+const columns: Column<UserRow>[] = [
+  {
+    key: 'fullName',
+    label: 'Admin',
+    sortable: true,
+    render: (row) => (
+      <span className="identity">
+        <span className="avatar">
+          {row.fullName
+            .split(' ')
+            .map((part) => part[0])
+            .join('')
+            .slice(0, 2)}
+        </span>
+        <span className="identity-copy">
+          <Link className="cell-link identity-name" to={`/admins/${row.id}`}>
+            {row.fullName}
+          </Link>
+          <span className="identity-meta">{row.email}</span>
+        </span>
+      </span>
+    ),
+  },
+  {
+    key: 'isActive',
+    label: 'Status',
+    render: (row) => <StatusBadge value={row.isActive ?? true} />,
+    csv: (row) => (row.isActive === false ? 'inactive' : 'active'),
+  },
+  { key: 'phoneNumber', label: 'Phone', render: (row) => row.phoneNumber, mobile: false },
+  {
+    key: 'signupSource',
+    label: 'Source',
+    sortable: true,
+    render: (row) => <StatusBadge value={row.signupSource} />,
+    mobile: false,
+  },
+  { key: 'role', label: 'Role', render: (row) => <StatusBadge value={row.role} />, mobile: false },
+  {
+    key: 'businessCount',
+    label: 'Businesses',
+    sortable: true,
+    align: 'right',
+    render: (row) => row.businessCount,
+  },
+  {
+    key: 'campaignCount',
+    label: 'Campaigns',
+    sortable: true,
+    align: 'right',
+    render: (row) => row.campaignCount,
+    mobile: false,
+  },
+  {
+    key: 'customerCount',
+    label: 'Customers',
+    sortable: true,
+    align: 'right',
+    render: (row) => row.customerCount.toLocaleString(),
+    mobile: false,
+  },
+  {
+    key: 'created_at',
+    label: 'Created',
+    sortable: true,
+    render: (row) => shortDate(row.created_at),
+    mobile: false,
+  },
+];
 
 export function AdminsList() {
   const state = useUrlState();
   const navigate = useNavigate();
   const client = useQueryClient();
   const query = useAdmins(state.listParams);
+  const actions = useAdminActions({ afterDelete: () => void query.refetch() });
   const [createOpen, setCreateOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -79,52 +118,7 @@ export function AdminsList() {
       setBusy(false);
     }
   }
-  const columns: Column<UserRow>[] = [
-    {
-      key: 'fullName',
-      label: 'Admin',
-      render: (row) => (
-        <span className="identity">
-          <span className="avatar">
-            {row.fullName
-              .split(' ')
-              .map((part) => part[0])
-              .join('')
-              .slice(0, 2)}
-          </span>
-          <span className="identity-copy">
-            <Link className="cell-link identity-name" to={`/admins/${row.id}`}>
-              {row.fullName}
-            </Link>
-            <span className="identity-meta">{row.email}</span>
-          </span>
-        </span>
-      ),
-    },
-    { key: 'phoneNumber', label: 'Phone', render: (row) => row.phoneNumber },
-    { key: 'signupSource', label: 'Source', render: (row) => <StatusBadge value={row.signupSource} /> },
-    { key: 'role', label: 'Role', render: (row) => <StatusBadge value={row.role} /> },
-    { key: 'isActive', label: 'Status', render: (row) => <StatusBadge value={row.isActive ?? true} /> },
-    {
-      key: 'businessCount',
-      label: 'Businesses',
-      render: (row) => <span className="tabular">{row.businessCount}</span>,
-    },
-    {
-      key: 'campaignCount',
-      label: 'Campaigns',
-      render: (row) => <span className="tabular">{row.campaignCount}</span>,
-      mobile: false,
-    },
-    {
-      key: 'customerCount',
-      label: 'Customers',
-      render: (row) => <span className="tabular">{row.customerCount.toLocaleString()}</span>,
-      mobile: false,
-    },
-    { key: 'created_at', label: 'Created', render: (row) => shortDate(row.created_at), mobile: false },
-    { key: 'toggle', label: 'Quick action', render: (row) => <AdminActions user={row} /> },
-  ];
+
   return (
     <>
       <PageHeader
@@ -145,16 +139,51 @@ export function AdminsList() {
         section="admins"
       >
         <DataTable
+          tableId="admins"
           columns={columns}
           rows={query.data?.data ?? []}
           rowId={(row) => row.id}
           total={query.data?.total ?? 0}
-          page={state.page}
-          pageSize={state.limit}
-          onPageChange={(page) => state.setParam('page', String(page))}
-          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+          loading={query.isFetching}
+          {...state.tableProps}
+          rowActions={(row) => {
+            const active = row.isActive ?? true;
+            return [
+              { label: 'View details', icon: <Eye />, onSelect: () => navigate(`/admins/${row.id}`) },
+              {
+                label: active ? 'Deactivate' : 'Activate',
+                icon: active ? <PowerOff /> : <Power />,
+                onSelect: () => void actions.setStatus([row], !active),
+              },
+              { label: 'Reset password…', icon: <KeyRound />, onSelect: () => actions.requestReset(row) },
+              {
+                label: 'Impersonate…',
+                icon: <UserRoundCog />,
+                onSelect: () => actions.requestImpersonate(row),
+              },
+              {
+                label: 'Delete…',
+                icon: <Trash2 />,
+                destructive: true,
+                onSelect: () => actions.requestDelete(row),
+              },
+            ];
+          }}
+          bulkActions={(selected, clear) => (
+            <>
+              <button className="button" onClick={() => void actions.setStatus(selected, true).then(clear)}>
+                <Power />
+                Activate
+              </button>
+              <button className="button" onClick={() => void actions.setStatus(selected, false).then(clear)}>
+                <PowerOff />
+                Deactivate
+              </button>
+            </>
+          )}
         />
       </QueryState>
+      {actions.dialogs}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
           <DialogTitle className="dialog-title">Create admin</DialogTitle>

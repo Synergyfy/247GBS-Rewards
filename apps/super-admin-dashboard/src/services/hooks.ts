@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } f
 import { toast } from 'sonner';
 import { superAdminApi } from './index';
 import { queryKeys } from './query-keys';
+import { isNotAvailable } from '@/lib/errors';
 import type { ListParams, UserListParams, BusinessListParams, CampaignListParams, CustomerListParams, TransactionListParams, PaymentListParams, AuditListParams, PointsAdjustmentInput } from './types';
 
 export const usePlatformAnalytics = (from?: string, to?: string) => useQuery({ queryKey: queryKeys.analytics(from, to), queryFn: () => superAdminApi.platformAnalytics(from, to) });
@@ -31,6 +32,40 @@ export function useCampaignsForBusinesses(businessIds: string[]) {
       refetch: () => results.forEach((result) => void result.refetch()),
     }),
   });
+}
+export interface EntitySearchGroup<T> {
+  items: T[];
+  isLoading: boolean;
+  /** The backend route for this group isn't implemented yet (real-API mode). */
+  notAvailable: boolean;
+  error: Error | null;
+}
+// ⌘K palette (§9B): one small search per entity type. Each group fails independently, so a
+// TODO-BACKEND list that isn't built yet doesn't break the whole search.
+export function useEntitySearch(term: string) {
+  const enabled = term.trim().length >= 2;
+  const params = { search: term.trim(), page: 1, limit: 5 };
+  const toGroup = <T,>(result: { data?: { data: T[] }; isLoading: boolean; error: unknown }): EntitySearchGroup<T> => ({
+    items: result.data?.data ?? [],
+    isLoading: enabled && result.isLoading,
+    notAvailable: isNotAvailable(result.error),
+    error: result.error && !isNotAvailable(result.error) ? (result.error as Error) : null,
+  });
+  const [admins, businesses, campaigns, customers] = useQueries({
+    queries: [
+      { queryKey: queryKeys.admins(params), queryFn: () => superAdminApi.listAdmins(params), enabled, retry: false },
+      { queryKey: queryKeys.businesses(params), queryFn: () => superAdminApi.listBusinesses(params), enabled, retry: false },
+      { queryKey: queryKeys.campaigns(params), queryFn: () => superAdminApi.listCampaigns(params), enabled, retry: false },
+      { queryKey: queryKeys.customers(params), queryFn: () => superAdminApi.listCustomers(params), enabled, retry: false },
+    ],
+  });
+  return {
+    enabled,
+    admins: toGroup(admins),
+    businesses: toGroup(businesses),
+    campaigns: toGroup(campaigns),
+    customers: toGroup(customers),
+  };
 }
 export const usePayments = (params: PaymentListParams) => useQuery({ queryKey: queryKeys.payments(params), queryFn: () => superAdminApi.listPayments(params), placeholderData: keepPreviousData });
 export const useAuditLogs = (params: AuditListParams) => useQuery({ queryKey: queryKeys.audit(params), queryFn: () => superAdminApi.listAuditLogs(params), placeholderData: keepPreviousData });

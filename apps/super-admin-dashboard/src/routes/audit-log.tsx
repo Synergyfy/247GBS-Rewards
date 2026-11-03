@@ -13,20 +13,23 @@ export function AuditLogList() {
   const query = useAuditLogs(state.listParams);
   const [expanded, setExpanded] = useState<string | null>(null);
   const columns: Column<AuditLogEntry>[] = [
-    { key: 'created_at', label: 'Timestamp', render: (row) => shortDate(row.created_at) },
+    { key: 'created_at', sortable: true, label: 'Timestamp', render: (row) => shortDate(row.created_at) },
     {
       key: 'actor',
       label: 'Actor',
       render: (row) => <span title={row.actor.email}>{row.actor.fullName}</span>,
     },
-    { key: 'action', label: 'Action', render: (row) => row.action.replaceAll('.', ' ') },
+    { key: 'action', sortable: true, label: 'Action', render: (row) => row.action.replaceAll('.', ' ') },
     {
       key: 'targetType',
+      sortable: true,
+      mobile: false,
       label: 'Target',
       render: (row) => <span className="cell-muted">{row.targetType}</span>,
     },
     {
       key: 'targetId',
+      mobile: false,
       label: 'Target ID',
       render: (row) => <span className="tabular">{row.targetId.slice(0, 8)}…</span>,
     },
@@ -58,14 +61,13 @@ export function AuditLogList() {
         section="audit log"
       >
         <DataTable
+          tableId="audit-log"
           columns={columns}
           rows={query.data?.data ?? []}
           rowId={(row) => row.id}
           total={query.data?.total ?? 0}
-          page={state.page}
-          pageSize={state.limit}
-          onPageChange={(page) => state.setParam('page', String(page))}
-          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+          {...state.tableProps}
+          loading={query.isFetching}
         />
       </QueryState>
     </>
