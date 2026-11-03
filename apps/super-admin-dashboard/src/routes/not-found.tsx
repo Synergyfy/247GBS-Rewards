@@ -1,2 +1,19 @@
 import { Link } from 'react-router';
-export function NotFound() { return <div className="panel empty-state"><h2>Page not found</h2><p>The requested dashboard page does not exist.</p><Link to="/" className="button primary">Back to overview</Link></div>; }
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/display/States';
+
+export function NotFound() {
+  return (
+    <div className="panel">
+      <EmptyState
+        title="Page not found"
+        description="The requested dashboard page does not exist."
+        action={
+          <Button asChild>
+            <Link to="/">Back to overview</Link>
+          </Button>
+        }
+      />
+    </div>
+  );
+}

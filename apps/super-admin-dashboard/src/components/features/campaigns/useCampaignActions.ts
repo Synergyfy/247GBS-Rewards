@@ -28,6 +28,7 @@ export function useCampaignActions() {
       const label = changed.length === 1 ? changed[0]!.name : `${changed.length} campaigns`;
       toast.success(`${label} ${isActive ? 'activated' : 'deactivated'}`, {
         duration: 6000,
+        className: 'toast-undo',
         action: {
           label: 'Undo',
           onClick: () => {

@@ -1,7 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ChevronDown, LogOut, Menu, Moon, Search, Sun } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { clearSession, getSessionUser } from '@/lib/session';
 import { useTheme } from '@/lib/useTheme';
 import { useCurrentCrumbs, type Crumb } from '@/lib/breadcrumb-context';
@@ -12,8 +21,8 @@ interface TopbarProps {
   onOpenSearch: () => void;
 }
 
+/** §9B top bar (44px): ownership breadcrumb, ⌘K search and the account menu. */
 export function Topbar({ onOpenNav, onOpenSearch }: TopbarProps) {
-  const [accountOpen, setAccountOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const client = useQueryClient();
@@ -38,19 +47,21 @@ export function Topbar({ onOpenNav, onOpenSearch }: TopbarProps) {
 
   return (
     <header className="topbar">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <button className="icon-button mobile-menu" aria-label="Open navigation" onClick={onOpenNav}>
+      <div className="flex min-w-0 items-center gap-2">
+        <Button variant="ghost" size="icon" className="mobile-menu text-muted-foreground" aria-label="Open navigation" onClick={onOpenNav}>
           <Menu />
-        </button>
+        </Button>
         <nav className="breadcrumb" aria-label="Breadcrumb">
           <Link to="/" className="inline-link">
             Monitor
           </Link>
           {crumbs.map((crumb, i) => (
-            <span key={`${crumb.label}-${i}`}>
+            <span key={`${crumb.label}-${i}`} className="truncate">
               /{' '}
               {i === crumbs.length - 1 ? (
-                <strong aria-current="page">{crumb.label}</strong>
+                <strong aria-current="page" className="font-medium text-foreground">
+                  {crumb.label}
+                </strong>
               ) : crumb.to ? (
                 <Link to={crumb.to} className="inline-link">
                   {crumb.label}
@@ -62,33 +73,36 @@ export function Topbar({ onOpenNav, onOpenSearch }: TopbarProps) {
           ))}
         </nav>
       </div>
-      <div className="topbar-actions">
-        <button className="button" onClick={onOpenSearch} aria-label="Search entities">
+      <div className="flex items-center gap-2">
+        <Button variant="outline" onClick={onOpenSearch} aria-label="Search entities">
           <Search />
-          Search<span className="cell-muted hide-mobile">⌘K</span>
-        </button>
-        <div style={{ position: 'relative' }}>
-          <button
-            className="button ghost"
-            onClick={() => setAccountOpen((open) => !open)}
-            aria-expanded={accountOpen}
-          >
-            <span className="avatar">{(user?.name ?? 'SA').slice(0, 1)}</span>
-            <span className="hide-mobile">{user?.name ?? 'Super Admin'}</span>
-            <ChevronDown size={12} />
-          </button>
-          {accountOpen && (
-            <div className="account-menu">
-              <button onClick={toggleTheme}>
-                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}Appearance: {theme}
-              </button>
-              <button onClick={logout}>
-                <LogOut size={14} />
-                Sign out
-              </button>
-            </div>
-          )}
-        </div>
+          Search
+          <kbd className="text-[11px] text-muted-foreground max-md:hidden">⌘K</kbd>
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" aria-label="Account menu">
+              <span className="avatar">{(user?.name ?? 'SA').slice(0, 1)}</span>
+              <span className="max-md:hidden">{user?.name ?? 'Super Admin'}</span>
+              <ChevronDown className="size-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-48">
+            <DropdownMenuLabel className="text-xs">
+              <div className="font-medium">{user?.name ?? 'Super Admin'}</div>
+              {user?.email && <div className="font-normal text-muted-foreground">{user.email}</div>}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="h-7 text-xs" onSelect={toggleTheme}>
+              {theme === 'dark' ? <Sun /> : <Moon />}
+              Switch to {theme === 'dark' ? 'light' : 'dark'} mode
+            </DropdownMenuItem>
+            <DropdownMenuItem className="h-7 text-xs" onSelect={logout}>
+              <LogOut />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

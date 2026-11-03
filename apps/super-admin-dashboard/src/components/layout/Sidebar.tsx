@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { NavLink } from 'react-router';
 import { navGroups } from './nav';
 
@@ -42,13 +43,13 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
         </nav>
         <div className="sidebar-footer">
           <span>247GBS · v0.1.0</span>
-          <button
-            className="icon-button collapse-button"
+          <Button
+            variant="ghost" size="icon" className="text-muted-foreground collapse-button"
             onClick={onToggleCollapse}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             ‹
-          </button>
+          </Button>
         </div>
       </aside>
     </>

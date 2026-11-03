@@ -1,6 +1,7 @@
 import { appEnv } from '@/lib/env';
 import { createMockToken } from '@/lib/session';
 import { sortByField } from '@/lib/sort';
+import { daysIn, resolveRange } from '@/lib/date-range';
 import type { SuperAdminApi } from '../api';
 import { createFixtures } from './fixtures';
 import type {
@@ -145,9 +146,13 @@ export const mockApi: SuperAdminApi = {
     const activity = Array.from({ length: 7 }, (_, i) => ({ date: new Date(Date.now() - (6 - i) * 86400000).toISOString().slice(0, 10), count: 20 + (i * 13) % 50 }));
     return { campaignName: campaign.name, isActive: campaign.isActive ?? true, totalCustomers: customers.length, totalPointsIssued: customers.reduce((sum, customer) => sum + (customer.balance ?? 0), 0), totalRewardsRedeemed: store.redemptions.filter((item) => item.campaign?.id === id).length, pointsActivity: activity, rewardsActivity: activity.map((point) => ({ ...point, count: Math.round(point.count / 8) })) };
   },
-  async platformAnalytics(): Promise<PlatformAnalytics> {
+  async platformAnalytics(from?: string, to?: string): Promise<PlatformAnalytics> {
     await pause();
-    const series = Array.from({ length: 30 }, (_, i) => ({ date: new Date(Date.now() - (29 - i) * 86400000).toISOString().slice(0, 10), newUsers: 4 + (i * 7) % 12, newCustomers: 33 + (i * 29) % 80, pointsIssued: 2200 + (i * 347) % 2600, redemptions: 15 + (i * 13) % 40 }));
+    // Honors the from/to contract; each day's figures derive from the date so they're stable across reloads
+    const series = daysIn(resolveRange(from, to)).map((date) => {
+      const n = Math.floor(Date.parse(date) / 86400000);
+      return { date, newUsers: 4 + (n * 7) % 12, newCustomers: 33 + (n * 29) % 80, pointsIssued: 2200 + (n * 347) % 2600, redemptions: 15 + (n * 13) % 40 };
+    });
     const pointsIssued = store.customers.reduce((sum, customer) => sum + (customer.balance ?? 0), 0);
     return { totals: { users: store.admins.length, usersByRole: { super_admin: 1, admin: store.admins.length, staff: store.staff.length, customer: store.customers.length }, usersBySignupSource: { mcom: store.admins.filter((user) => user.signupSource === 'mcom').length, stock_audit: store.admins.filter((user) => user.signupSource === 'stock_audit').length }, businesses: store.businesses.length, campaigns: store.campaigns.length, activeCampaigns: store.campaigns.filter((campaign) => campaign.isActive).length, customers: store.customers.length, pointsIssued, pointsRedeemed: Math.abs(store.ledger.filter((entry) => entry.points < 0).reduce((sum, entry) => sum + entry.points, 0)), rewardsRedeemed: store.redemptions.length, revenue: store.payments.filter((payment) => payment.status === 'success').reduce((sum, payment) => sum + payment.amount, 0) }, series, topBusinesses: store.businesses.slice(0, 5).map((business) => ({ businessId: business.id, name: business.name, ownerName: business.user?.fullName ?? '—', customers: store.customers.filter((customer) => store.campaigns.some((campaign) => campaign.business?.id === business.id && campaign.id === customer.campaign?.id)).length, pointsIssued: 4200 + business.id.charCodeAt(35) * 120 })) };
   },

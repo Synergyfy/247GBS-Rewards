@@ -1,3 +1,5 @@
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
@@ -27,9 +29,9 @@ export function LoginPage() {
     } finally { setPending(false); }
   }
   return <main className="login-page"><section className="login-card"><div className="brand"><span className="brand-mark">247</span><span>247GBS Rewards<span className="brand-sub">SUPER ADMIN</span></span></div><h1>Sign in</h1><p>Use your super-admin account to continue.</p><form onSubmit={submit}>
-    <div className="form-field"><label htmlFor="email">Email</label><input id="email" className="input" type="email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} /></div>
-    <div className="form-field"><label htmlFor="password">Password</label><input id="password" className="input" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} /></div>
+    <div className="form-field"><label htmlFor="email">Email</label><Input id="email"  type="email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} /></div>
+    <div className="form-field"><label htmlFor="password">Password</label><Input id="password"  type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} /></div>
     {error && <p className="form-error" role="alert">{error}</p>}
-    <button className="button primary login-submit" type="submit" disabled={pending}>{pending ? 'Signing in…' : 'Sign in'}</button>
-  </form>{appEnv.USE_MOCKS && <p style={{ marginTop: 13, marginBottom: 0 }}>Mock mode: <span className="tabular">super@247gbs.test / password</span></p>}</section></main>;
+    <Button variant="default" className="login-submit" type="submit" disabled={pending}>{pending ? 'Signing in…' : 'Sign in'}</Button>
+  </form>{appEnv.USE_MOCKS && <p style={{ marginTop: 13, marginBottom: 0 }}>Mock mode: <span className="tabular-nums">super@247gbs.test / password</span></p>}</section></main>;
 }

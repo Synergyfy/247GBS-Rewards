@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { PageHeader, KpiStrip } from '@/components/display/PageHeader';
 import { QueryState } from '@/components/display/QueryState';
@@ -19,7 +20,7 @@ const ledgerColumns: Column<PointsLedgerEntry>[] = [
     key: 'points',
     label: 'Points',
     render: (row) => (
-      <span className="tabular" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
+      <span className="tabular-nums" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
         {row.points > 0 ? '+' : ''}
         {row.points}
       </span>
@@ -30,13 +31,20 @@ const ledgerColumns: Column<PointsLedgerEntry>[] = [
 const redemptionColumns: Column<Redemption>[] = [
   { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
   { key: 'description', label: 'Reward', render: (row) => row.reward?.title ?? row.description },
-  { key: 'uniqueCode', label: 'Redemption code', render: (row) => <span className="tabular">{row.uniqueCode}</span> },
+  { key: 'uniqueCode', label: 'Redemption code', render: (row) => <span className="tabular-nums">{row.uniqueCode}</span> },
 ];
 
 export function CustomerDetail() {
   const { id = '' } = useParams();
   const query = useCustomer(id);
   const [adjustOpen, setAdjustOpen] = useState(false);
+  // §9A: the new ledger entry gets a one-time 1.2s highlight after a points adjustment
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!highlightId) return;
+    const timer = window.setTimeout(() => setHighlightId(null), 1200);
+    return () => window.clearTimeout(timer);
+  }, [highlightId]);
   const adjust = useAdjustPoints();
   const customer = query.data;
   const campaign = customer?.campaign;
@@ -66,9 +74,9 @@ export function CustomerDetail() {
             title={`${customer.firstName} ${customer.lastName}`}
             description={customer.email}
             actions={
-              <button className="button primary" onClick={() => setAdjustOpen(true)}>
+              <Button variant="default" onClick={() => setAdjustOpen(true)}>
                 Adjust points
-              </button>
+              </Button>
             }
           />
           <KpiStrip
@@ -88,7 +96,16 @@ export function CustomerDetail() {
                     value: 'ledger',
                     label: 'Ledger',
                     count: customer.ledger.length,
-                    content: <DataTable columns={ledgerColumns} rows={customer.ledger} rowId={(row) => row.id} emptyTitle="No points activity" />,
+                    content: (
+                      <DataTable
+                        tableId="customer-ledger"
+                        columns={ledgerColumns}
+                        rows={customer.ledger}
+                        rowId={(row) => row.id}
+                        highlightId={highlightId}
+                        emptyTitle="No points activity"
+                      />
+                    ),
                   },
                   {
                     value: 'redemptions',
@@ -122,7 +139,8 @@ export function CustomerDetail() {
             campaignId={campaign?.id ?? ''}
             campaignName={campaign?.name ?? 'No campaign'}
             onSubmit={async (input) => {
-              await adjust.mutateAsync({ id, input });
+              const entry = await adjust.mutateAsync({ id, input });
+              setHighlightId(entry.id);
             }}
           />
         </>

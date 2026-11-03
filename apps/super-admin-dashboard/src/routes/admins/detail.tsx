@@ -1,3 +1,5 @@
+import { NativeSelect } from '@/components/ui/native-select';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { Building2, KeyRound, Power, PowerOff, Trash2, UserRoundCog } from 'lucide-react';
@@ -77,12 +79,12 @@ function ScopeSelect({
   return (
     <div className="toolbar" style={{ borderBottom: '1px solid var(--border)' }}>
       <div className="toolbar-left">
-        <label className="cell-muted" htmlFor={`scope-${label}`}>
+        <label className="text-muted-foreground" htmlFor={`scope-${label}`}>
           {label}
         </label>
-        <select
+        <NativeSelect
           id={`scope-${label}`}
-          className="select"
+          
           value={value}
           onChange={(event) => onChange(event.target.value)}
         >
@@ -91,7 +93,7 @@ function ScopeSelect({
               {option.name}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
     </div>
   );
@@ -131,7 +133,7 @@ function CustomersTab({ businesses }: { businesses: Business[] }) {
     { key: 'created_at', label: 'Joined', render: (row) => shortDate(row.created_at) },
   ];
   if (!businesses.length)
-    return <div className="panel-body cell-muted">This admin has no businesses yet.</div>;
+    return <div className="panel-body text-muted-foreground">This admin has no businesses yet.</div>;
   return (
     <>
       <ScopeSelect
@@ -193,7 +195,7 @@ function TransactionsTab({ businesses }: { businesses: Business[] }) {
       key: 'points',
       label: 'Points',
       render: (row) => (
-        <span className="tabular" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
+        <span className="tabular-nums" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
           {row.points > 0 ? '+' : ''}
           {row.points.toLocaleString()}
         </span>
@@ -201,7 +203,7 @@ function TransactionsTab({ businesses }: { businesses: Business[] }) {
     },
   ];
   if (!campaigns.isLoading && !campaigns.data.length)
-    return <div className="panel-body cell-muted">This admin has no campaigns yet.</div>;
+    return <div className="panel-body text-muted-foreground">This admin has no campaigns yet.</div>;
   return (
     <>
       <ScopeSelect
@@ -247,7 +249,7 @@ function PaymentsTab({ userId }: { userId: string }) {
     {
       key: 'amount',
       label: 'Amount',
-      render: (row) => <span className="tabular">{currency(row.amount)}</span>,
+      render: (row) => <span className="tabular-nums">{currency(row.amount)}</span>,
     },
   ];
   const seasons = (row: AuditBalance) => `${row.spring} / ${row.summer} / ${row.autumn} / ${row.winter}`;
@@ -257,7 +259,7 @@ function PaymentsTab({ userId }: { userId: string }) {
     {
       key: 'seasons',
       label: 'Spring / Summer / Autumn / Winter',
-      render: (row) => <span className="tabular">{seasons(row)}</span>,
+      render: (row) => <span className="tabular-nums">{seasons(row)}</span>,
     },
   ];
   return (
@@ -309,7 +311,7 @@ function ActivityTab({ userId }: { userId: string }) {
     {
       key: 'note',
       label: 'Note',
-      render: (row) => <span className="cell-muted">{String(row.payload?.note ?? '—')}</span>,
+      render: (row) => <span className="text-muted-foreground">{String(row.payload?.note ?? '—')}</span>,
     },
   ];
   return (
@@ -355,21 +357,21 @@ export function AdminDetail() {
               <>
                 <StatusBadge value={user.role} />
                 <StatusBadge value={user.isActive ?? true} />
-                <button
-                  className="button"
+                <Button
+                  variant="outline"
                   onClick={() => void actions.setStatus([user], !(user.isActive ?? true))}
                 >
                   {user.isActive === false ? <Power /> : <PowerOff />}
                   {user.isActive === false ? 'Activate' : 'Deactivate'}
-                </button>
-                <button className="button" onClick={() => actions.requestReset(user)}>
+                </Button>
+                <Button variant="outline" onClick={() => actions.requestReset(user)}>
                   <KeyRound />
                   Reset password
-                </button>
-                <button className="button" onClick={() => actions.requestImpersonate(user)}>
+                </Button>
+                <Button variant="outline" onClick={() => actions.requestImpersonate(user)}>
                   <UserRoundCog />
                   Impersonate
-                </button>
+                </Button>
               </>
             }
           />
@@ -395,14 +397,14 @@ export function AdminDetail() {
                     content: (
                       <>
                         <div className="toolbar" style={{ borderBottom: '1px solid var(--border)' }}>
-                          <span className="cell-muted">Businesses owned by this admin</span>
-                          <button
-                            className="button"
+                          <span className="text-muted-foreground">Businesses owned by this admin</span>
+                          <Button
+                            variant="outline"
                             onClick={() => navigate(`/businesses?ownerId=${user.id}`)}
                           >
                             <Building2 />
                             Add business
-                          </button>
+                          </Button>
                         </div>
                         <DataTable
                           columns={businessColumns}
@@ -451,10 +453,10 @@ export function AdminDetail() {
                 ]}
               />
               <DangerZone description="Deleting an account is permanent. Related business data may remain depending on backend cascade rules.">
-                <button className="button danger" onClick={() => actions.requestDelete(user)}>
+                <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => actions.requestDelete(user)}>
                   <Trash2 />
                   Delete admin
-                </button>
+                </Button>
               </DangerZone>
               <details className="panel panel-body" style={{ marginTop: 12 }}>
                 <summary>Technical details</summary>

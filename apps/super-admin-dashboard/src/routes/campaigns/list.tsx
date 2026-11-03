@@ -1,3 +1,5 @@
+import { NativeSelect } from '@/components/ui/native-select';
+import { Button } from '@/components/ui/button';
 import { useCampaignActions } from '@/components/features/campaigns/useCampaignActions';
 import { appEnv } from '@/lib/env';
 import { ExternalLink, Eye, Power, PowerOff } from 'lucide-react';
@@ -58,7 +60,7 @@ export function CampaignsList() {
       sortable: true,
       mobile: false,
       label: 'Code',
-      render: (row) => <span className="tabular">{row.uniqueCode}</span>,
+      render: (row) => <span className="tabular-nums">{row.uniqueCode}</span>,
     },
     {
       key: 'created_at',
@@ -72,8 +74,8 @@ export function CampaignsList() {
     <>
       <PageHeader title="Campaigns" description="Loyalty programs across all businesses." />
       <FilterBar placeholder="Search campaign or unique code…">
-        <select
-          className="select"
+        <NativeSelect
+          
           aria-label="Campaign type"
           value={type ?? ''}
           onChange={(event) => state.setParam('type', event.target.value || undefined)}
@@ -82,9 +84,9 @@ export function CampaignsList() {
           <option value="PRESET">Preset</option>
           <option value="CO_BRANDED">Co-branded</option>
           <option value="SEASONAL">Seasonal</option>
-        </select>
-        <select
-          className="select"
+        </NativeSelect>
+        <NativeSelect
+          
           aria-label="Campaign status"
           value={state.params.get('active') ?? ''}
           onChange={(event) => state.setParam('active', event.target.value || undefined)}
@@ -92,7 +94,7 @@ export function CampaignsList() {
           <option value="">All status</option>
           <option value="true">Active</option>
           <option value="false">Inactive</option>
-        </select>
+        </NativeSelect>
       </FilterBar>
       <QueryState
         loading={query.isLoading}
@@ -128,20 +130,20 @@ export function CampaignsList() {
           ]}
           bulkActions={(selected, clear) => (
             <>
-              <button
-                className="button"
+              <Button
+                variant="outline"
                 onClick={() => void campaignActions.setStatus(selected, true).then(clear)}
               >
                 <Power />
                 Activate
-              </button>
-              <button
-                className="button"
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => void campaignActions.setStatus(selected, false).then(clear)}
               >
                 <PowerOff />
                 Deactivate
-              </button>
+              </Button>
             </>
           )}
         />

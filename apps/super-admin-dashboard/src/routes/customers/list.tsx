@@ -43,7 +43,7 @@ export function CustomersList() {
       sortable: true,
       align: 'right',
       label: 'Balance',
-      render: (row) => <span className="tabular">{(row.balance ?? 0).toLocaleString()} pts</span>,
+      render: (row) => <span className="tabular-nums">{(row.balance ?? 0).toLocaleString()} pts</span>,
     },
     {
       key: 'created_at',

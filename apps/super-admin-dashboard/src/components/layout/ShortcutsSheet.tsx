@@ -24,7 +24,7 @@ export function ShortcutsSheet({ open, onClose }: { open: boolean; onClose: () =
             {SHORTCUTS.map(([keys, action]) => (
               <tr key={keys}>
                 <td style={{ width: 120 }}>
-                  <kbd className="tabular rounded-sm border border-border bg-muted px-1.5 py-0.5 text-[11px]">{keys}</kbd>
+                  <kbd className="tabular-nums rounded-sm border border-border bg-muted px-1.5 py-0.5 text-[11px]">{keys}</kbd>
                 </td>
                 <td>{action}</td>
               </tr>

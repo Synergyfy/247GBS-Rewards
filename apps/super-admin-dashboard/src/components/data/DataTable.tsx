@@ -1,3 +1,5 @@
+import { NativeSelect } from '@/components/ui/native-select';
+import { Button } from '@/components/ui/button';
 import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import {
   ArrowDown,
@@ -12,7 +14,7 @@ import {
   Rows3,
   Rows4,
 } from 'lucide-react';
-import { EmptyState } from '@/components/display/States';
+import { EmptyState, ErrorState } from '@/components/display/States';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -217,14 +219,7 @@ export function DataTable<T>({
   }
 
   if (error) {
-    return (
-      <div className="error-box">
-        <span>{error.message || 'Something went wrong while loading data.'}</span>
-        <button className="button" onClick={onRetry}>
-          Retry
-        </button>
-      </div>
-    );
+    return <ErrorState message={error.message || 'Something went wrong while loading data.'} retry={() => onRetry?.()} />;
   }
 
   const allSelected = viewRows.length > 0 && selectedIds.length === viewRows.length;
@@ -239,41 +234,41 @@ export function DataTable<T>({
           aria-label="Bulk actions"
         >
           <div className="toolbar-left">
-            <span className="tabular">{selectedIds.length} selected</span>
+            <span className="tabular-nums">{selectedIds.length} selected</span>
             {bulkActions?.(selectedRows, clearSelection)}
-            <button className="button" onClick={() => exportCsv(selectedRows)}>
+            <Button variant="outline" onClick={() => exportCsv(selectedRows)}>
               <Download />
               Export selected
-            </button>
+            </Button>
           </div>
           <div className="toolbar-right">
-            <button className="button ghost" onClick={clearSelection}>
+            <Button variant="ghost" onClick={clearSelection}>
               Clear selection
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
         <div className="toolbar">
           <div className="toolbar-left">
-            <span className="cell-muted tabular">
+            <span className="text-muted-foreground tabular-nums">
               {loading ? 'Updating…' : `${totalRows.toLocaleString()} records`}
             </span>
           </div>
           <div className="toolbar-right">
-            <button
-              className="icon-button"
+            <Button
+              variant="ghost" size="icon" className="text-muted-foreground"
               onClick={toggleDensity}
               aria-label={density === 'compact' ? 'Switch to comfortable rows' : 'Switch to compact rows'}
               title={density === 'compact' ? 'Comfortable rows' : 'Compact rows'}
             >
               {density === 'compact' ? <Rows3 /> : <Rows4 />}
-            </button>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="button" aria-label="Choose visible columns">
+                <Button variant="outline" aria-label="Choose visible columns">
                   <Columns3 />
                   Columns
-                </button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-44">
                 <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -292,14 +287,14 @@ export function DataTable<T>({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <button
-              className="button"
+            <Button
+              variant="outline"
               onClick={() => exportCsv(viewRows)}
               aria-label="Export current page as CSV"
             >
               <Download />
               Export CSV
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -406,7 +401,7 @@ export function DataTable<T>({
                         key={column.key}
                         className={cn(
                           column.mobile === false && 'max-md:hidden',
-                          column.align === 'right' && 'tabular text-right',
+                          column.align === 'right' && 'tabular-nums text-right',
                         )}
                       >
                         {column.render(row)}
@@ -414,8 +409,8 @@ export function DataTable<T>({
                     ))}
                     <td>
                       <div style={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                        <button
-                          className="icon-button"
+                        <Button
+                          variant="ghost" size="icon" className="text-muted-foreground"
                           title="Quick look (Space)"
                           aria-label="Quick look"
                           onClick={() =>
@@ -423,13 +418,13 @@ export function DataTable<T>({
                           }
                         >
                           <Eye />
-                        </button>
+                        </Button>
                         {actions.length > 0 && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <button className="icon-button" aria-label="More row actions">
+                              <Button variant="ghost" size="icon" className="text-muted-foreground" aria-label="More row actions">
                                 <MoreHorizontal />
-                              </button>
+                              </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="min-w-44">
                               {actions.map((action, index) => (
@@ -461,40 +456,40 @@ export function DataTable<T>({
         </div>
       )}
       <div className="table-footer">
-        <span className="tabular">
+        <span className="tabular-nums">
           {first}–{last} of {totalRows.toLocaleString()}
         </span>
         <div className="pagination">
-          <label className="cell-muted" htmlFor={`page-size-${tableId ?? 'table'}`}>
+          <label className="text-muted-foreground" htmlFor={`page-size-${tableId ?? 'table'}`}>
             Rows
           </label>
-          <select
+          <NativeSelect
             id={`page-size-${tableId ?? 'table'}`}
-            className="select"
+            
             value={pageSize}
             onChange={(event) => changePageSize(Number(event.target.value))}
           >
             <option value={25}>25</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
-          </select>
-          <button
-            className="icon-button"
+          </NativeSelect>
+          <Button
+            variant="ghost" size="icon" className="text-muted-foreground"
             aria-label="Previous page"
             disabled={page <= 1}
             onClick={() => changePage(page - 1)}
           >
             <ChevronLeft />
-          </button>
-          <span className="tabular">{page}</span>
-          <button
-            className="icon-button"
+          </Button>
+          <span className="tabular-nums">{page}</span>
+          <Button
+            variant="ghost" size="icon" className="text-muted-foreground"
             aria-label="Next page"
             disabled={last >= totalRows}
             onClick={() => changePage(page + 1)}
           >
             <ChevronRight />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

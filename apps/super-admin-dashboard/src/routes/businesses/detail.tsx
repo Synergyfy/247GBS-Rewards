@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -29,7 +30,7 @@ const campaignColumns: Column<Campaign>[] = [
   },
   { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
   { key: 'isActive', label: 'Status', render: (row) => <StatusBadge value={row.isActive} /> },
-  { key: 'uniqueCode', label: 'Code', render: (row) => <span className="tabular">{row.uniqueCode}</span> },
+  { key: 'uniqueCode', label: 'Code', render: (row) => <span className="tabular-nums">{row.uniqueCode}</span> },
   { key: 'created_at', label: 'Created', render: (row) => shortDate(row.created_at) },
 ];
 
@@ -88,13 +89,13 @@ export function BusinessDetail() {
             title={business.name}
             description={business.email}
             actions={
-              <button
-                className="button"
+              <Button
+                variant="outline"
                 onClick={() => navigator.clipboard.writeText(business.id).then(() => toast.success('ID copied'))}
               >
                 <Copy />
                 Copy ID
-              </button>
+              </Button>
             }
           />
           <KpiStrip
@@ -164,10 +165,10 @@ export function BusinessDetail() {
               <DangerZone
                 description={`Deleting this business also removes its ${business.campaigns?.length ?? 0} campaigns, staff, segments, seasons and links. Customers of those campaigns may be removed.`}
               >
-                <button className="button danger" onClick={() => setDeleteOpen(true)}>
+                <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => setDeleteOpen(true)}>
                   <Trash2 />
                   Delete business
-                </button>
+                </Button>
               </DangerZone>
               <details className="panel panel-body" style={{ marginTop: 12 }}>
                 <summary>Technical details</summary>

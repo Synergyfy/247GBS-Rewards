@@ -65,6 +65,7 @@ export function useAdminActions({ afterDelete }: { afterDelete?: () => void } = 
       const label = changed.length === 1 ? changed[0]!.fullName : `${changed.length} accounts`;
       toast.success(`${label} ${isActive ? 'activated' : 'deactivated'}`, {
         duration: 6000,
+        className: 'toast-undo',
         action: {
           label: 'Undo',
           onClick: () => {

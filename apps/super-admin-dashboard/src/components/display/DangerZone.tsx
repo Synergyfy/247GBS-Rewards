@@ -10,7 +10,7 @@ export function DangerZone({ description, children }: { description: ReactNode; 
         </h2>
         <div style={{ display: 'flex', gap: 6 }}>{children}</div>
       </header>
-      <div className="panel-body cell-muted">{description}</div>
+      <div className="panel-body text-muted-foreground">{description}</div>
     </section>
   );
 }

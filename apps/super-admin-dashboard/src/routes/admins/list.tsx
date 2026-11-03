@@ -1,3 +1,5 @@
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -125,10 +127,10 @@ export function AdminsList() {
         title="Admins"
         description="Business-owner accounts and their platform footprint."
         actions={
-          <button className="button primary" onClick={() => setCreateOpen(true)}>
+          <Button variant="default" onClick={() => setCreateOpen(true)}>
             <UserRoundPlus />
             Create admin
-          </button>
+          </Button>
         }
       />
       <FilterBar placeholder="Search name, email, phone…" />
@@ -171,14 +173,14 @@ export function AdminsList() {
           }}
           bulkActions={(selected, clear) => (
             <>
-              <button className="button" onClick={() => void actions.setStatus(selected, true).then(clear)}>
+              <Button variant="outline" onClick={() => void actions.setStatus(selected, true).then(clear)}>
                 <Power />
                 Activate
-              </button>
-              <button className="button" onClick={() => void actions.setStatus(selected, false).then(clear)}>
+              </Button>
+              <Button variant="outline" onClick={() => void actions.setStatus(selected, false).then(clear)}>
                 <PowerOff />
                 Deactivate
-              </button>
+              </Button>
             </>
           )}
         />
@@ -186,30 +188,30 @@ export function AdminsList() {
       {actions.dialogs}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
-          <DialogTitle className="dialog-title">Create admin</DialogTitle>
-          <DialogDescription className="dialog-description">
+          <DialogTitle>Create admin</DialogTitle>
+          <DialogDescription >
             Create a business-owner account. A password is not shown or stored by the dashboard.
           </DialogDescription>
           <form onSubmit={create}>
             <div className="form-field">
               <label htmlFor="new-name">Full name</label>
-              <input id="new-name" name="fullName" required className="input" />
+              <Input id="new-name" name="fullName" required />
             </div>
             <div className="form-field">
               <label htmlFor="new-email">Email</label>
-              <input id="new-email" name="email" required type="email" className="input" />
+              <Input id="new-email" name="email" required type="email" />
             </div>
             <div className="form-field">
               <label htmlFor="new-phone">Phone</label>
-              <input id="new-phone" name="phoneNumber" required className="input" />
+              <Input id="new-phone" name="phoneNumber" required />
             </div>
-            <div className="dialog-footer">
-              <button type="button" className="button" onClick={() => setCreateOpen(false)}>
+            <div className="mt-4 flex justify-end gap-1.5">
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
                 Cancel
-              </button>
-              <button type="submit" className="button primary" disabled={busy}>
+              </Button>
+              <Button type="submit" variant="default" disabled={busy}>
                 {busy ? 'Creating…' : 'Create admin'}
-              </button>
+              </Button>
             </div>
           </form>
         </DialogContent>

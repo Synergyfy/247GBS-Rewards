@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Outlet, useLocation } from 'react-router';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation, useNavigation } from 'react-router';
 import { useHotkeys } from '@/hooks/useHotkeys';
 import { BreadcrumbContext, type Crumb } from '@/lib/breadcrumb-context';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
-import { CommandPalette } from './CommandPalette';
-import { QuickLookSheet } from './QuickLookSheet';
-import { ShortcutsSheet } from './ShortcutsSheet';
+
+// Overlays load on first use so they stay out of the initial bundle (§10: shell, login and overview only)
+const CommandPalette = lazy(() => import('./CommandPalette').then((m) => ({ default: m.CommandPalette })));
+const QuickLookSheet = lazy(() => import('./QuickLookSheet').then((m) => ({ default: m.QuickLookSheet })));
+const ShortcutsSheet = lazy(() => import('./ShortcutsSheet').then((m) => ({ default: m.ShortcutsSheet })));
 
 const COLLAPSED_KEY = 'sa_sidebar_collapsed';
 
@@ -25,8 +27,15 @@ export function RootLayout() {
   const [crumbs, setCrumbs] = useState<Crumb[] | null>(null);
   const breadcrumbs = useMemo(() => ({ crumbs, setCrumbs }), [crumbs]);
   const location = useLocation();
+  // Pending lazy route or loader (§9A: 2px top progress bar; no page transition)
+  const navigating = useNavigation().state !== 'idle';
 
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  // Once an overlay has been opened it stays mounted, so its close animation can play
+  const [mounted, setMounted] = useState({ palette: false, shortcuts: false, quickLook: false });
+  if (paletteOpen && !mounted.palette) setMounted((m) => ({ ...m, palette: true }));
+  if (shortcutsOpen && !mounted.shortcuts) setMounted((m) => ({ ...m, shortcuts: true }));
+  if (quickLook && !mounted.quickLook) setMounted((m) => ({ ...m, quickLook: true }));
   const openSearch = useCallback(() => setPaletteOpen(true), []);
   const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
   useHotkeys({ onSearch: openSearch, onShortcuts: openShortcuts });
@@ -57,6 +66,7 @@ export function RootLayout() {
   return (
     <BreadcrumbContext.Provider value={breadcrumbs}>
     <div className={`app-shell ${collapsed ? 'collapsed' : ''}`}>
+      {navigating && <div className="route-progress" role="progressbar" aria-label="Loading page" />}
       <Sidebar
         collapsed={collapsed}
         onToggleCollapse={toggleCollapsed}
@@ -69,9 +79,11 @@ export function RootLayout() {
           <Outlet />
         </main>
       </div>
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-      <QuickLookSheet row={quickLook} onClose={() => setQuickLook(null)} />
-      <ShortcutsSheet open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <Suspense fallback={null}>
+        {mounted.palette && <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />}
+        {mounted.quickLook && <QuickLookSheet row={quickLook} onClose={() => setQuickLook(null)} />}
+        {mounted.shortcuts && <ShortcutsSheet open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />}
+      </Suspense>
     </div>
     </BreadcrumbContext.Provider>
   );

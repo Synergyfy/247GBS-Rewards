@@ -1,3 +1,4 @@
+import { NativeSelect } from '@/components/ui/native-select';
 import { ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { DataTable, type Column } from '@/components/data/DataTable';
@@ -41,7 +42,7 @@ export function PaymentsList() {
       sortable: true,
       align: 'right',
       label: 'Amount',
-      render: (row) => <span className="tabular">{currency(row.amount)}</span>,
+      render: (row) => <span className="tabular-nums">{currency(row.amount)}</span>,
     },
     {
       key: 'created_at',
@@ -55,8 +56,8 @@ export function PaymentsList() {
     <>
       <PageHeader title="Payments" description="Subscription and balance payment history." />
       <FilterBar placeholder="Search account or payment…">
-        <select
-          className="select"
+        <NativeSelect
+          
           aria-label="Payment status"
           value={status ?? ''}
           onChange={(event) => state.setParam('status', event.target.value || undefined)}
@@ -65,7 +66,7 @@ export function PaymentsList() {
           <option value="success">Success</option>
           <option value="pending">Pending</option>
           <option value="failed">Failed</option>
-        </select>
+        </NativeSelect>
       </FilterBar>
       <QueryState
         loading={query.isLoading}

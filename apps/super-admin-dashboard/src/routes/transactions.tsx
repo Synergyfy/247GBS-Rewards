@@ -1,3 +1,4 @@
+import { NativeSelect } from '@/components/ui/native-select';
 import { Megaphone, UserRound } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { DataTable, type Column } from '@/components/data/DataTable';
@@ -42,7 +43,7 @@ export function TransactionsList() {
       align: 'right',
       label: 'Points',
       render: (row) => (
-        <span className="tabular" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
+        <span className="tabular-nums" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
           {row.points > 0 ? '+' : ''}
           {row.points.toLocaleString()}
         </span>
@@ -53,8 +54,8 @@ export function TransactionsList() {
     <>
       <PageHeader title="Transactions" description="Cross-tenant points ledger entries." />
       <FilterBar placeholder="Search customers or descriptions…">
-        <select
-          className="select"
+        <NativeSelect
+          
           aria-label="Transaction kind"
           value={kind ?? ''}
           onChange={(event) => state.setParam('kind', event.target.value || undefined)}
@@ -62,7 +63,7 @@ export function TransactionsList() {
           <option value="">All activity</option>
           <option value="earn">Earned</option>
           <option value="redeem">Redeemed</option>
-        </select>
+        </NativeSelect>
       </FilterBar>
       <QueryState
         loading={query.isLoading}

@@ -1,3 +1,6 @@
+import { NativeSelect } from '@/components/ui/native-select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -87,7 +90,7 @@ export function BusinessesList() {
       key: 'campaigns',
       align: 'right',
       label: 'Campaigns',
-      render: (row) => <span className="tabular">{row.campaigns?.length ?? '—'}</span>,
+      render: (row) => <span className="tabular-nums">{row.campaigns?.length ?? '—'}</span>,
     },
     {
       key: 'created_at',
@@ -103,9 +106,9 @@ export function BusinessesList() {
         title="Businesses"
         description="Business accounts and their linked programs."
         actions={
-          <button className="button primary" onClick={() => setCreateOpen(true)}>
+          <Button variant="default" onClick={() => setCreateOpen(true)}>
             Create business
-          </button>
+          </Button>
         }
       />
       <FilterBar placeholder="Search business or owner…" />
@@ -139,17 +142,17 @@ export function BusinessesList() {
       </QueryState>
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
-          <DialogTitle className="dialog-title">Create business</DialogTitle>
-          <DialogDescription className="dialog-description">
+          <DialogTitle>Create business</DialogTitle>
+          <DialogDescription >
             Add a business to an admin account. Owner is prefilled when launched from admin onboarding.
           </DialogDescription>
           <form onSubmit={create}>
             <div className="form-field">
               <label htmlFor="business-owner">Owner admin</label>
-              <select
+              <NativeSelect
                 id="business-owner"
                 name="ownerId"
-                className="select"
+                
                 value={ownerId}
                 onChange={(event) => setOwnerId(event.target.value)}
                 required
@@ -160,31 +163,31 @@ export function BusinessesList() {
                     {admin.fullName} · {admin.email}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="form-field">
               <label htmlFor="business-name">Business name</label>
-              <input id="business-name" name="name" required className="input" />
+              <Input id="business-name" name="name" required />
             </div>
             <div className="form-field">
               <label htmlFor="business-email">Email</label>
-              <input id="business-email" name="email" required type="email" className="input" />
+              <Input id="business-email" name="email" required type="email" />
             </div>
             <div className="form-field">
               <label htmlFor="business-phone">Phone</label>
-              <input id="business-phone" name="phoneNumber" required className="input" />
+              <Input id="business-phone" name="phoneNumber" required />
             </div>
             <div className="form-field">
               <label htmlFor="business-website">Website (optional)</label>
-              <input id="business-website" name="website" type="url" className="input" />
+              <Input id="business-website" name="website" type="url" />
             </div>
-            <div className="dialog-footer">
-              <button type="button" className="button" onClick={() => setCreateOpen(false)}>
+            <div className="mt-4 flex justify-end gap-1.5">
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
                 Cancel
-              </button>
-              <button type="submit" className="button primary" disabled={busy}>
+              </Button>
+              <Button type="submit" variant="default" disabled={busy}>
                 {busy ? 'Creating…' : 'Create business'}
-              </button>
+              </Button>
             </div>
           </form>
         </DialogContent>

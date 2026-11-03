@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { ExternalLink, Power } from 'lucide-react';
@@ -17,14 +18,14 @@ import type { ActivityPoint, Campaign, Customer, Redemption, Reward } from '@/se
 
 const rewardColumns: Column<Reward>[] = [
   { key: 'title', label: 'Reward', render: (row) => row.title },
-  { key: 'pointCost', label: 'Cost', render: (row) => <span className="tabular">{row.pointCost} pts</span> },
+  { key: 'pointCost', label: 'Cost', render: (row) => <span className="tabular-nums">{row.pointCost} pts</span> },
   { key: 'rewardValue', label: 'Value', render: (row) => row.rewardValue },
   { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
   {
     key: 'quantityRemaining',
     label: 'Remaining',
     render: (row) => (
-      <span className="tabular">
+      <span className="tabular-nums">
         {row.quantityRemaining} / {row.quantityAvailable}
       </span>
     ),
@@ -47,7 +48,7 @@ const redemptionColumns: Column<Redemption>[] = [
       ),
   },
   { key: 'reward', label: 'Reward', render: (row) => row.reward?.title ?? row.description },
-  { key: 'uniqueCode', label: 'Redemption code', render: (row) => <span className="tabular">{row.uniqueCode}</span> },
+  { key: 'uniqueCode', label: 'Redemption code', render: (row) => <span className="tabular-nums">{row.uniqueCode}</span> },
 ];
 
 const customerColumns: Column<Customer>[] = [
@@ -182,7 +183,7 @@ function SettingsMatrix({ campaign }: { campaign: Campaign }) {
                   <td key={label}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Switch size="sm" checked={enabled} disabled aria-label={`${group}: ${label}`} />
-                      <span className={enabled ? undefined : 'cell-muted'}>{label}</span>
+                      <span className={enabled ? undefined : 'text-muted-foreground'}>{label}</span>
                     </label>
                   </td>
                 );
@@ -227,14 +228,16 @@ export function CampaignDetail() {
               <>
                 <StatusBadge value={campaign.type} />
                 <StatusBadge value={campaign.isActive} />
-                <button className="button" onClick={() => update.mutate({ id, active: !(campaign.isActive ?? true) })}>
+                <Button variant="outline" onClick={() => update.mutate({ id, active: !(campaign.isActive ?? true) })}>
                   <Power />
                   {campaign.isActive ? 'Deactivate' : 'Activate'}
-                </button>
-                <a className="button" href={publicUrl} target="_blank" rel="noreferrer">
-                  <ExternalLink />
-                  Public page
-                </a>
+                </Button>
+                <Button asChild variant="outline">
+                  <a href={publicUrl} target="_blank" rel="noreferrer">
+                    <ExternalLink />
+                    Public page
+                  </a>
+                </Button>
               </>
             }
           />

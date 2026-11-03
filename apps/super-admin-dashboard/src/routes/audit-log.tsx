@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { FilterBar } from '@/components/data/FilterBar';
@@ -25,22 +26,22 @@ export function AuditLogList() {
       sortable: true,
       mobile: false,
       label: 'Target',
-      render: (row) => <span className="cell-muted">{row.targetType}</span>,
+      render: (row) => <span className="text-muted-foreground">{row.targetType}</span>,
     },
     {
       key: 'targetId',
       mobile: false,
       label: 'Target ID',
-      render: (row) => <span className="tabular">{row.targetId.slice(0, 8)}…</span>,
+      render: (row) => <span className="tabular-nums">{row.targetId.slice(0, 8)}…</span>,
     },
     {
       key: 'payload',
       label: 'Payload',
       render: (row) => (
         <div>
-          <button className="button" onClick={() => setExpanded(expanded === row.id ? null : row.id)}>
+          <Button variant="outline" onClick={() => setExpanded(expanded === row.id ? null : row.id)}>
             {expanded === row.id ? 'Hide JSON' : 'Expand JSON'}
-          </button>
+          </Button>
           {expanded === row.id && (
             <pre style={{ whiteSpace: 'pre-wrap', maxWidth: 260 }}>
               {JSON.stringify(row.payload, null, 2)}
