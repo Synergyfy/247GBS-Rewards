@@ -1,0 +1,174 @@
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Building2 } from 'lucide-react';
+import { DataTable, type Column } from '@/components/data/DataTable';
+import { FilterBar } from '@/components/data/FilterBar';
+import { PageHeader } from '@/components/display/PageHeader';
+import { QueryState } from '@/components/display/QueryState';
+import { useUrlState } from '@/hooks/useUrlState';
+import { shortDate } from '@/lib/format';
+import { superAdminApi } from '@/services';
+import { useAdmins, useBusinesses } from '@/services/hooks';
+import type { Business } from '@/services/types';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+
+export function BusinessesList() {
+  const state = useUrlState();
+  const client = useQueryClient();
+  const navigate = useNavigate();
+  const ownerParam = state.params.get('ownerId') ?? '';
+  const query = useBusinesses({ ...state.listParams, userId: ownerParam || undefined });
+  const admins = useAdmins({ page: 1, limit: 100 });
+  const [createOpen, setCreateOpen] = useState(Boolean(ownerParam));
+  const [ownerId, setOwnerId] = useState(ownerParam);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (ownerParam) {
+      setOwnerId(ownerParam);
+      setCreateOpen(true);
+    }
+  }, [ownerParam]);
+  async function create(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const selectedOwner = String(form.get('ownerId'));
+    setBusy(true);
+    try {
+      const business = await superAdminApi.createBusiness(selectedOwner, {
+        name: String(form.get('name')),
+        email: String(form.get('email')),
+        phoneNumber: String(form.get('phoneNumber')),
+        website: String(form.get('website')) || undefined,
+      });
+      await client.invalidateQueries({ queryKey: ['businesses'] });
+      setCreateOpen(false);
+      state.setParam('ownerId', undefined);
+      toast.success('Business created');
+      navigate(`/businesses/${business.id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not create business.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  const columns: Column<Business>[] = [
+    {
+      key: 'name',
+      label: 'Business',
+      render: (row) => (
+        <span className="identity">
+          <span className="avatar">
+            <Building2 size={13} />
+          </span>
+          <Link className="cell-link" to={`/businesses/${row.id}`}>
+            {row.name}
+          </Link>
+        </span>
+      ),
+    },
+    {
+      key: 'user',
+      label: 'Owner',
+      render: (row) =>
+        row.user ? (
+          <Link className="inline-link" to={`/admins/${row.user.id}`}>
+            {row.user.fullName}
+          </Link>
+        ) : (
+          '—'
+        ),
+    },
+    { key: 'email', label: 'Email', render: (row) => row.email },
+    {
+      key: 'campaigns',
+      label: 'Campaigns',
+      render: (row) => <span className="tabular">{row.campaigns?.length ?? '—'}</span>,
+    },
+    { key: 'created_at', label: 'Created', render: (row) => shortDate(row.created_at) },
+  ];
+  return (
+    <>
+      <PageHeader
+        title="Businesses"
+        description="Business accounts and their linked programs."
+        actions={
+          <button className="button primary" onClick={() => setCreateOpen(true)}>
+            Create business
+          </button>
+        }
+      />
+      <FilterBar placeholder="Search business or owner…" />
+      <QueryState
+        loading={query.isLoading}
+        error={query.error as Error | null}
+        retry={() => void query.refetch()}
+        section="businesses"
+      >
+        <DataTable
+          columns={columns}
+          rows={query.data?.data ?? []}
+          rowId={(row) => row.id}
+          total={query.data?.total ?? 0}
+          page={state.page}
+          pageSize={state.limit}
+          onPageChange={(page) => state.setParam('page', String(page))}
+          onPageSizeChange={(limit) => state.setParam('limit', String(limit))}
+        />
+      </QueryState>
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogTitle className="dialog-title">Create business</DialogTitle>
+          <DialogDescription className="dialog-description">
+            Add a business to an admin account. Owner is prefilled when launched from admin onboarding.
+          </DialogDescription>
+          <form onSubmit={create}>
+            <div className="form-field">
+              <label htmlFor="business-owner">Owner admin</label>
+              <select
+                id="business-owner"
+                name="ownerId"
+                className="select"
+                value={ownerId}
+                onChange={(event) => setOwnerId(event.target.value)}
+                required
+              >
+                <option value="">Select an admin</option>
+                {(admins.data?.data ?? []).map((admin) => (
+                  <option key={admin.id} value={admin.id}>
+                    {admin.fullName} · {admin.email}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-field">
+              <label htmlFor="business-name">Business name</label>
+              <input id="business-name" name="name" required className="input" />
+            </div>
+            <div className="form-field">
+              <label htmlFor="business-email">Email</label>
+              <input id="business-email" name="email" required type="email" className="input" />
+            </div>
+            <div className="form-field">
+              <label htmlFor="business-phone">Phone</label>
+              <input id="business-phone" name="phoneNumber" required className="input" />
+            </div>
+            <div className="form-field">
+              <label htmlFor="business-website">Website (optional)</label>
+              <input id="business-website" name="website" type="url" className="input" />
+            </div>
+            <div className="dialog-footer">
+              <button type="button" className="button" onClick={() => setCreateOpen(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="button primary" disabled={busy}>
+                {busy ? 'Creating…' : 'Create business'}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
