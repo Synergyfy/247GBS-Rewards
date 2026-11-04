@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { superAdminApi } from './index';
 import { queryKeys } from './query-keys';
 import { isNotAvailable } from '@/lib/errors';
-import type { ListParams, UserListParams, BusinessListParams, CampaignListParams, CustomerListParams, TransactionListParams, PaymentListParams, AuditListParams, PointsAdjustmentInput } from './types';
+import type { ListParams, UserListParams, BusinessListParams, CampaignListParams, CustomerListParams, RedemptionListParams, AuditListParams, PointsAdjustmentInput } from './types';
 
 export const usePlatformAnalytics = (from?: string, to?: string) => useQuery({ queryKey: queryKeys.analytics(from, to), queryFn: () => superAdminApi.platformAnalytics(from, to) });
 export const useAdmins = (params: ListParams) => useQuery({ queryKey: queryKeys.admins(params), queryFn: () => superAdminApi.listAdmins(params), placeholderData: keepPreviousData });
@@ -15,8 +15,7 @@ export const useCampaigns = (params: CampaignListParams) => useQuery({ queryKey:
 export const useCampaign = (id: string) => useQuery({ queryKey: queryKeys.campaign(id), queryFn: () => superAdminApi.getCampaign(id), enabled: Boolean(id) });
 export const useCustomers = (params: CustomerListParams) => useQuery({ queryKey: queryKeys.customers(params), queryFn: () => superAdminApi.listCustomers(params), placeholderData: keepPreviousData });
 export const useCustomer = (id: string) => useQuery({ queryKey: queryKeys.customer(id), queryFn: () => superAdminApi.getCustomer(id), enabled: Boolean(id) });
-export const useTransactions = (params: TransactionListParams) => useQuery({ queryKey: queryKeys.transactions(params), queryFn: () => superAdminApi.listTransactions(params), placeholderData: keepPreviousData });
-export const useRedemptions = (params: TransactionListParams) => useQuery({ queryKey: queryKeys.redemptions(params), queryFn: () => superAdminApi.listRedemptions(params), placeholderData: keepPreviousData });
+export const useRedemptions = (params: RedemptionListParams) => useQuery({ queryKey: queryKeys.redemptions(params), queryFn: () => superAdminApi.listRedemptions(params), placeholderData: keepPreviousData });
 // Campaigns across several businesses (an admin's Campaigns tab). The §7.2 contract filters by businessId
 // only, so this issues one list call per business and merges the results.
 export function useCampaignsForBusinesses(businessIds: string[]) {
@@ -67,12 +66,9 @@ export function useEntitySearch(term: string) {
     customers: toGroup(customers),
   };
 }
-export const usePayments = (params: PaymentListParams) => useQuery({ queryKey: queryKeys.payments(params), queryFn: () => superAdminApi.listPayments(params), placeholderData: keepPreviousData });
 export const useAuditLogs = (params: AuditListParams) => useQuery({ queryKey: queryKeys.audit(params), queryFn: () => superAdminApi.listAuditLogs(params), placeholderData: keepPreviousData });
 export const useUserAnalytics = (id: string) => useQuery({ queryKey: queryKeys.adminAnalytics(id), queryFn: () => superAdminApi.userAnalytics(id), enabled: Boolean(id) });
 export const useCampaignAnalytics = (id: string) => useQuery({ queryKey: queryKeys.campaignAnalytics(id), queryFn: () => superAdminApi.campaignAnalytics(id), enabled: Boolean(id) });
-export const useUserPayments = (id: string) => useQuery({ queryKey: queryKeys.userPayments(id), queryFn: () => superAdminApi.userPayments(id), enabled: Boolean(id) });
-export const useUserBalances = (id: string) => useQuery({ queryKey: queryKeys.userBalances(id), queryFn: () => superAdminApi.userBalances(id), enabled: Boolean(id) });
 
 export function useSetUserStatus() {
   const client = useQueryClient();
@@ -80,7 +76,7 @@ export function useSetUserStatus() {
 }
 export function useAdjustPoints() {
   const client = useQueryClient();
-  return useMutation({ mutationFn: ({ id, input }: { id: string; input: PointsAdjustmentInput }) => superAdminApi.adjustCustomerPoints(id, input), onSuccess: async (_, variables) => { await Promise.all([client.invalidateQueries({ queryKey: queryKeys.customer(variables.id) }), client.invalidateQueries({ queryKey: ['transactions'] })]); toast.success('Points adjustment recorded'); }, onError: () => toast.error('Could not adjust points.') });
+  return useMutation({ mutationFn: ({ id, input }: { id: string; input: PointsAdjustmentInput }) => superAdminApi.adjustCustomerPoints(id, input), onSuccess: async (_, variables) => { await Promise.all([client.invalidateQueries({ queryKey: queryKeys.customer(variables.id) })]); toast.success('Points adjustment recorded'); }, onError: () => toast.error('Could not adjust points.') });
 }
 export function useSetCampaignStatus() {
   const client = useQueryClient();

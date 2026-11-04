@@ -1,11 +1,9 @@
 import {
   Activity,
   Building2,
-  CreditCard,
   LayoutDashboard,
   ShieldCheck,
   Users,
-  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -42,13 +40,6 @@ export const navGroups: NavGroup[] = [
       { label: 'Customers', path: '/customers', icon: Users },
     ],
   },
-  {
-    label: 'Money & activity',
-    items: [
-      { label: 'Transactions', path: '/transactions', icon: Wallet },
-      { label: 'Payments', path: '/payments', icon: CreditCard },
-    ],
-  },
 ];
 
 export const navItems: NavItem[] = navGroups.flatMap((group) => group.items);
@@ -59,7 +50,5 @@ export const pageLabels: Record<string, string> = {
   businesses: 'Businesses',
   campaigns: 'Campaigns',
   customers: 'Customers',
-  transactions: 'Transactions',
-  payments: 'Payments',
   'audit-log': 'Audit log',
 };

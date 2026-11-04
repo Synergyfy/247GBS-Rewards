@@ -5,11 +5,10 @@ import { toast } from 'sonner';
 import { ConfirmActionDialog } from '@/components/dialogs/ConfirmActionDialog';
 import { ResetPasswordResultDialog } from '@/components/dialogs/ResetPasswordResultDialog';
 import { superAdminApi } from '@/services';
-import { appEnv } from '@/lib/env';
 import type { User } from '@/services/types';
 
 type AdminRef = Pick<User, 'id' | 'fullName' | 'email' | 'isActive'>;
-type DangerAction = 'delete' | 'reset' | 'impersonate';
+type DangerAction = 'delete' | 'reset';
 
 const COPY: Record<DangerAction, { title: string; description: string; confirmLabel: string }> = {
   delete: {
@@ -22,17 +21,12 @@ const COPY: Record<DangerAction, { title: string; description: string; confirmLa
     description: 'A temporary password is issued once. Provide a reason for the audit log.',
     confirmLabel: 'Reset password',
   },
-  impersonate: {
-    title: 'Impersonate account',
-    description: 'This opens a limited support session in the business web app. Provide a reason.',
-    confirmLabel: 'Open support session',
-  },
 };
 
 /**
  * Admin account actions shared by the Admins list (row menu, bulk bar) and the admin detail page.
- * §9B: status changes are reversible, so they run immediately with a 6s Undo toast; delete, reset
- * and impersonate are high-impact and go through ConfirmActionDialog with a required reason.
+ * §9B: status changes are reversible, so they run immediately with a 6s Undo toast; delete and
+ * reset are high-impact and go through ConfirmActionDialog with a required reason.
  */
 export function useAdminActions({ afterDelete }: { afterDelete?: () => void } = {}) {
   const client = useQueryClient();
@@ -94,15 +88,6 @@ export function useAdminActions({ afterDelete }: { afterDelete?: () => void } = 
         const result = await superAdminApi.resetPassword(user.id, reason);
         setResetResult(result.temporaryPassword);
       }
-      if (action === 'impersonate') {
-        const result = await superAdminApi.impersonate(user.id, reason);
-        window.open(
-          `${appEnv.WEB_APP_URL}/auth/impersonate#token=${encodeURIComponent(result.accessToken)}&expiresIn=${result.expiresIn}`,
-          '_blank',
-          'noopener,noreferrer',
-        );
-        toast.success(`Support session opened for ${user.fullName}`);
-      }
       await refresh([user.id]);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'The action could not be completed.');
@@ -128,7 +113,6 @@ export function useAdminActions({ afterDelete }: { afterDelete?: () => void } = 
     setStatus,
     requestDelete: (user: AdminRef) => setPending({ action: 'delete', user }),
     requestReset: (user: AdminRef) => setPending({ action: 'reset', user }),
-    requestImpersonate: (user: AdminRef) => setPending({ action: 'impersonate', user }),
     dialogs,
   };
 }

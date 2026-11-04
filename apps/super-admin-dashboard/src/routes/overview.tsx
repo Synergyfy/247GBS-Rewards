@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { RefreshCw } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -7,11 +7,11 @@ import { DataTable, type Column } from '@/components/data/DataTable';
 import { PageHeader, KpiStrip, type Kpi } from '@/components/display/PageHeader';
 import { DateRangePicker } from '@/components/display/DateRangePicker';
 import { ErrorState, NotAuthorized, NotAvailableYet } from '@/components/display/States';
-import { compact, currency, shortDate } from '@/lib/format';
+import { compact, shortDate } from '@/lib/format';
 import { isNotAvailable } from '@/lib/errors';
 import { percentChange, previousRange, resolveRange } from '@/lib/date-range';
-import { usePlatformAnalytics, useAuditLogs, usePayments } from '@/services/hooks';
-import type { AuditLogEntry, PaymentHistory, PlatformAnalytics } from '@/services/types';
+import { usePlatformAnalytics, useAuditLogs } from '@/services/hooks';
+import type { AuditLogEntry, PlatformAnalytics } from '@/services/types';
 
 type Metric = 'newUsers' | 'newCustomers' | 'pointsIssued' | 'redemptions';
 const metricLabels: Record<Metric, string> = {
@@ -23,23 +23,6 @@ const metricLabels: Record<Metric, string> = {
 
 type Series = PlatformAnalytics['series'];
 const sum = (series: Series | undefined, metric: Metric) => (series ?? []).reduce((total, day) => total + day[metric], 0);
-
-const paymentColumns: Column<PaymentHistory>[] = [
-  {
-    key: 'user',
-    label: 'Account',
-    render: (row) =>
-      row.user ? (
-        <Link className="cell-link" to={`/admins/${row.user.id}`}>
-          {row.user.fullName}
-        </Link>
-      ) : (
-        'Unknown account'
-      ),
-  },
-  { key: 'amount', label: 'Amount', align: 'right', render: (row) => currency(row.amount) },
-  { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
-];
 
 const auditColumns: Column<AuditLogEntry>[] = [
   { key: 'action', label: 'Action', render: (row) => row.action.replaceAll('.', ' ') },
@@ -57,7 +40,6 @@ export function Overview() {
   // Same-length window just before the selected one, for real "vs previous period" deltas
   const previous = usePlatformAnalytics(prior.from, prior.to);
   const audit = useAuditLogs({ page: 1, limit: 6 });
-  const failed = usePayments({ page: 1, limit: 5, status: 'failed' });
 
   function setRange(from: string, to: string) {
     setSearchParams((current) => {
@@ -103,8 +85,8 @@ export function Overview() {
       />
       {analyticsBlock ??
         (analytics.isLoading && !data ? (
-          <div className="kpi-strip" aria-label="Loading platform totals">
-            {Array.from({ length: 6 }, (_, i) => (
+          <div className="kpi-strip" aria-label="Loading platform totals" style={{ '--kpi-cols': 5 } as CSSProperties}>
+            {Array.from({ length: 5 }, (_, i) => (
               <div className="kpi-cell" key={i}>
                 <div className="skeleton" style={{ height: 42 }} />
               </div>
@@ -119,7 +101,6 @@ export function Overview() {
                 { label: 'Active campaigns', value: `${totals.activeCampaigns} / ${totals.campaigns}` },
                 trendKpi('Customers', totals.customers, 'newCustomers'),
                 trendKpi('Points issued', compact(totals.pointsIssued), 'pointsIssued'),
-                { label: 'Revenue', value: currency(totals.revenue) },
               ]}
             />
           )
@@ -219,22 +200,6 @@ export function Overview() {
           )}
         </div>
         <div className="dashboard-stack">
-          <section className="panel">
-            <header className="panel-head">
-              <h2 className="panel-title">Failed payments</h2>
-              <Link to="/payments?status=failed" className="inline-link">
-                Review all
-              </Link>
-            </header>
-            {failed.isLoading && (
-              <div className="panel-body">
-                <div className="skeleton" style={{ height: 88 }} />
-              </div>
-            )}
-            {failed.data && (
-              <DataTable tableId="overview-failed" columns={paymentColumns} rows={failed.data.data} rowId={(row) => row.id} emptyTitle="No failed payments" />
-            )}
-          </section>
           <section className="panel">
             <header className="panel-head">
               <h2 className="panel-title">Recent audit events</h2>

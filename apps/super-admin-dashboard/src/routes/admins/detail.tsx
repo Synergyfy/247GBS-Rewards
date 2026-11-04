@@ -2,7 +2,7 @@ import { NativeSelect } from '@/components/ui/native-select';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { Building2, KeyRound, Power, PowerOff, Trash2, UserRoundCog } from 'lucide-react';
+import { Building2, KeyRound, Power, PowerOff, Trash2 } from 'lucide-react';
 import { PageHeader, KpiStrip } from '@/components/display/PageHeader';
 import { QueryState } from '@/components/display/QueryState';
 import { StatusBadge } from '@/components/display/States';
@@ -15,22 +15,16 @@ import {
   useAuditLogs,
   useCampaignsForBusinesses,
   useCustomers,
-  useTransactions,
   useUser,
   useUserAnalytics,
-  useUserBalances,
-  useUserPayments,
 } from '@/services/hooks';
-import { compact, currency, shortDate } from '@/lib/format';
+import { compact, shortDate } from '@/lib/format';
 import { useBreadcrumbs } from '@/lib/breadcrumb-context';
 import type {
-  AuditBalance,
   AuditLogEntry,
   Business,
   Campaign,
   Customer,
-  PaymentHistory,
-  PointsLedgerEntry,
 } from '@/services/types';
 
 const businessColumns: Column<Business>[] = [
@@ -169,134 +163,6 @@ function CustomersTab({ businesses }: { businesses: Business[] }) {
   );
 }
 
-function TransactionsTab({ businesses }: { businesses: Business[] }) {
-  const campaigns = useCampaignsForBusinesses(businesses.map((business) => business.id));
-  const [selected, setSelected] = useState('');
-  const campaignId = selected || campaigns.data[0]?.id || '';
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(25);
-  const query = useTransactions({ campaignId, page, limit });
-  const columns: Column<PointsLedgerEntry>[] = [
-    { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
-    {
-      key: 'customer',
-      label: 'Customer',
-      render: (row) =>
-        row.customer ? (
-          <Link className="inline-link" to={`/customers/${row.customer.id}`}>
-            {row.customer.firstName} {row.customer.lastName}
-          </Link>
-        ) : (
-          '—'
-        ),
-    },
-    { key: 'description', label: 'Description', render: (row) => row.description },
-    {
-      key: 'points',
-      label: 'Points',
-      render: (row) => (
-        <span className="tabular-nums" style={{ color: row.points < 0 ? 'var(--destructive)' : 'var(--success)' }}>
-          {row.points > 0 ? '+' : ''}
-          {row.points.toLocaleString()}
-        </span>
-      ),
-    },
-  ];
-  if (!campaigns.isLoading && !campaigns.data.length)
-    return <div className="panel-body text-muted-foreground">This admin has no campaigns yet.</div>;
-  return (
-    <>
-      <ScopeSelect
-        label="Campaign"
-        value={campaignId}
-        options={campaigns.data}
-        onChange={(id) => {
-          setSelected(id);
-          setPage(1);
-        }}
-      />
-      <QueryState
-        loading={campaigns.isLoading || query.isLoading}
-        error={campaigns.error ?? (query.error as Error | null)}
-        retry={() => void query.refetch()}
-        section="transactions"
-      >
-        <DataTable
-          columns={columns}
-          rows={query.data?.data ?? []}
-          rowId={(row) => row.id}
-          total={query.data?.total ?? 0}
-          page={page}
-          pageSize={limit}
-          onPageChange={setPage}
-          onPageSizeChange={(size) => {
-            setLimit(size);
-            setPage(1);
-          }}
-        />
-      </QueryState>
-    </>
-  );
-}
-
-function PaymentsTab({ userId }: { userId: string }) {
-  const payments = useUserPayments(userId);
-  const balances = useUserBalances(userId);
-  const paymentColumns: Column<PaymentHistory>[] = [
-    { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
-    { key: 'status', label: 'Status', render: (row) => <StatusBadge value={row.status} /> },
-    { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
-    {
-      key: 'amount',
-      label: 'Amount',
-      render: (row) => <span className="tabular-nums">{currency(row.amount)}</span>,
-    },
-  ];
-  const seasons = (row: AuditBalance) => `${row.spring} / ${row.summer} / ${row.autumn} / ${row.winter}`;
-  const balanceColumns: Column<AuditBalance>[] = [
-    { key: 'created_at', label: 'Date', render: (row) => shortDate(row.created_at) },
-    { key: 'type', label: 'Type', render: (row) => <StatusBadge value={row.type} /> },
-    {
-      key: 'seasons',
-      label: 'Spring / Summer / Autumn / Winter',
-      render: (row) => <span className="tabular-nums">{seasons(row)}</span>,
-    },
-  ];
-  return (
-    <>
-      <QueryState
-        loading={payments.isLoading}
-        error={payments.error as Error | null}
-        retry={() => void payments.refetch()}
-        section="payments"
-      >
-        <DataTable
-          columns={paymentColumns}
-          rows={payments.data ?? []}
-          rowId={(row) => row.id}
-          emptyTitle="No payments"
-        />
-      </QueryState>
-      <h3 className="panel-title" style={{ padding: '10px 11px 0' }}>
-        Balances
-      </h3>
-      <QueryState
-        loading={balances.isLoading}
-        error={balances.error as Error | null}
-        retry={() => void balances.refetch()}
-        section="balances"
-      >
-        <DataTable
-          columns={balanceColumns}
-          rows={balances.data ?? []}
-          rowId={(row) => row.id}
-          emptyTitle="No balances"
-        />
-      </QueryState>
-    </>
-  );
-}
-
 function ActivityTab({ userId }: { userId: string }) {
   // Super-admin actions taken on this account (audit entries targeting it)
   const query = useAuditLogs({ targetId: userId, page: 1, limit: 50 });
@@ -368,10 +234,6 @@ export function AdminDetail() {
                   <KeyRound />
                   Reset password
                 </Button>
-                <Button variant="outline" onClick={() => actions.requestImpersonate(user)}>
-                  <UserRoundCog />
-                  Impersonate
-                </Button>
               </>
             }
           />
@@ -425,16 +287,6 @@ export function AdminDetail() {
                     label: 'Customers',
                     content: <CustomersTab businesses={user.businesses} />,
                   },
-                  {
-                    value: 'transactions',
-                    label: 'Transactions',
-                    content: <TransactionsTab businesses={user.businesses} />,
-                  },
-                  {
-                    value: 'payments',
-                    label: 'Payments & balances',
-                    content: <PaymentsTab userId={user.id} />,
-                  },
                   { value: 'activity', label: 'Activity', content: <ActivityTab userId={user.id} /> },
                 ]}
               />
@@ -447,7 +299,6 @@ export function AdminDetail() {
                   ['Location', user.location],
                   ['Role', user.role],
                   ['Signup source', user.signupSource],
-                  ['Referral code', user.referralCode],
                   ['Created', shortDate(user.created_at)],
                   ['Status', user.isActive === false ? 'Inactive' : 'Active'],
                 ]}

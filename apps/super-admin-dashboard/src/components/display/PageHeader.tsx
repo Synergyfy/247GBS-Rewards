@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 
 export function PageHeader({
@@ -85,7 +85,8 @@ function Delta({ value, label }: { value: number | null; label?: string }) {
 /** §9A KPI strip: cards separated by 1px lines; value cross-fades when it changes. */
 export function KpiStrip({ items }: { items: Kpi[] }) {
   return (
-    <div className="kpi-strip">
+    // Wide screens fit every tile on one row, however many there are
+    <div className="kpi-strip" style={{ '--kpi-cols': items.length } as CSSProperties}>
       {items.map((item) => {
         const display = typeof item.value === 'number' ? item.value.toLocaleString() : item.value;
         return (

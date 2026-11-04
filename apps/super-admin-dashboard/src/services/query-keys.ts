@@ -9,12 +9,8 @@ export const queryKeys = {
   campaign: (id: string) => ['campaign', id] as const,
   customers: (params: unknown) => ['customers', params] as const,
   customer: (id: string) => ['customer', id] as const,
-  transactions: (params: unknown) => ['transactions', params] as const,
   redemptions: (params: unknown) => ['redemptions', params] as const,
-  payments: (params: unknown) => ['payments', params] as const,
   audit: (params: unknown) => ['audit', params] as const,
   adminAnalytics: (id: string) => ['user-analytics', id] as const,
   campaignAnalytics: (id: string) => ['campaign-analytics', id] as const,
-  userPayments: (id: string) => ['user-payments', id] as const,
-  userBalances: (id: string) => ['user-balances', id] as const,
 };

@@ -188,7 +188,7 @@
   .page-description { @apply mt-0.5 text-xs text-muted-foreground; }
   .page-actions { @apply flex flex-wrap items-center gap-1.5; }
 
-  .kpi-strip { @apply mb-3 grid grid-cols-2 gap-px border border-border bg-border md:grid-cols-4 xl:grid-cols-6; }
+  .kpi-strip { @apply mb-3 grid grid-cols-2 gap-px border border-border bg-border md:grid-cols-4 xl:grid-cols-[repeat(var(--kpi-cols,6),minmax(0,1fr))]; }
   .kpi-cell { @apply min-w-0 bg-card px-3 py-2.5; }
   .kpi-label { @apply text-xs text-muted-foreground; }
   .kpi-row { @apply flex min-w-0 items-end justify-between gap-1.5; }

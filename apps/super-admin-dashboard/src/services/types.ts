@@ -3,15 +3,12 @@ export type SignupSource = 'mcom' | 'stock_audit';
 export type CampaignType = 'PRESET' | 'CO_BRANDED' | 'SEASONAL';
 export type RewardType = 'STANDARD' | 'LINK' | 'CREDENTIALS';
 export type RewardMethod = 'QR' | 'CustomerNumber';
-export type PaymentStatus = 'pending' | 'success' | 'failed';
-export type PaymentType = 'fresh' | 'increase';
-export type BalanceType = 'new' | 'edit' | 'increase' | 'used';
 
 export interface Base { id: string; created_at: string; updated_at: string; }
 export interface LoginResponse { accessToken: string; name: string; role: Role; }
 export interface User extends Base {
   fullName: string; email: string; role: Role; phoneNumber: string; location: string | null;
-  referralCode: string | null; signupSource: SignupSource; isActive?: boolean; businesses?: Business[];
+  signupSource: SignupSource; isActive?: boolean; businesses?: Business[];
 }
 export interface Address extends Base { street: string; postalCode: string; city: string; state: string; }
 export interface Socials extends Base {
@@ -47,11 +44,6 @@ export interface Customer extends Base { firstName: string; lastName: string; em
 export interface PointsLedgerEntry extends Base { points: number; description: string; campaign?: Campaign; customer?: Customer; }
 export interface Redemption extends Base { description: string; uniqueCode: string; campaign?: Campaign; customer?: Customer; reward?: Reward; }
 export interface GeneratedCode extends Base { expiry: string; points: number; code: string; type: string; staff?: Staff | null; }
-export interface PaymentHistory extends Base {
-  status: PaymentStatus; type: PaymentType; amount: number; autumn: number; spring: number; summer: number; winter: number;
-  user?: Pick<User, 'id' | 'fullName' | 'email'>;
-}
-export interface AuditBalance extends Base { type: BalanceType; autumn: number; spring: number; summer: number; winter: number; }
 export interface ActivityPoint { date: string; count: number; }
 export interface UserAnalytics {
   totalCampaigns: number; activeCampaigns: number; inactiveCampaigns: number;
@@ -68,7 +60,7 @@ export interface PlatformAnalytics {
   totals: {
     users: number; usersByRole: Record<Role, number>; usersBySignupSource: Record<SignupSource, number>;
     businesses: number; campaigns: number; activeCampaigns: number; customers: number;
-    pointsIssued: number; pointsRedeemed: number; rewardsRedeemed: number; revenue: number;
+    pointsIssued: number; pointsRedeemed: number; rewardsRedeemed: number;
   };
   series: { date: string; newUsers: number; newCustomers: number; pointsIssued: number; redemptions: number; }[];
   topBusinesses: { businessId: string; name: string; ownerName: string; customers: number; pointsIssued: number; }[];
@@ -82,12 +74,10 @@ export interface ApiError { status: number; message: string; }
 export interface UserListParams extends ListParams {
   role?: Role; signupSource?: SignupSource; isActive?: boolean; createdFrom?: string; createdTo?: string;
 }
-export interface PaymentListParams extends ListParams { status?: PaymentStatus; type?: PaymentType; from?: string; to?: string; }
 export interface BusinessListParams extends ListParams { userId?: string; }
 export interface CampaignListParams extends ListParams { businessId?: string; type?: CampaignType; active?: boolean; }
 export interface CustomerListParams extends ListParams { campaignId?: string; businessId?: string; }
-export interface TransactionListParams extends ListParams { campaignId?: string; customerId?: string; kind?: 'earn' | 'redeem'; from?: string; to?: string; }
+export interface RedemptionListParams extends ListParams { campaignId?: string; customerId?: string; from?: string; to?: string; }
 export interface AuditListParams extends ListParams { actorId?: string; targetType?: AuditLogEntry['targetType']; targetId?: string; from?: string; to?: string; }
-export interface UserCreateInput { fullName: string; email: string; phoneNumber: string; password?: string; location?: string; referralCode?: string; role?: Role; }
 export interface BusinessCreateInput { name: string; email: string; phoneNumber: string; website?: string; logo?: string; address?: Partial<Address>; socials?: Partial<Socials>; links?: Array<Pick<Link, 'url' | 'text'>>; }
 export interface PointsAdjustmentInput { campaignId: string; points: number; reason: string; }

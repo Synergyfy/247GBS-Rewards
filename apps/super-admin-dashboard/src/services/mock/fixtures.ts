@@ -1,4 +1,4 @@
-import type { AuditLogEntry, Business, Campaign, Customer, PaymentHistory, PointsLedgerEntry, Redemption, Reward, Staff, User } from '../types';
+import type { AuditLogEntry, Business, Campaign, Customer, PointsLedgerEntry, Redemption, Reward, Staff, User } from '../types';
 
 const names = ['Maya Chen', 'Oliver Grant', 'Sofia Patel', 'Ethan Walker', 'Amara Okafor', 'Noah Kim', 'Isabella Rossi', 'Liam Brooks', 'Zara Ahmed', 'Mateo Silva', 'Ava Wilson', 'Theo Martin', 'Nia Johnson', 'Leo Anders', 'Priya Shah', 'Felix Morgan', 'Aisha Khan', 'Max Turner', 'Elena Cruz', 'Kai Thompson', 'Grace Lee', 'Daniel Price', 'Mila Novak', 'Arjun Rao', 'Hana Sato'];
 const brands = ['Northstar Coffee', 'Fieldwork Market', 'Juniper House', 'Common Ground', 'Studio Sunday', 'Goodfolk Goods', 'Harvest & Co', 'Bluebird Supply', 'The Local Edit', 'Paper & Pine', 'Poppy Lane', 'Morrow Bakery', 'Cedar & Stone', 'Daytrip Outfitters', 'Little Acre', 'Brightside Books', 'Forma Studio', 'Everwell Kitchen', 'Driftwood Roasters', 'Kindred Table', 'Atlas Goods', 'Olive & Oak', 'Westward Cycle', 'Soft Hours', 'Copperline'];
@@ -10,8 +10,7 @@ const pick = <T,>(values: readonly T[], index: number): T => { const value = val
 
 export interface MockStore {
   admins: User[]; businesses: Business[]; campaigns: Campaign[]; customers: Customer[];
-  ledger: PointsLedgerEntry[]; redemptions: Redemption[]; payments: PaymentHistory[];
-  balances: Array<{ id: string; created_at: string; updated_at: string; type: 'new' | 'edit' | 'increase' | 'used'; autumn: number; spring: number; summer: number; winter: number; userId: string }>;
+  ledger: PointsLedgerEntry[]; redemptions: Redemption[];
   staff: Staff[]; audit: AuditLogEntry[];
 }
 
@@ -19,7 +18,7 @@ export function createFixtures(): MockStore {
   const admins: User[] = names.map((fullName, i) => ({
     ...makeBase(i + 1, 150 - i * 4), fullName, email: `${fullName.toLowerCase().replaceAll(' ', '.')}@example.com`,
     role: 'admin', phoneNumber: `+1 512 555 ${String(1000 + i).slice(-4)}`, location: pick(cities, i % cities.length),
-    referralCode: `GBS${String(500 + i)}`, signupSource: i % 5 === 0 ? 'stock_audit' : 'mcom', isActive: i % 9 !== 0,
+    signupSource: i % 5 === 0 ? 'stock_audit' : 'mcom', isActive: i % 9 !== 0,
   }));
   const businesses: Business[] = Array.from({ length: 40 }, (_, i) => ({
     ...makeBase(100 + i, 130 - (i % 100)), name: pick(brands, i % brands.length), logo: null,
@@ -40,7 +39,7 @@ export function createFixtures(): MockStore {
       redeemStaffScanQR: i % 2 !== 0, redeemStaffPersonalCode: true, redeemGiveStaffNumber: false,
       homeTitle: 'Rewards made local', homeText: 'Earn points every time you shop.', headerImg: null,
       background: '#ffffff', text: '#111827', primaryBg: '#2d3dff', primaryText: '#ffffff', secondaryBg: '#eef0fe', secondaryText: '#2d3dff',
-      business, season, isActive: active, rewards: Array.from({ length: 2 }, (_, rewardIndex): Reward => ({ ...makeBase(12000 + i * 2 + rewardIndex, 20 + i % 60), title: pick(rewards, (i + rewardIndex) % rewards.length), pointCost: String(200 + rewardIndex * 150), currency: 'points', rewardValue: rewardIndex === 0 ? '$5' : 'Free item', activeFrom: isoDaysAgo(30), expires: new Date(Date.now() + 120 * 86400000).toISOString(), description: 'A member-only reward from this campaign.', type: 'STANDARD', successPageTitle: null, successPageMessage: null, successPageButtonLink: null, config: null, quantityAvailable: 500, quantityRemaining: 350 - i % 180 })),
+      business, season, isActive: active, rewards: Array.from({ length: 2 }, (_, rewardIndex): Reward => ({ ...makeBase(12000 + i * 2 + rewardIndex, 20 + i % 60), title: pick(rewards, (i + rewardIndex) % rewards.length), pointCost: String(200 + rewardIndex * 150), currency: 'points', rewardValue: rewardIndex === 0 ? '£5' : 'Free item', activeFrom: isoDaysAgo(30), expires: new Date(Date.now() + 120 * 86400000).toISOString(), description: 'A member-only reward from this campaign.', type: 'STANDARD', successPageTitle: null, successPageMessage: null, successPageButtonLink: null, config: null, quantityAvailable: 500, quantityRemaining: 350 - i % 180 })),
     };
   });
   const customers: Customer[] = Array.from({ length: 2000 }, (_, i) => {
@@ -59,10 +58,6 @@ export function createFixtures(): MockStore {
     const customer = pick(customers, (i * 13) % customers.length);
     return { ...makeBase(6000 + i, i % 80), description: pick(rewards, i % rewards.length), uniqueCode: `RDM${String(i + 1).padStart(6, '0')}`, customer, campaign: customer.campaign };
   });
-  const payments: PaymentHistory[] = Array.from({ length: 120 }, (_, i) => {
-    const user = pick(admins, i % admins.length);
-    return { ...makeBase(7000 + i, i % 100), status: i % 13 === 0 ? 'failed' : i % 5 === 0 ? 'pending' : 'success', type: i % 2 === 0 ? 'fresh' : 'increase', amount: 29 + (i % 8) * 10, autumn: 0, spring: 0, summer: 0, winter: 0, user: { id: user.id, fullName: user.fullName, email: user.email } };
-  });
   const staff: Staff[] = Array.from({ length: 58 }, (_, i) => {
     const name = pick(names, i % names.length);
     return { ...makeBase(8000 + i, i % 100), name: `${name.split(' ')[0]} Staff`, email: `staff${i + 1}@example.com`, avatar: null, isActive: i % 8 !== 0, business: pick(businesses, i % businesses.length) };
@@ -73,6 +68,5 @@ export function createFixtures(): MockStore {
     const target = targetType === 'user' ? pick(admins, i % admins.length) : targetType === 'business' ? pick(businesses, i % businesses.length) : targetType === 'campaign' ? pick(campaigns, i % campaigns.length) : pick(customers, i % customers.length);
     return { ...makeBase(9000 + i, i % 45), actor: { id: actor.id, fullName: actor.fullName, email: actor.email }, action: pick(['user.status_changed', 'points.adjusted', 'campaign.updated', 'business.created', 'payment.reviewed'], i % 5), targetType, targetId: target.id, payload: { source: 'admin-console', note: i % 3 === 0 ? 'Support request' : 'Routine review' }, ip: `192.168.1.${10 + i % 220}` };
   });
-  const balances = admins.slice(0, 15).map((user, i) => ({ ...makeBase(10000 + i, i % 30), type: i % 3 === 0 ? 'increase' as const : 'new' as const, autumn: 10 + i, spring: 15 + i, summer: 5 + i, winter: 8 + i, userId: user.id }));
-  return { admins, businesses, campaigns, customers, ledger, redemptions, payments, balances, staff, audit };
+  return { admins, businesses, campaigns, customers, ledger, redemptions, staff, audit };
 }

@@ -7,7 +7,6 @@ export const STATUS: Record<string, StatusPresentation> = {
   mcom: { tone: 'neutral', label: 'MCom' }, stock_audit: { tone: 'seasonal', label: 'Stock audit' },
   PRESET: { tone: 'brand', label: 'Preset' }, CO_BRANDED: { tone: 'special', label: 'Co-branded' }, SEASONAL: { tone: 'seasonal', label: 'Seasonal' },
   STANDARD: { tone: 'neutral', label: 'Standard' }, LINK: { tone: 'brand', label: 'Link' }, CREDENTIALS: { tone: 'special', label: 'Credentials' },
-  fresh: { tone: 'brand', label: 'Fresh' }, increase: { tone: 'seasonal', label: 'Increase' }, new: { tone: 'success', label: 'New' }, edit: { tone: 'warning', label: 'Edit' }, used: { tone: 'neutral', label: 'Used' },
 };
 export function statusFor(key: string | boolean | undefined): StatusPresentation {
   if (typeof key === 'boolean') return key ? STATUS.active! : STATUS.inactive!;

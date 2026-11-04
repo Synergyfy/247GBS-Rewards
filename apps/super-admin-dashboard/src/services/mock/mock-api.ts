@@ -7,8 +7,8 @@ import { createFixtures } from './fixtures';
 import type {
   AuditListParams, AuditLogEntry, Business, BusinessCreateInput, BusinessListParams,
   CampaignAnalytics, CampaignListParams, CustomerListParams, ListParams, Paginated,
-  PaymentListParams, PlatformAnalytics, PointsAdjustmentInput, PointsLedgerEntry,
-  TransactionListParams, User, UserAnalytics, UserCreateInput, UserListParams, UserRow,
+  PlatformAnalytics, PointsAdjustmentInput, PointsLedgerEntry,
+  RedemptionListParams, User, UserAnalytics, UserListParams, UserRow,
 } from '../types';
 
 const store = createFixtures();
@@ -70,12 +70,6 @@ export const mockApi: SuperAdminApi = {
     return page(rows, params);
   },
   async getUser(id) { await pause(); return userWithBusinesses(required(store.admins, (item) => item.id === id, 'User')); },
-  async createUser(input: UserCreateInput) {
-    await pause();
-    if (store.admins.some((user) => user.email === input.email)) throw Object.assign(new Error('An account with this email already exists.'), { status: 409 });
-    const user: User = { id: crypto.randomUUID(), created_at: new Date().toISOString(), updated_at: new Date().toISOString(), fullName: input.fullName, email: input.email, role: input.role ?? 'admin', phoneNumber: input.phoneNumber, location: input.location ?? null, referralCode: input.referralCode ?? null, signupSource: 'mcom', isActive: true };
-    store.admins.unshift(user); record('user.created', 'user', user.id, { fullName: user.fullName }); return user;
-  },
   async updateUser(id, input) {
     await pause(); const user = required(store.admins, (item) => item.id === id, 'User'); Object.assign(user, input, { updated_at: new Date().toISOString() });
     record('user.updated', 'user', id, input); return user;
@@ -91,12 +85,6 @@ export const mockApi: SuperAdminApi = {
   async deleteUser(id, reason) {
     await pause(); required(store.admins, (item) => item.id === id, 'User'); store.admins = store.admins.filter((user) => user.id !== id); record('user.deleted', 'user', id, { reason }); return { success: true };
   },
-  async impersonate(id, reason) {
-    await pause(); required(store.admins, (item) => item.id === id, 'User'); record('user.impersonated', 'user', id, { reason });
-    return { accessToken: createMockToken('admin'), expiresIn: 900 };
-  },
-  async userPayments(id) { await pause(); return store.payments.filter((payment) => payment.user?.id === id); },
-  async userBalances(id) { await pause(); return store.balances.filter((balance) => balance.userId === id).map(({ id: balanceId, created_at, updated_at, type, autumn, spring, summer, winter }) => ({ id: balanceId, created_at, updated_at, type, autumn, spring, summer, winter })); },
   async listBusinesses(params: BusinessListParams) {
     await pause(); let rows = [...store.businesses]; if (params.userId) rows = rows.filter((business) => business.user?.id === params.userId); return page(rows, params);
   },
@@ -154,7 +142,7 @@ export const mockApi: SuperAdminApi = {
       return { date, newUsers: 4 + (n * 7) % 12, newCustomers: 33 + (n * 29) % 80, pointsIssued: 2200 + (n * 347) % 2600, redemptions: 15 + (n * 13) % 40 };
     });
     const pointsIssued = store.customers.reduce((sum, customer) => sum + (customer.balance ?? 0), 0);
-    return { totals: { users: store.admins.length, usersByRole: { super_admin: 1, admin: store.admins.length, staff: store.staff.length, customer: store.customers.length }, usersBySignupSource: { mcom: store.admins.filter((user) => user.signupSource === 'mcom').length, stock_audit: store.admins.filter((user) => user.signupSource === 'stock_audit').length }, businesses: store.businesses.length, campaigns: store.campaigns.length, activeCampaigns: store.campaigns.filter((campaign) => campaign.isActive).length, customers: store.customers.length, pointsIssued, pointsRedeemed: Math.abs(store.ledger.filter((entry) => entry.points < 0).reduce((sum, entry) => sum + entry.points, 0)), rewardsRedeemed: store.redemptions.length, revenue: store.payments.filter((payment) => payment.status === 'success').reduce((sum, payment) => sum + payment.amount, 0) }, series, topBusinesses: store.businesses.slice(0, 5).map((business) => ({ businessId: business.id, name: business.name, ownerName: business.user?.fullName ?? '—', customers: store.customers.filter((customer) => store.campaigns.some((campaign) => campaign.business?.id === business.id && campaign.id === customer.campaign?.id)).length, pointsIssued: 4200 + business.id.charCodeAt(35) * 120 })) };
+    return { totals: { users: store.admins.length, usersByRole: { super_admin: 1, admin: store.admins.length, staff: store.staff.length, customer: store.customers.length }, usersBySignupSource: { mcom: store.admins.filter((user) => user.signupSource === 'mcom').length, stock_audit: store.admins.filter((user) => user.signupSource === 'stock_audit').length }, businesses: store.businesses.length, campaigns: store.campaigns.length, activeCampaigns: store.campaigns.filter((campaign) => campaign.isActive).length, customers: store.customers.length, pointsIssued, pointsRedeemed: Math.abs(store.ledger.filter((entry) => entry.points < 0).reduce((sum, entry) => sum + entry.points, 0)), rewardsRedeemed: store.redemptions.length }, series, topBusinesses: store.businesses.slice(0, 5).map((business) => ({ businessId: business.id, name: business.name, ownerName: business.user?.fullName ?? '—', customers: store.customers.filter((customer) => store.campaigns.some((campaign) => campaign.business?.id === business.id && campaign.id === customer.campaign?.id)).length, pointsIssued: 4200 + business.id.charCodeAt(35) * 120 })) };
   },
   async listCustomers(params: CustomerListParams) {
     await pause(); let rows = [...store.customers];
@@ -171,26 +159,13 @@ export const mockApi: SuperAdminApi = {
     const entry: PointsLedgerEntry = { id: crypto.randomUUID(), created_at: new Date().toISOString(), updated_at: new Date().toISOString(), points: input.points, description: input.reason, customer, campaign: required(store.campaigns, (campaign) => campaign.id === input.campaignId, 'Campaign') };
     store.ledger.unshift(entry); record('points.adjusted', 'customer', id, { points: input.points, reason: input.reason, campaignId: input.campaignId }); return entry;
   },
-  async listTransactions(params: TransactionListParams) {
-    await pause(); let rows = [...store.ledger];
-    if (params.campaignId) rows = rows.filter((entry) => entry.campaign?.id === params.campaignId);
-    if (params.customerId) rows = rows.filter((entry) => entry.customer?.id === params.customerId);
-    if (params.kind) rows = rows.filter((entry) => params.kind === 'earn' ? entry.points > 0 : entry.points < 0);
-    return page(rows, params);
-  },
-  async listRedemptions(params: TransactionListParams) {
+  async listRedemptions(params: RedemptionListParams) {
     await pause(); let rows = [...store.redemptions];
     if (params.campaignId) rows = rows.filter((entry) => entry.campaign?.id === params.campaignId);
     if (params.customerId) rows = rows.filter((entry) => entry.customer?.id === params.customerId);
     return page(rows, params);
   },
   async revokeCode(id) { await pause(); record('code.revoked', 'code', id, null); return { success: true }; },
-  async listPayments(params: PaymentListParams) {
-    await pause(); let rows = [...store.payments];
-    if (params.status) rows = rows.filter((payment) => payment.status === params.status);
-    if (params.type) rows = rows.filter((payment) => payment.type === params.type);
-    return page(rows, params);
-  },
   async listAuditLogs(params: AuditListParams) {
     await pause(); let rows = [...store.audit];
     if (params.actorId) rows = rows.filter((entry) => entry.actor.id === params.actorId);

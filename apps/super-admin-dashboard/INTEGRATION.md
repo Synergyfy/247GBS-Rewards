@@ -23,7 +23,7 @@ For standalone mock development, use `VITE_USE_MOCKS=true`. The mock credential 
 
 ## Backend prerequisites and follow-ups
 
-The API must allow the dashboard origin through Nest CORS. Add `http://localhost:8079`, `http://127.0.0.1:8079`, and the production dashboard URL to the origin allow-list in `apps/api/src/main.ts` (or the current API `main.ts`). At least one `Users` row must have role `super_admin`. Merge backend hardening branch `fix/super-admin-api-hardening` before connecting the dashboard to a real API. The business web app must implement the receiving hand-off at `/auth/impersonate`; the dashboard opens it as `${VITE_WEB_APP_URL}/auth/impersonate#token=<accessToken>&expiresIn=<n>`, keeping the token in the URL fragment.
+The API must allow the dashboard origin through Nest CORS. Add `http://localhost:8079`, `http://127.0.0.1:8079`, and the production dashboard URL to the origin allow-list in `apps/api/src/main.ts` (or the current API `main.ts`). At least one `Users` row must have role `super_admin`. Merge backend hardening branch `fix/super-admin-api-hardening` before connecting the dashboard to a real API.
 
 ## Endpoint map
 
@@ -35,14 +35,10 @@ All paths are in `src/services/endpoints.ts`. `EXISTS` endpoints are currently a
 | GET | `super-admin/admins` | EXISTS; array is adapted for local filtering/pagination |
 | GET | `super-admin/users` | EXISTS array; paginated form and filters are TODO-BACKEND |
 | GET | `super-admin/users/:id` | TODO-BACKEND |
-| POST | `super-admin/users` | EXISTS; create admin |
 | PATCH | `super-admin/users/:id` | TODO-BACKEND |
 | PATCH | `super-admin/users/:id/status` | TODO-BACKEND |
 | POST | `super-admin/users/:id/reset-password` | TODO-BACKEND |
 | DELETE | `super-admin/users/:id` | TODO-BACKEND |
-| POST | `super-admin/users/:id/impersonate` | TODO-BACKEND |
-| GET | `super-admin/users/:id/payments` | TODO-BACKEND |
-| GET | `super-admin/users/:id/balances` | TODO-BACKEND |
 | GET | `super-admin/admins/:id/businesses` | EXISTS |
 | GET | `super-admin/analytics/user/:id` | EXISTS |
 | GET | `super-admin/businesses` | Paginated list/filter contract is TODO-BACKEND |
@@ -59,10 +55,8 @@ All paths are in `src/services/endpoints.ts`. `EXISTS` endpoints are currently a
 | GET | `super-admin/customers` | TODO-BACKEND |
 | GET | `super-admin/customers/:id` | TODO-BACKEND |
 | POST | `super-admin/customers/:id/points-adjustment` | TODO-BACKEND |
-| GET | `super-admin/transactions` | TODO-BACKEND |
 | GET | `super-admin/redemptions` | TODO-BACKEND |
 | DELETE | `super-admin/codes/:id` | TODO-BACKEND |
-| GET | `super-admin/payments` | TODO-BACKEND |
 | GET | `super-admin/analytics/platform` | Existing API is a stub; usable aggregate response is TODO-BACKEND |
 | GET | `super-admin/audit-logs` | TODO-BACKEND |
 
@@ -74,4 +68,4 @@ All paths are in `src/services/endpoints.ts`. `EXISTS` endpoints are currently a
 
 Use `created_at` and `updated_at` snake_case timestamp keys. IDs are UUID strings; dates are ISO strings. Never return a password in API response types. A campaign is active if it is non-`SEASONAL`, or if its related season exists and the current date lies within its start/end dates; a seasonal campaign without a season is inactive.
 
-The API hardening items from the backend notes remain important: ensure public signup cannot set role, password hashes are not exposed, routes are scoped, unknown records return 404, login enforces `isActive`, mutation/impersonation writes are audited, analytics aggregates are implemented, duplicate email/phone checks exist, and a super-admin seed/promotion path is available. CORS changes also belong in the API, not this dashboard.
+The API hardening items from the backend notes remain important: ensure public signup cannot set role, password hashes are not exposed, routes are scoped, unknown records return 404, login enforces `isActive`, mutation writes are audited, analytics aggregates are implemented, duplicate email/phone checks exist, and a super-admin seed/promotion path is available. CORS changes also belong in the API, not this dashboard.
