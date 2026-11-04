@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Business } from '../../../modules/business/entities/business.entity.js';
 import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import { Column, Entity, OneToMany } from 'typeorm';
@@ -18,11 +19,11 @@ export class User extends AbstractBaseEntity {
   @Column({ unique: true })
   email: string;
 
-  @ApiProperty({ enum: Role, example: Role.CUSTOMER, description: 'Role of the user' })
+  @ApiProperty({ enum: Role, example: Role.ADMIN, description: 'Role of the user' })
   @Column({
     type: 'enum',
     enum: Role,
-    default: Role.CUSTOMER,
+    default: Role.ADMIN,
   })
   role: Role;
 
@@ -38,6 +39,7 @@ export class User extends AbstractBaseEntity {
   @Column({ nullable: true })
   referralCode: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column()
   password: string;
 

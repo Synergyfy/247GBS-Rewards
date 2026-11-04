@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BusinessModule } from './modules/business/business.module.js';
 import dataSource from './database/data-source.js';
 import authConfig from './config/auth.config.js';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthGuard } from './core/guards/auth.guard.js';
 import { RolesGuard } from './core/guards/roles.guard.js';
 import { StaffModule } from './modules/staff/staff.module.js';
@@ -64,6 +64,11 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      // Applies @Exclude() on entities (e.g. password hashes) to every response
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
     },
     AppService,
   ],

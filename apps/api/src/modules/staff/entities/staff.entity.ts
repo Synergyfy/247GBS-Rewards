@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { AbstractBaseEntity } from '../../../entities/base.entity.js';
 import type { Relation } from 'typeorm';
 import { Business } from '../../business/entities/business.entity.js';
@@ -20,6 +21,7 @@ export class Staff extends AbstractBaseEntity {
   @Column({ unique: true })
   email: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column()
   password: string;
 

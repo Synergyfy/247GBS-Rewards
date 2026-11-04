@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { Role } from '../../core/enums/roles.js';
 import { Roles } from '../../core/decorators/roles.decorator.js';
@@ -109,7 +119,7 @@ export class SuperAdminController {
     @Body() createBusinessDto: CreateBusinessDto,
   ) {
     const user = await this.userService.findOne(userId);
-    if (!user) throw new Error('User not found');
+    if (!user) throw new NotFoundException('User not found');
     return this.businessService.create(createBusinessDto, user);
   }
 
@@ -122,7 +132,7 @@ export class SuperAdminController {
   ) {
     // We need to fetch the existing business to preserve the user/owner
     const business = await this.businessService.findOne(id);
-    if (!business) throw new Error('Business not found');
+    if (!business) throw new NotFoundException('Business not found');
     
     // We pass the existing user so ownership doesn't change
     // Note: BusinessService.update assigns the passed user. 
@@ -135,6 +145,8 @@ export class SuperAdminController {
   @Delete('businesses/:id')
   @ApiOperation({ summary: 'Delete a business' })
   async deleteBusiness(@Param('id') id: string) {
+    const business = await this.businessService.findOne(id);
+    if (!business) throw new NotFoundException('Business not found');
     return this.businessService.remove(id);
   }
 }
