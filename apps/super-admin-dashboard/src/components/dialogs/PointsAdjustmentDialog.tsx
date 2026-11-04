@@ -3,37 +3,50 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ConfirmActionDialog } from './ConfirmActionDialog';
 import type { PointsAdjustmentInput } from '@/services/types';
 
 const REVIEW_THRESHOLD = 1000;
 
-/** §9C points adjustment: ±integer, campaign, required reason; above 1,000 points needs a second confirmation. */
+/** A campaign the customer belongs to; `membershipId` is the customer row that receives the points. */
+export interface AdjustmentTarget {
+  membershipId: string;
+  campaignId: string;
+  campaignName: string;
+  balance: number;
+}
+
+/**
+ * §9C points adjustment: ±integer, campaign, required reason; above 1,000 points needs a second confirmation.
+ * Points live per campaign, so a customer in several campaigns picks which one to adjust.
+ */
 export function PointsAdjustmentDialog({
   open,
   onOpenChange,
-  campaignId,
-  campaignName,
+  targets,
   onSubmit,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  campaignId: string;
-  campaignName: string;
-  onSubmit: (input: PointsAdjustmentInput) => Promise<void>;
+  targets: AdjustmentTarget[];
+  onSubmit: (membershipId: string, input: PointsAdjustmentInput) => Promise<void>;
 }) {
+  const [selectedId, setSelectedId] = useState('');
+  const target = targets.find((item) => item.membershipId === selectedId) ?? targets[0];
   const [points, setPoints] = useState('100');
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [riskOpen, setRiskOpen] = useState(false);
   const amount = Number(points);
-  const valid = Number.isInteger(amount) && amount !== 0 && reason.trim().length >= 3;
+  const valid = Boolean(target) && Number.isInteger(amount) && amount !== 0 && reason.trim().length >= 3;
 
   async function apply() {
+    if (!target) return;
     setBusy(true);
     try {
-      await onSubmit({ campaignId, points: amount, reason: reason.trim() });
+      await onSubmit(target.membershipId, { campaignId: target.campaignId, points: amount, reason: reason.trim() });
       onOpenChange(false);
       setReason('');
       setPoints('100');
@@ -70,7 +83,22 @@ export function PointsAdjustmentDialog({
               <Label htmlFor="adjust-campaign" className="text-xs">
                 Campaign
               </Label>
-              <Input id="adjust-campaign" value={campaignName} readOnly />
+              {targets.length > 1 ? (
+                <NativeSelect
+                  id="adjust-campaign"
+                  className="w-full"
+                  value={target?.membershipId ?? ''}
+                  onChange={(event) => setSelectedId(event.target.value)}
+                >
+                  {targets.map((item) => (
+                    <option key={item.membershipId} value={item.membershipId}>
+                      {item.campaignName} · {item.balance.toLocaleString()} pts
+                    </option>
+                  ))}
+                </NativeSelect>
+              ) : (
+                <Input id="adjust-campaign" value={target?.campaignName ?? 'No campaign'} readOnly />
+              )}
             </div>
             <div className="grid gap-1">
               <Label htmlFor="adjust-reason" className="text-xs">
@@ -101,7 +129,7 @@ export function PointsAdjustmentDialog({
         open={riskOpen}
         onOpenChange={setRiskOpen}
         title="Confirm high-impact adjustment"
-        description={`This adjustment is for ${amount.toLocaleString()} points, above the ${REVIEW_THRESHOLD.toLocaleString()}-point review threshold. Confirm the required reason has been provided.`}
+        description={`This adjustment is for ${amount.toLocaleString()} points${target ? ` in ${target.campaignName}` : ''}, above the ${REVIEW_THRESHOLD.toLocaleString()}-point review threshold. Confirm the required reason has been provided.`}
         confirmLabel="Confirm adjustment"
         onConfirm={() => void apply()}
       />

@@ -40,7 +40,23 @@ export interface Reward extends Base {
   successPageButtonLink: string | null; config: Record<string, unknown> | null; quantityAvailable: number;
   quantityRemaining: number; campaign?: Campaign;
 }
+/** One campaign membership. The API stores a customer row per campaign joined. */
 export interface Customer extends Base { firstName: string; lastName: string; email: string; campaign?: Campaign; balance?: number; }
+export interface CustomerMembership { id: string; created_at: string; balance: number; campaign?: Campaign; }
+/**
+ * One person, grouped by email (case-insensitive), with every campaign they joined inside the
+ * requested scope. `id` is a membership id and opens the person's page; `balance` sums the memberships.
+ */
+export interface CustomerRow {
+  id: string; firstName: string; lastName: string; email: string;
+  /** Earliest join within scope. */
+  created_at: string;
+  balance: number; campaignCount: number;
+  /** Newest first. */
+  memberships: CustomerMembership[];
+}
+/** The person behind any one membership id, across all of their campaigns. */
+export interface CustomerProfile extends CustomerRow { ledger: PointsLedgerEntry[]; redemptions: Redemption[]; }
 export interface PointsLedgerEntry extends Base { points: number; description: string; campaign?: Campaign; customer?: Customer; }
 export interface Redemption extends Base { description: string; uniqueCode: string; campaign?: Campaign; customer?: Customer; reward?: Reward; }
 export interface GeneratedCode extends Base { expiry: string; points: number; code: string; type: string; staff?: Staff | null; }

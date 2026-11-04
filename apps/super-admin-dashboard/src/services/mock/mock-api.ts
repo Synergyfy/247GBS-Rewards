@@ -6,7 +6,7 @@ import type { SuperAdminApi } from '../api';
 import { createFixtures } from './fixtures';
 import type {
   AuditListParams, AuditLogEntry, Business, BusinessCreateInput, BusinessListParams,
-  CampaignAnalytics, CampaignListParams, CustomerListParams, ListParams, Paginated,
+  CampaignAnalytics, CampaignListParams, Customer, CustomerListParams, CustomerRow, ListParams, Paginated,
   PlatformAnalytics, PointsAdjustmentInput, PointsLedgerEntry,
   RedemptionListParams, User, UserAnalytics, UserListParams, UserRow,
 } from '../types';
@@ -33,6 +33,26 @@ function page<T>(items: T[], params: ListParams = {}): Paginated<T> {
   const current = Math.max(1, Number(params.page ?? 1));
   const limit = Math.max(1, Number(params.limit ?? 25));
   return { data: rows.slice((current - 1) * limit, current * limit), total: rows.length, page: current, limit };
+}
+/** Collapse campaign memberships into one row per person (email, case-insensitive). */
+function personRow(rows: Customer[]): CustomerRow {
+  const newest = [...rows].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const latest = newest[0]!;
+  const memberships = newest.map((row) => ({ id: row.id, created_at: row.created_at, balance: row.balance ?? 0, campaign: row.campaign }));
+  return {
+    id: newest[newest.length - 1]!.id, firstName: latest.firstName, lastName: latest.lastName, email: latest.email,
+    created_at: newest[newest.length - 1]!.created_at, balance: memberships.reduce((sum, item) => sum + item.balance, 0),
+    campaignCount: memberships.length, memberships,
+  };
+}
+function groupByPerson(rows: Customer[]): CustomerRow[] {
+  const people = new Map<string, Customer[]>();
+  for (const row of rows) {
+    const key = row.email.toLocaleLowerCase();
+    const list = people.get(key);
+    if (list) list.push(row); else people.set(key, [row]);
+  }
+  return [...people.values()].map(personRow);
 }
 function userRow(user: User): UserRow {
   const businesses = store.businesses.filter((business) => business.user?.id === user.id);
@@ -148,11 +168,14 @@ export const mockApi: SuperAdminApi = {
     await pause(); let rows = [...store.customers];
     if (params.campaignId) rows = rows.filter((customer) => customer.campaign?.id === params.campaignId);
     if (params.businessId) rows = rows.filter((customer) => customer.campaign?.business?.id === params.businessId);
-    return page(rows, params);
+    return page(groupByPerson(rows), params);
   },
   async getCustomer(id) {
     await pause(); const customer = required(store.customers, (item) => item.id === id, 'Customer');
-    return { ...customer, balance: customer.balance ?? 0, ledger: store.ledger.filter((entry) => entry.customer?.id === id), redemptions: store.redemptions.filter((item) => item.customer?.id === id) };
+    const email = customer.email.toLocaleLowerCase();
+    const memberships = store.customers.filter((item) => item.email.toLocaleLowerCase() === email);
+    const ids = new Set(memberships.map((item) => item.id));
+    return { ...personRow(memberships), ledger: store.ledger.filter((entry) => entry.customer && ids.has(entry.customer.id)), redemptions: store.redemptions.filter((item) => item.customer && ids.has(item.customer.id)) };
   },
   async adjustCustomerPoints(id, input: PointsAdjustmentInput) {
     await pause(); const customer = required(store.customers, (item) => item.id === id, 'Customer'); customer.balance = (customer.balance ?? 0) + input.points;

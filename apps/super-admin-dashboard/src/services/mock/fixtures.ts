@@ -42,11 +42,13 @@ export function createFixtures(): MockStore {
       business, season, isActive: active, rewards: Array.from({ length: 2 }, (_, rewardIndex): Reward => ({ ...makeBase(12000 + i * 2 + rewardIndex, 20 + i % 60), title: pick(rewards, (i + rewardIndex) % rewards.length), pointCost: String(200 + rewardIndex * 150), currency: 'points', rewardValue: rewardIndex === 0 ? '£5' : 'Free item', activeFrom: isoDaysAgo(30), expires: new Date(Date.now() + 120 * 86400000).toISOString(), description: 'A member-only reward from this campaign.', type: 'STANDARD', successPageTitle: null, successPageMessage: null, successPageButtonLink: null, config: null, quantityAvailable: 500, quantityRemaining: 350 - i % 180 })),
     };
   });
-  const customers: Customer[] = Array.from({ length: 2000 }, (_, i) => {
-    const firstName = pick(['Sam', 'Taylor', 'Jordan', 'Alex', 'Morgan', 'Riley', 'Casey', 'Jamie', 'Robin', 'Cameron'], i % 10);
-    const lastName = pick(['Foster', 'Parker', 'Reed', 'Bailey', 'Morgan', 'Ellis', 'Kelly', 'Rivera'], i % 8);
-    const campaign = pick(campaigns, i % campaigns.length);
-    return { ...makeBase(1000 + i, i % 360), firstName, lastName, email: `customer${String(i + 1).padStart(4, '0')}@mail.example`, campaign, balance: 80 + (i * 37) % 1800 };
+  // 1,400 people: the first 500 also joined a second campaign, the first 150 a third.
+  const customers: Customer[] = Array.from({ length: 2050 }, (_, i) => {
+    const [person, join] = i < 1400 ? [i, 0] : i < 1900 ? [i - 1400, 1] : [i - 1900, 2];
+    const firstName = pick(['Sam', 'Taylor', 'Jordan', 'Alex', 'Morgan', 'Riley', 'Casey', 'Jamie', 'Robin', 'Cameron'], person % 10);
+    const lastName = pick(['Foster', 'Parker', 'Reed', 'Bailey', 'Morgan', 'Ellis', 'Kelly', 'Rivera'], person % 8);
+    const campaign = pick(campaigns, (person + join * 29) % campaigns.length);
+    return { ...makeBase(1000 + i, Math.max(0, (person % 360) - join * 40)), firstName, lastName, email: `customer${String(person + 1).padStart(4, '0')}@mail.example`, campaign, balance: 80 + (i * 37) % 1800 };
   });
   const ledger: PointsLedgerEntry[] = Array.from({ length: 900 }, (_, i) => {
     const customer = pick(customers, (i * 17) % customers.length);

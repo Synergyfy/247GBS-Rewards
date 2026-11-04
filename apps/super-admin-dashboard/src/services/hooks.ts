@@ -76,7 +76,7 @@ export function useSetUserStatus() {
 }
 export function useAdjustPoints() {
   const client = useQueryClient();
-  return useMutation({ mutationFn: ({ id, input }: { id: string; input: PointsAdjustmentInput }) => superAdminApi.adjustCustomerPoints(id, input), onSuccess: async (_, variables) => { await Promise.all([client.invalidateQueries({ queryKey: queryKeys.customer(variables.id) })]); toast.success('Points adjustment recorded'); }, onError: () => toast.error('Could not adjust points.') });
+  return useMutation({ mutationFn: ({ id, input }: { id: string; input: PointsAdjustmentInput }) => superAdminApi.adjustCustomerPoints(id, input), onSuccess: async () => { await Promise.all([client.invalidateQueries({ queryKey: ['customer'] }), client.invalidateQueries({ queryKey: ['customers'] })]); toast.success('Points adjustment recorded'); }, onError: () => toast.error('Could not adjust points.') });
 }
 export function useSetCampaignStatus() {
   const client = useQueryClient();

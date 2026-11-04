@@ -10,6 +10,8 @@ import { Properties } from '@/components/display/Properties';
 import { DetailTabs } from '@/components/display/DetailTabs';
 import { DangerZone } from '@/components/display/DangerZone';
 import { useAdminActions } from '@/components/features/admins/useAdminActions';
+import { CampaignMemberships } from '@/components/features/customers/CampaignMemberships';
+import { membershipsCsv } from '@/lib/customers';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import {
   useAuditLogs,
@@ -24,7 +26,7 @@ import type {
   AuditLogEntry,
   Business,
   Campaign,
-  Customer,
+  CustomerRow,
 } from '@/services/types';
 
 const businessColumns: Column<Business>[] = [
@@ -112,7 +114,7 @@ function CustomersTab({ businesses }: { businesses: Business[] }) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const query = useCustomers({ businessId, page, limit });
-  const columns: Column<Customer>[] = [
+  const columns: Column<CustomerRow>[] = [
     {
       key: 'name',
       label: 'Customer',
@@ -123,8 +125,13 @@ function CustomersTab({ businesses }: { businesses: Business[] }) {
       ),
     },
     { key: 'email', label: 'Email', render: (row) => row.email },
-    { key: 'campaign', label: 'Campaign', render: (row) => row.campaign?.name ?? '—' },
-    { key: 'created_at', label: 'Joined', render: (row) => shortDate(row.created_at) },
+    {
+      key: 'campaigns',
+      label: 'Campaigns',
+      render: (row) => <CampaignMemberships memberships={row.memberships} />,
+      csv: (row) => membershipsCsv(row.memberships),
+    },
+    { key: 'created_at', label: 'First joined', render: (row) => shortDate(row.created_at) },
   ];
   if (!businesses.length)
     return <div className="panel-body text-muted-foreground">This admin has no businesses yet.</div>;

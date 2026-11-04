@@ -52,9 +52,9 @@ All paths are in `src/services/endpoints.ts`. `EXISTS` endpoints are currently a
 | GET | `super-admin/campaigns/:id` | TODO-BACKEND |
 | PATCH | `super-admin/campaigns/:id/status` | TODO-BACKEND |
 | GET | `super-admin/analytics/campaign/:id` | EXISTS |
-| GET | `super-admin/customers` | TODO-BACKEND |
-| GET | `super-admin/customers/:id` | TODO-BACKEND |
-| POST | `super-admin/customers/:id/points-adjustment` | TODO-BACKEND |
+| GET | `super-admin/customers` | TODO-BACKEND. One row per person, grouped by `lower(email)` (a `Customers` row exists per campaign joined): `CustomerRow` with `memberships[]` (newest first), `campaignCount`, summed `balance`, earliest `created_at`. `campaignId`/`businessId` limit which memberships count; `total` counts people |
+| GET | `super-admin/customers/:id` | TODO-BACKEND. `:id` is any membership id; returns `CustomerProfile`: the person across every campaign, with ledger and redemptions from all memberships |
+| POST | `super-admin/customers/:id/points-adjustment` | TODO-BACKEND. `:id` is the membership for the chosen campaign |
 | GET | `super-admin/redemptions` | TODO-BACKEND |
 | DELETE | `super-admin/codes/:id` | TODO-BACKEND |
 | GET | `super-admin/analytics/platform` | Existing API is a stub; usable aggregate response is TODO-BACKEND |

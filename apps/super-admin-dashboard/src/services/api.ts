@@ -1,6 +1,6 @@
 import type {
   AuditListParams, AuditLogEntry, Business, BusinessCreateInput, BusinessListParams,
-  Campaign, CampaignAnalytics, CampaignListParams, Customer, CustomerListParams, LoginResponse,
+  Campaign, CampaignAnalytics, CampaignListParams, CustomerListParams, CustomerProfile, CustomerRow, LoginResponse,
   Paginated, PlatformAnalytics, PointsAdjustmentInput, PointsLedgerEntry,
   Redemption, RedemptionListParams, Staff, User, UserAnalytics, UserListParams, UserRow,
 } from './types';
@@ -28,8 +28,10 @@ export interface SuperAdminApi {
   userAnalytics(id: string): Promise<UserAnalytics>;
   campaignAnalytics(id: string): Promise<CampaignAnalytics>;
   platformAnalytics(from?: string, to?: string): Promise<PlatformAnalytics>;
-  listCustomers(params: CustomerListParams): Promise<Paginated<Customer>>;
-  getCustomer(id: string): Promise<Customer & { balance: number; ledger: PointsLedgerEntry[]; redemptions: Redemption[] }>;
+  /** People grouped by email; `campaignId` / `businessId` narrow which memberships count. */
+  listCustomers(params: CustomerListParams): Promise<Paginated<CustomerRow>>;
+  getCustomer(id: string): Promise<CustomerProfile>;
+  /** `id` is the membership (campaign-specific customer row) receiving the points. */
   adjustCustomerPoints(id: string, input: PointsAdjustmentInput): Promise<PointsLedgerEntry>;
   listRedemptions(params: RedemptionListParams): Promise<Paginated<Redemption>>;
   revokeCode(id: string): Promise<{ success: true }>;

@@ -7,13 +7,15 @@ import { QueryState } from '@/components/display/QueryState';
 import { useUrlState } from '@/hooks/useUrlState';
 import { shortDate } from '@/lib/format';
 import { useCustomers } from '@/services/hooks';
-import type { Customer } from '@/services/types';
+import type { CustomerRow } from '@/services/types';
+import { CampaignMemberships } from '@/components/features/customers/CampaignMemberships';
+import { membershipsCsv } from '@/lib/customers';
 
 export function CustomersList() {
   const navigate = useNavigate();
   const state = useUrlState();
   const query = useCustomers(state.listParams);
-  const columns: Column<Customer>[] = [
+  const columns: Column<CustomerRow>[] = [
     {
       key: 'firstName',
       sortable: true,
@@ -26,36 +28,39 @@ export function CustomersList() {
     },
     { key: 'email', sortable: true, mobile: false, label: 'Email', render: (row) => row.email },
     {
-      key: 'campaign',
+      key: 'campaigns',
       mobile: false,
-      label: 'Campaign',
-      render: (row) =>
-        row.campaign ? (
-          <Link className="inline-link" to={`/campaigns/${row.campaign.id}`}>
-            {row.campaign.name}
-          </Link>
-        ) : (
-          '—'
-        ),
+      label: 'Campaigns',
+      render: (row) => <CampaignMemberships memberships={row.memberships} />,
+      csv: (row) => membershipsCsv(row.memberships),
+    },
+    {
+      key: 'campaignCount',
+      sortable: true,
+      mobile: false,
+      align: 'right',
+      label: 'Joined',
+      render: (row) => <span className="tabular-nums">{row.campaignCount}</span>,
     },
     {
       key: 'balance',
       sortable: true,
       align: 'right',
-      label: 'Balance',
-      render: (row) => <span className="tabular-nums">{(row.balance ?? 0).toLocaleString()} pts</span>,
+      // Summed across every campaign; the "+N" popover breaks it down per campaign
+      label: 'Total balance',
+      render: (row) => <span className="tabular-nums">{row.balance.toLocaleString()} pts</span>,
     },
     {
       key: 'created_at',
       sortable: true,
       mobile: false,
-      label: 'Joined',
+      label: 'First joined',
       render: (row) => shortDate(row.created_at),
     },
   ];
   return (
     <>
-      <PageHeader title="Customers" description="Customer membership, balances and campaign joins." />
+      <PageHeader title="Customers" description="One row per customer, with every campaign they have joined." />
       <FilterBar placeholder="Search customer email or name…" />
       <QueryState
         loading={query.isLoading}
@@ -73,12 +78,13 @@ export function CustomersList() {
           loading={query.isFetching}
           rowActions={(row) => [
             { label: 'View details', icon: <Eye />, onSelect: () => navigate(`/customers/${row.id}`) },
-            ...(row.campaign
+            // One campaign: jump straight to it. Several: the "+N" popover in the row lists them.
+            ...(row.memberships.length === 1 && row.memberships[0]?.campaign
               ? [
                   {
                     label: 'View campaign',
                     icon: <Megaphone />,
-                    onSelect: () => navigate(`/campaigns/${row.campaign!.id}`),
+                    onSelect: () => navigate(`/campaigns/${row.memberships[0]!.campaign!.id}`),
                   },
                 ]
               : []),

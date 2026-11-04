@@ -14,7 +14,7 @@ import { useCampaign, useCampaignAnalytics, useCustomers, useRedemptions, useSet
 import { compact, shortDate } from '@/lib/format';
 import { appEnv } from '@/lib/env';
 import { useBreadcrumbs } from '@/lib/breadcrumb-context';
-import type { ActivityPoint, Campaign, Customer, Redemption, Reward } from '@/services/types';
+import type { ActivityPoint, Campaign, CustomerRow, Redemption, Reward } from '@/services/types';
 
 const rewardColumns: Column<Reward>[] = [
   { key: 'title', label: 'Reward', render: (row) => row.title },
@@ -51,7 +51,7 @@ const redemptionColumns: Column<Redemption>[] = [
   { key: 'uniqueCode', label: 'Redemption code', render: (row) => <span className="tabular-nums">{row.uniqueCode}</span> },
 ];
 
-const customerColumns: Column<Customer>[] = [
+const customerColumns: Column<CustomerRow>[] = [
   {
     key: 'name',
     label: 'Customer',
@@ -62,6 +62,8 @@ const customerColumns: Column<Customer>[] = [
     ),
   },
   { key: 'email', label: 'Email', render: (row) => row.email },
+  // The list is scoped to this campaign, so this is the balance held here
+  { key: 'balance', label: 'Balance', align: 'right', render: (row) => <span className="tabular-nums">{row.balance.toLocaleString()} pts</span> },
   { key: 'created_at', label: 'Joined', render: (row) => shortDate(row.created_at) },
 ];
 
