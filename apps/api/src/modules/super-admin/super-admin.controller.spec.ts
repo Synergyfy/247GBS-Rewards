@@ -1,165 +1,307 @@
 import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SuperAdminController } from './super-admin.controller.js';
-import { UserService } from '../user/user.service.js';
-import { BusinessService } from '../business/business.service.js';
-import { StaffService } from '../staff/staff.service.js';
-import { AnalyticsService } from '../analytics/analytics.service.js';
-import { CampaignService } from '../campaign/campaign.service.js';
+import { SuperAdminService } from './super-admin.service.js';
+import { ROLES_KEY } from '../../core/decorators/roles.decorator.js';
 import { Role } from '../../core/enums/roles.js';
 
 describe('SuperAdminController', () => {
   let controller: SuperAdminController;
-  let userService: UserService;
-  let businessService: BusinessService;
-  let staffService: StaffService;
-  let analyticsService: AnalyticsService;
+  let service: Record<string, jest.Mock>;
 
-  const mockUserService = {
-    findAllAdmins: jest.fn(),
-    findAll: jest.fn(),
-    create: jest.fn(),
-    findOne: jest.fn(),
-  };
-
-  const mockBusinessService = {
-    findAllBusinessByUser: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    findOne: jest.fn(),
-    remove: jest.fn(),
-  };
-
-  const mockStaffService = {
-    findStaffByBusiness: jest.fn(),
-  };
-
-  const mockAnalyticsService = {
-    getOverallAnalytics: jest.fn(),
-    getPlatformAnalytics: jest.fn(),
-    getCampaignAnalytics: jest.fn(),
-  };
-
-  const mockCampaignService = {};
+  const request = {
+    user: { userId: 'actor-id', role: Role.SUPER_ADMIN },
+    ip: '127.0.0.1',
+    headers: {},
+  } as any;
 
   beforeEach(async () => {
+    service = {
+      listAdmins: jest.fn(),
+      listUsers: jest.fn(),
+      createUser: jest.fn(),
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+      setUserStatus: jest.fn(),
+      resetPassword: jest.fn(),
+      deleteUser: jest.fn(),
+      getAdminBusinesses: jest.fn(),
+      createBusinessForUser: jest.fn(),
+      listBusinesses: jest.fn(),
+      getBusiness: jest.fn(),
+      updateBusiness: jest.fn(),
+      deleteBusiness: jest.fn(),
+      businessStaff: jest.fn(),
+      updateStaff: jest.fn(),
+      listCampaigns: jest.fn(),
+      getCampaign: jest.fn(),
+      setCampaignStatus: jest.fn(),
+      getPlatformAnalytics: jest.fn(),
+      getUserAnalytics: jest.fn(),
+      getCampaignAnalytics: jest.fn(),
+      listCustomers: jest.fn(),
+      getCustomer: jest.fn(),
+      adjustCustomerPoints: jest.fn(),
+      listRedemptions: jest.fn(),
+      revokeCode: jest.fn(),
+      listAuditLogs: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SuperAdminController],
-      providers: [
-        { provide: UserService, useValue: mockUserService },
-        { provide: BusinessService, useValue: mockBusinessService },
-        { provide: StaffService, useValue: mockStaffService },
-        { provide: AnalyticsService, useValue: mockAnalyticsService },
-        { provide: CampaignService, useValue: mockCampaignService },
-      ],
+      providers: [{ provide: SuperAdminService, useValue: service }],
     }).compile();
 
-    controller = module.get<SuperAdminController>(SuperAdminController);
-    userService = module.get<UserService>(UserService);
-    businessService = module.get<BusinessService>(BusinessService);
-    staffService = module.get<StaffService>(StaffService);
-    analyticsService = module.get<AnalyticsService>(AnalyticsService);
+    controller = module.get(SuperAdminController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('is guarded to super admins only', () => {
+    expect(Reflect.getMetadata(ROLES_KEY, SuperAdminController)).toEqual([
+      Role.SUPER_ADMIN,
+    ]);
   });
 
-  describe('getAllAdmins', () => {
-    it('should return all admins', async () => {
-      const result = [{ id: '1', role: Role.ADMIN }];
-      mockUserService.findAllAdmins.mockResolvedValue(result);
-
-      expect(await controller.getAllAdmins()).toBe(result);
-    });
+  it('lists admins', async () => {
+    const query = { page: 1 };
+    service.listAdmins.mockResolvedValue({ data: [], total: 0 });
+    await controller.listAdmins(query as any);
+    expect(service.listAdmins).toHaveBeenCalledWith(query);
   });
 
-  describe('getAllUsers', () => {
-    it('should return all users', async () => {
-      const result = [{ id: '1', role: Role.CUSTOMER }];
-      mockUserService.findAll.mockResolvedValue(result);
-
-      expect(await controller.getAllUsers()).toBe(result);
-    });
+  it('lists users', async () => {
+    const query = { page: 1 };
+    service.listUsers.mockResolvedValue({ data: [], total: 0 });
+    await controller.listUsers(query as any);
+    expect(service.listUsers).toHaveBeenCalledWith(query);
   });
 
-  describe('getAdminBusinesses', () => {
-    it('should return businesses for an admin', async () => {
-      const result = [{ id: 'biz1' }];
-      mockBusinessService.findAllBusinessByUser.mockResolvedValue(result);
-
-      expect(await controller.getAdminBusinesses('adminId')).toBe(result);
-      expect(mockBusinessService.findAllBusinessByUser).toHaveBeenCalledWith('adminId');
-    });
+  it('creates a user', async () => {
+    const dto = { fullName: 'A', email: 'a@b.com', phoneNumber: '1' };
+    service.createUser.mockResolvedValue({ id: 'user-1' });
+    await controller.createUser(dto as any, request);
+    expect(service.createUser).toHaveBeenCalledWith(dto, 'actor-id', '127.0.0.1');
   });
 
-  describe('getBusinessStaff', () => {
-    it('should return staff for a business', async () => {
-      const result = [{ id: 'staff1' }];
-      mockStaffService.findStaffByBusiness.mockResolvedValue(result);
-
-      expect(await controller.getBusinessStaff('bizId')).toBe(result);
-      expect(mockStaffService.findStaffByBusiness).toHaveBeenCalledWith('bizId');
-    });
+  it('gets a user', async () => {
+    service.getUser.mockResolvedValue({ id: 'user-1' });
+    await controller.getUser({ id: 'user-1' });
+    expect(service.getUser).toHaveBeenCalledWith('user-1');
   });
 
-  describe('getUserAnalytics', () => {
-    it('should return analytics for a user', async () => {
-      const result = { totalCampaigns: 5 };
-      mockAnalyticsService.getOverallAnalytics.mockResolvedValue(result);
-
-      expect(await controller.getUserAnalytics('userId')).toBe(result);
-      expect(mockAnalyticsService.getOverallAnalytics).toHaveBeenCalledWith('userId');
-    });
+  it('updates a user', async () => {
+    const dto = { location: 'Austin' };
+    service.updateUser.mockResolvedValue({ id: 'user-1' });
+    await controller.updateUser({ id: 'user-1' }, dto, request);
+    expect(service.updateUser).toHaveBeenCalledWith(
+      'user-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
   });
 
-  describe('getPlatformAnalytics', () => {
-    it('should return platform analytics', async () => {
-      const result = { totalCampaigns: 100 };
-      mockAnalyticsService.getPlatformAnalytics.mockResolvedValue(result);
-
-      expect(await controller.getPlatformAnalytics()).toBe(result);
-    });
+  it('sets user status', async () => {
+    const dto = { isActive: false };
+    service.setUserStatus.mockResolvedValue({ id: 'user-1' });
+    await controller.setUserStatus({ id: 'user-1' }, dto, request);
+    expect(service.setUserStatus).toHaveBeenCalledWith(
+      'user-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
   });
 
-  describe('management endpoints', () => {
-     it('should create a user', async () => {
-         const dto = { email: 'test@test.com', password: 'pw', fullName: 'Test', phoneNumber: '123' };
-         mockUserService.create.mockResolvedValue({ id: '1', ...dto });
-         expect(await controller.createUser(dto as any)).toBeDefined();
-         expect(mockUserService.create).toHaveBeenCalledWith(dto);
-     });
+  it('resets a password', async () => {
+    const dto = { reason: 'support' };
+    service.resetPassword.mockResolvedValue({ temporaryPassword: 'x' });
+    await controller.resetPassword({ id: 'user-1' }, dto, request);
+    expect(service.resetPassword).toHaveBeenCalledWith(
+      'user-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
 
-     it('should create a business for user', async () => {
-         const userId = 'uid';
-         const dto = { name: 'Biz' };
-         const user = { id: userId };
-         mockUserService.findOne.mockResolvedValue(user);
-         mockBusinessService.create.mockResolvedValue({ id: 'bid', ...dto });
+  it('deletes a user', async () => {
+    const dto = { reason: 'duplicate' };
+    service.deleteUser.mockResolvedValue({ success: true });
+    await controller.deleteUser({ id: 'user-1' }, dto, request);
+    expect(service.deleteUser).toHaveBeenCalledWith(
+      'user-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
 
-         expect(await controller.createBusinessForUser(userId, dto as any)).toBeDefined();
-         expect(mockBusinessService.create).toHaveBeenCalledWith(dto, user);
-     });
-     
-     it('should update a business', async () => {
-         const bid = 'bid';
-         const dto = { name: 'New Name' };
-         const existingBiz = { id: bid, user: { id: 'uid' } };
-         const owner = { id: 'uid' };
-         
-         mockBusinessService.findOne.mockResolvedValue(existingBiz);
-         mockUserService.findOne.mockResolvedValue(owner);
-         mockBusinessService.update.mockResolvedValue({ ...existingBiz, ...dto });
+  it('lists an admin’s businesses', async () => {
+    service.getAdminBusinesses.mockResolvedValue([]);
+    await controller.getAdminBusinesses({ id: 'user-1' });
+    expect(service.getAdminBusinesses).toHaveBeenCalledWith('user-1');
+  });
 
-         expect(await controller.updateBusiness(bid, dto as any)).toBeDefined();
-         expect(mockBusinessService.update).toHaveBeenCalledWith(bid, dto, owner);
-     });
+  it('creates a business for a user', async () => {
+    const dto = { name: 'B', email: 'b@c.com', phoneNumber: '1' };
+    service.createBusinessForUser.mockResolvedValue({ id: 'biz-1' });
+    await controller.createBusinessForUser({ userId: 'user-1' }, dto as any, request);
+    expect(service.createBusinessForUser).toHaveBeenCalledWith(
+      'user-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
 
-     it('should delete a business', async () => {
-         const bid = 'bid';
-         mockBusinessService.remove.mockResolvedValue(undefined);
-         await controller.deleteBusiness(bid);
-         expect(mockBusinessService.remove).toHaveBeenCalledWith(bid);
-     });
+  it('lists businesses', async () => {
+    const query = { page: 1 };
+    service.listBusinesses.mockResolvedValue({ data: [], total: 0 });
+    await controller.listBusinesses(query as any);
+    expect(service.listBusinesses).toHaveBeenCalledWith(query);
+  });
+
+  it('gets a business', async () => {
+    service.getBusiness.mockResolvedValue({ id: 'biz-1' });
+    await controller.getBusiness({ id: 'biz-1' });
+    expect(service.getBusiness).toHaveBeenCalledWith('biz-1');
+  });
+
+  it('updates a business', async () => {
+    const dto = { name: 'New' };
+    service.updateBusiness.mockResolvedValue({ id: 'biz-1' });
+    await controller.updateBusiness({ id: 'biz-1' }, dto, request);
+    expect(service.updateBusiness).toHaveBeenCalledWith(
+      'biz-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
+
+  it('deletes a business', async () => {
+    const dto = { reason: 'closed' };
+    service.deleteBusiness.mockResolvedValue({ success: true });
+    await controller.deleteBusiness({ id: 'biz-1' }, dto, request);
+    expect(service.deleteBusiness).toHaveBeenCalledWith(
+      'biz-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
+
+  it('lists business staff', async () => {
+    service.businessStaff.mockResolvedValue([]);
+    await controller.getBusinessStaff({ id: 'biz-1' });
+    expect(service.businessStaff).toHaveBeenCalledWith('biz-1');
+  });
+
+  it('updates staff', async () => {
+    const dto = { isActive: false };
+    service.updateStaff.mockResolvedValue({ id: 'staff-1' });
+    await controller.updateStaff({ id: 'staff-1' }, dto, request);
+    expect(service.updateStaff).toHaveBeenCalledWith(
+      'staff-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
+
+  it('lists campaigns', async () => {
+    const query = { page: 1 };
+    service.listCampaigns.mockResolvedValue({ data: [], total: 0 });
+    await controller.listCampaigns(query as any);
+    expect(service.listCampaigns).toHaveBeenCalledWith(query);
+  });
+
+  it('gets a campaign', async () => {
+    service.getCampaign.mockResolvedValue({ id: 'campaign-1' });
+    await controller.getCampaign({ id: 'campaign-1' });
+    expect(service.getCampaign).toHaveBeenCalledWith('campaign-1');
+  });
+
+  it('sets campaign status', async () => {
+    const dto = { isActive: false };
+    service.setCampaignStatus.mockResolvedValue({ id: 'campaign-1' });
+    await controller.setCampaignStatus({ id: 'campaign-1' }, dto, request);
+    expect(service.setCampaignStatus).toHaveBeenCalledWith(
+      'campaign-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
+
+  it('gets platform analytics', async () => {
+    const query = { from: '2025-01-01', to: '2025-01-31' };
+    service.getPlatformAnalytics.mockResolvedValue({ totals: {} });
+    await controller.getPlatformAnalytics(query);
+    expect(service.getPlatformAnalytics).toHaveBeenCalledWith(
+      '2025-01-01',
+      '2025-01-31',
+    );
+  });
+
+  it('gets user analytics', async () => {
+    service.getUserAnalytics.mockResolvedValue({});
+    await controller.getUserAnalytics({ id: 'user-1' });
+    expect(service.getUserAnalytics).toHaveBeenCalledWith('user-1');
+  });
+
+  it('gets campaign analytics', async () => {
+    service.getCampaignAnalytics.mockResolvedValue({});
+    await controller.getCampaignAnalytics({ id: 'campaign-1' });
+    expect(service.getCampaignAnalytics).toHaveBeenCalledWith('campaign-1');
+  });
+
+  it('lists customers', async () => {
+    const query = { page: 1 };
+    service.listCustomers.mockResolvedValue({ data: [], total: 0 });
+    await controller.listCustomers(query as any);
+    expect(service.listCustomers).toHaveBeenCalledWith(query);
+  });
+
+  it('gets a customer', async () => {
+    service.getCustomer.mockResolvedValue({ id: 'customer-1' });
+    await controller.getCustomer({ id: 'customer-1' });
+    expect(service.getCustomer).toHaveBeenCalledWith('customer-1');
+  });
+
+  it('adjusts customer points', async () => {
+    const dto = { campaignId: 'campaign-1', points: 10, reason: 'fix' };
+    service.adjustCustomerPoints.mockResolvedValue({ id: 'point-1' });
+    await controller.adjustCustomerPoints({ id: 'customer-1' }, dto, request);
+    expect(service.adjustCustomerPoints).toHaveBeenCalledWith(
+      'customer-1',
+      dto,
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
+
+  it('lists redemptions', async () => {
+    const query = { page: 1 };
+    service.listRedemptions.mockResolvedValue({ data: [], total: 0 });
+    await controller.listRedemptions(query as any);
+    expect(service.listRedemptions).toHaveBeenCalledWith(query);
+  });
+
+  it('revokes a code', async () => {
+    service.revokeCode.mockResolvedValue({ success: true });
+    await controller.revokeCode({ id: 'code-1' }, request);
+    expect(service.revokeCode).toHaveBeenCalledWith(
+      'code-1',
+      'actor-id',
+      '127.0.0.1',
+    );
+  });
+
+  it('lists audit logs', async () => {
+    const query = { page: 1 };
+    service.listAuditLogs.mockResolvedValue({ data: [], total: 0 });
+    await controller.listAuditLogs(query as any);
+    expect(service.listAuditLogs).toHaveBeenCalledWith(query);
   });
 });

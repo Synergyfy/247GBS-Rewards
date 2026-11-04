@@ -30,6 +30,8 @@ export class UserService {
     const hashedPassword = await hashPassword(payload.password ?? 'mypassword');
     const user = this.userRepository.create({
       ...payload,
+      // Users-table accounts are business owners; customers/staff live in their own tables
+      role: payload.role ?? Role.ADMIN,
       password: hashedPassword,
     });
 
