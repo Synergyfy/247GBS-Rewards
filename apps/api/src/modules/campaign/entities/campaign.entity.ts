@@ -228,6 +228,13 @@ export class Campaign extends AbstractBaseEntity {
   @Column({ unique: true, nullable: false }) // Ensure the column is unique
   uniqueCode: string;
 
+  @ApiProperty({
+    description: 'Whether super admins have enabled this campaign',
+    default: true,
+  })
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
   @OneToMany(() => Customer, (customer) => customer.campaign, { cascade: true })
   customers: Customer[];
 }

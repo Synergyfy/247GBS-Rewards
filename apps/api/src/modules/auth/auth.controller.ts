@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req } from '@nestjs/common';
+import { Controller, Post, Body, Req, ForbiddenException } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import {
   CreateAuthDto,
@@ -51,6 +51,10 @@ export class AuthController {
 
     const user = await this.userService.getUserbyEmail(createAuthDto.email);
 
+    if (user.isActive === false) {
+      throw new ForbiddenException('This account has been deactivated');
+    }
+
     const passwordMatced = await comparePasswords(
       createAuthDto.password,
       user.password,
@@ -98,6 +102,10 @@ export class AuthController {
   async createStaff(@Body() createAuthDto: CreateAuthDto) {
     const user = await this.staffService.findOneByEmail(createAuthDto.email);
     if (!user) throw new UserDoesNotExistException();
+
+    if (user.isActive === false) {
+      throw new ForbiddenException('This staff account has been deactivated');
+    }
 
     const passwordMatced = await comparePasswords(
       createAuthDto.password,

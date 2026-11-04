@@ -20,10 +20,13 @@
     "test:cov": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "test:debug": "node --inspect-brk --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand",
     "test:e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json",
+    "test:super-admin": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js super-admin.controller",
+    "test:e2e:super-admin": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config ./test/jest-e2e.json super-admin",
     "migration:generate": "nest build && node ./node_modules/typeorm/cli.js migration:generate -d dist/database/data-source.js",
     "migration:run": "nest build && node ./node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js",
     "migration:revert": "nest build && node ./node_modules/typeorm/cli.js migration:revert -d dist/database/data-source.js",
     "migration:show": "nest build && node ./node_modules/typeorm/cli.js migration:show -d dist/database/data-source.js",
+    "seed:super-admin": "nest build && node dist/database/seed-super-admin.js",
     "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },
   "dependencies": {

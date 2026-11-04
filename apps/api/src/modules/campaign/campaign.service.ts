@@ -116,6 +116,10 @@ export class CampaignService {
   }
 
   isCampaignActive(campaign: Campaign): boolean {
+    if (campaign.isActive === false) {
+      return false;
+    }
+
     if (campaign.type !== CampaignType.SEASONAL) {
       return true;
     }

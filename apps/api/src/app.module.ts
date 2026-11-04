@@ -22,6 +22,7 @@ import { CustomerModule } from './modules/customer/customer.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
 import { AnalyticsModule } from './modules/analytics/analytics.module.js';
 import { SuperAdminModule } from './modules/super-admin/super-admin.module.js';
+import { AppCacheModule } from './core/cache/cache.module.js';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
@@ -54,6 +55,7 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
     AuditModule,
     AnalyticsModule,
     SuperAdminModule,
+    AppCacheModule,
   ],
   controllers: [AppController],
   providers: [
