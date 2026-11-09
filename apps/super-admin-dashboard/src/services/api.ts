@@ -1,6 +1,6 @@
 import type {
-  AuditListParams, AuditLogEntry, Business, BusinessCreateInput, BusinessListParams,
-  Campaign, CampaignAnalytics, CampaignListParams, CustomerListParams, CustomerProfile, CustomerRow, LoginResponse,
+  AuditListParams, AuditLogEntry, Business, BusinessCreateInput, BusinessListParams, BusinessUpdateInput, StaffUpdateInput,
+  Campaign, CampaignAnalytics, CampaignCode, CampaignCodeListParams, CampaignListParams, CustomerListParams, CustomerProfile, CustomerRow, LoginResponse,
   Paginated, PlatformAnalytics, PointsAdjustmentInput, PointsLedgerEntry,
   Redemption, RedemptionListParams, Staff, User, UserAnalytics, UserListParams, UserRow,
 } from './types';
@@ -18,14 +18,17 @@ export interface SuperAdminApi {
   listBusinesses(params: BusinessListParams): Promise<Paginated<Business>>;
   getBusiness(id: string): Promise<Business>;
   createBusiness(ownerId: string, input: BusinessCreateInput): Promise<Business>;
-  updateBusiness(id: string, input: Partial<Business>): Promise<Business>;
+  updateBusiness(id: string, input: BusinessUpdateInput): Promise<Business>;
   deleteBusiness(id: string, reason: string): Promise<{ success: true }>;
   businessStaff(id: string): Promise<Staff[]>;
-  updateStaff(id: string, input: Partial<Pick<Staff, 'isActive' | 'name' | 'email'>>): Promise<Staff>;
+  updateStaff(id: string, input: StaffUpdateInput): Promise<Staff>;
   listCampaigns(params: CampaignListParams): Promise<Paginated<Campaign>>;
   getCampaign(id: string): Promise<Campaign>;
   setCampaignStatus(id: string, isActive: boolean, reason?: string): Promise<Campaign>;
+  listCampaignCodes(campaignId: string, params: CampaignCodeListParams): Promise<Paginated<CampaignCode>>;
   userAnalytics(id: string): Promise<UserAnalytics>;
+  /** Same totals as `userAnalytics`, across one business's campaigns. */
+  businessAnalytics(id: string): Promise<UserAnalytics>;
   campaignAnalytics(id: string): Promise<CampaignAnalytics>;
   platformAnalytics(from?: string, to?: string): Promise<PlatformAnalytics>;
   /** People grouped by email; `campaignId` / `businessId` narrow which memberships count. */
@@ -34,6 +37,6 @@ export interface SuperAdminApi {
   /** `id` is the membership (campaign-specific customer row) receiving the points. */
   adjustCustomerPoints(id: string, input: PointsAdjustmentInput): Promise<PointsLedgerEntry>;
   listRedemptions(params: RedemptionListParams): Promise<Paginated<Redemption>>;
-  revokeCode(id: string): Promise<{ success: true }>;
+  revokeCode(id: string, reason?: string): Promise<{ success: true }>;
   listAuditLogs(params: AuditListParams): Promise<Paginated<AuditLogEntry>>;
 }

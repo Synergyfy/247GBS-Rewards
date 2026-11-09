@@ -36,13 +36,6 @@ function ResultGroup<T>({
   toItem: (row: T) => ResultItem;
   onSelect: (to: string) => void;
 }) {
-  if (group.notAvailable) {
-    return (
-      <CommandGroup heading={heading} className={GROUP}>
-        <div className="px-2 py-1 text-xs text-muted-foreground">Search for this type is not available yet.</div>
-      </CommandGroup>
-    );
-  }
   if (group.error) {
     return (
       <CommandGroup heading={heading} className={GROUP}>

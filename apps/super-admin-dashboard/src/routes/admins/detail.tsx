@@ -2,7 +2,7 @@ import { NativeSelect } from '@/components/ui/native-select';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { Building2, KeyRound, Power, PowerOff, Trash2 } from 'lucide-react';
+import { Building2, KeyRound, Pencil, Power, PowerOff, Trash2 } from 'lucide-react';
 import { PageHeader, KpiStrip } from '@/components/display/PageHeader';
 import { QueryState } from '@/components/display/QueryState';
 import { StatusBadge } from '@/components/display/States';
@@ -10,13 +10,15 @@ import { Properties } from '@/components/display/Properties';
 import { DetailTabs } from '@/components/display/DetailTabs';
 import { DangerZone } from '@/components/display/DangerZone';
 import { useAdminActions } from '@/components/features/admins/useAdminActions';
+import { EditFieldsDialog } from '@/components/dialogs/EditFieldsDialog';
 import { CampaignMemberships } from '@/components/features/customers/CampaignMemberships';
 import { membershipsCsv } from '@/lib/customers';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import {
   useAuditLogs,
-  useCampaignsForBusinesses,
+  useCampaigns,
   useCustomers,
+  useUpdateUser,
   useUser,
   useUserAnalytics,
 } from '@/services/hooks';
@@ -95,15 +97,30 @@ function ScopeSelect({
   );
 }
 
-function CampaignsTab({ businesses }: { businesses: Business[] }) {
-  const query = useCampaignsForBusinesses(businesses.map((business) => business.id));
+function CampaignsTab({ userId }: { userId: string }) {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(25);
+  const query = useCampaigns({ userId, page, limit });
   return (
-    <QueryState loading={query.isLoading} error={query.error} retry={query.refetch} section="campaigns">
+    <QueryState
+      loading={query.isLoading}
+      error={query.error as Error | null}
+      retry={() => void query.refetch()}
+      section="campaigns"
+    >
       <DataTable
         columns={campaignColumns}
-        rows={query.data}
+        rows={query.data?.data ?? []}
         rowId={(row) => row.id}
         emptyTitle="No campaigns yet"
+        total={query.data?.total ?? 0}
+        page={page}
+        pageSize={limit}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setLimit(size);
+          setPage(1);
+        }}
       />
     </QueryState>
   );
@@ -178,7 +195,7 @@ function ActivityTab({ userId }: { userId: string }) {
     {
       key: 'actor',
       label: 'Actor',
-      render: (row) => <span title={row.actor.email}>{row.actor.fullName}</span>,
+      render: (row) => (row.actor ? <span title={row.actor.email}>{row.actor.fullName}</span> : <span className="text-muted-foreground">Deleted account</span>),
     },
     { key: 'action', label: 'Action', render: (row) => row.action.replaceAll('.', ' ') },
     {
@@ -207,6 +224,8 @@ function ActivityTab({ userId }: { userId: string }) {
 export function AdminDetail() {
   const { id = '' } = useParams();
   const query = useUser(id);
+  const updateUser = useUpdateUser();
+  const [editOpen, setEditOpen] = useState(false);
   const analytics = useUserAnalytics(id);
   const actions = useAdminActions();
   const navigate = useNavigate();
@@ -230,6 +249,10 @@ export function AdminDetail() {
               <>
                 <StatusBadge value={user.role} />
                 <StatusBadge value={user.isActive ?? true} />
+                <Button variant="outline" onClick={() => setEditOpen(true)}>
+                  <Pencil />
+                  Edit
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => void actions.setStatus([user], !(user.isActive ?? true))}
@@ -287,7 +310,7 @@ export function AdminDetail() {
                   {
                     value: 'campaigns',
                     label: 'Campaigns',
-                    content: <CampaignsTab businesses={user.businesses} />,
+                    content: <CampaignsTab userId={user.id} />,
                   },
                   {
                     value: 'customers',
@@ -310,7 +333,9 @@ export function AdminDetail() {
                   ['Status', user.isActive === false ? 'Inactive' : 'Active'],
                 ]}
               />
-              <DangerZone description="Deleting an account is permanent. Related business data may remain depending on backend cascade rules.">
+              <DangerZone
+                description={`Deleting an account is permanent. It also deletes the ${user.businesses.length} business${user.businesses.length === 1 ? '' : 'es'} this admin owns, with their campaigns, staff and campaign customers.`}
+              >
                 <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => actions.requestDelete(user)}>
                   <Trash2 />
                   Delete admin
@@ -323,6 +348,19 @@ export function AdminDetail() {
             </div>
           </div>
           {actions.dialogs}
+          <EditFieldsDialog
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            title="Edit admin"
+            description="Changes are recorded in the audit trail."
+            fields={[
+              { name: 'fullName', label: 'Full name', value: user.fullName, required: true },
+              { name: 'email', label: 'Email', value: user.email, type: 'email', required: true },
+              { name: 'phoneNumber', label: 'Phone', value: user.phoneNumber, type: 'tel', required: true },
+              { name: 'location', label: 'Location', value: user.location },
+            ]}
+            onSubmit={(changes) => updateUser.mutateAsync({ id, input: changes }).then(() => undefined)}
+          />
         </>
       )}
     </QueryState>

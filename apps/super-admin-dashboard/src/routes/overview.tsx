@@ -6,9 +6,8 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { PageHeader, KpiStrip, type Kpi } from '@/components/display/PageHeader';
 import { DateRangePicker } from '@/components/display/DateRangePicker';
-import { ErrorState, NotAuthorized, NotAvailableYet } from '@/components/display/States';
+import { ErrorState, NotAuthorized } from '@/components/display/States';
 import { compact, shortDate } from '@/lib/format';
-import { isNotAvailable } from '@/lib/errors';
 import { percentChange, previousRange, resolveRange } from '@/lib/date-range';
 import { usePlatformAnalytics, useAuditLogs } from '@/services/hooks';
 import type { AuditLogEntry, PlatformAnalytics } from '@/services/types';
@@ -26,7 +25,7 @@ const sum = (series: Series | undefined, metric: Metric) => (series ?? []).reduc
 
 const auditColumns: Column<AuditLogEntry>[] = [
   { key: 'action', label: 'Action', render: (row) => row.action.replaceAll('.', ' ') },
-  { key: 'actor', label: 'Actor', render: (row) => row.actor.fullName },
+  { key: 'actor', label: 'Actor', render: (row) => row.actor?.fullName ?? 'Deleted account' },
   { key: 'created_at', label: 'When', render: (row) => shortDate(row.created_at) },
 ];
 
@@ -65,7 +64,6 @@ export function Overview() {
   const analyticsError = analytics.error as (Error & { status?: number }) | null;
   let analyticsBlock;
   if (analyticsError?.status === 403) analyticsBlock = <NotAuthorized />;
-  else if (isNotAvailable(analyticsError)) analyticsBlock = <NotAvailableYet section="platform analytics" />;
   else if (analyticsError && !data) analyticsBlock = <ErrorState message={analyticsError.message} retry={() => void analytics.refetch()} />;
 
   return (

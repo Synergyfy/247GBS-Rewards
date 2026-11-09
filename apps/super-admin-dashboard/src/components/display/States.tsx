@@ -1,7 +1,6 @@
 import { AlertCircle, ShieldAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { Callout } from '@/components/display/Callout';
 import { statusFor, TONE_CLASSES } from '@/lib/status';
 import { cn } from '@/lib/utils';
 
@@ -55,14 +54,5 @@ export function NotAuthorized() {
       <h3 className="text-sm font-semibold text-foreground">Not authorized</h3>
       <div>Your account does not have permission to view this section.</div>
     </div>
-  );
-}
-
-export function NotAvailableYet({ section }: { section?: string }) {
-  return (
-    <Callout tone="warning">
-      <strong className="font-semibold">{section ?? 'This section'} isn’t available yet.</strong> The backend endpoint is still being
-      implemented. Existing dashboard data remains available in mock mode.
-    </Callout>
   );
 }

@@ -5,13 +5,31 @@ import { daysIn, resolveRange } from '@/lib/date-range';
 import type { SuperAdminApi } from '../api';
 import { createFixtures } from './fixtures';
 import type {
-  AuditListParams, AuditLogEntry, Business, BusinessCreateInput, BusinessListParams,
+  AuditListParams, AuditLogEntry, Business, BusinessCreateInput, BusinessListParams, CampaignCode, CampaignCodeKind,
   CampaignAnalytics, CampaignListParams, Customer, CustomerListParams, CustomerRow, ListParams, Paginated,
   PlatformAnalytics, PointsAdjustmentInput, PointsLedgerEntry,
   RedemptionListParams, User, UserAnalytics, UserListParams, UserRow,
 } from '../types';
 
 const store = createFixtures();
+const codeKinds: CampaignCodeKind[] = ['point_code', 'reward_code', 'reward_number', 'customer_number'];
+// A few issued codes per campaign and kind, shaped like GET campaigns/:id/codes rows
+let codes: Array<CampaignCode & { campaignId: string }> = store.campaigns.flatMap((campaign, c) => codeKinds.flatMap((kind, k) => Array.from({ length: 3 }, (_, i) => {
+  const staffMember = store.staff.find((member) => member.business?.id === campaign.business?.id);
+  const customer = store.customers.find((row) => row.campaign?.id === campaign.id);
+  const reward = campaign.rewards?.[0];
+  const isCode = kind === 'point_code' || kind === 'reward_code';
+  return {
+    id: crypto.randomUUID(), campaignId: campaign.id, kind,
+    created_at: new Date(Date.now() - (c * 7 + k * 3 + i) * 3600000).toISOString(),
+    code: `${kind.split('_').map((part) => part[0]!.toUpperCase()).join('')}-${String(1000 + c * 31 + k * 7 + i)}`,
+    expiry: isCode ? new Date(Date.now() + (i + 1) * 86400000).toISOString() : null,
+    points: kind === 'point_code' ? 10 * (i + 1) : null,
+    staff: isCode && staffMember ? { id: staffMember.id, label: staffMember.name } : null,
+    customer: !isCode && customer ? { id: customer.id, label: `${customer.firstName} ${customer.lastName}` } : null,
+    reward: kind === 'reward_code' && reward ? { id: reward.id, label: reward.title } : null,
+  };
+})));
 const actor = { id: '00000000-0000-4000-8000-999999999999', fullName: 'Super Admin', email: 'super@247gbs.test' };
 const pause = async () => {
   await new Promise((resolve) => window.setTimeout(resolve, 330 + Math.random() * 230));
@@ -134,6 +152,7 @@ export const mockApi: SuperAdminApi = {
   async listCampaigns(params: CampaignListParams) {
     await pause(); let rows = [...store.campaigns];
     if (params.businessId) rows = rows.filter((campaign) => campaign.business?.id === params.businessId);
+    if (params.userId) rows = rows.filter((campaign) => campaign.business?.user?.id === params.userId);
     if (params.type) rows = rows.filter((campaign) => campaign.type === params.type);
     if (params.active !== undefined) rows = rows.filter((campaign) => campaign.isActive === params.active);
     return page(rows, params);
@@ -142,9 +161,21 @@ export const mockApi: SuperAdminApi = {
   async setCampaignStatus(id, isActive, reason) {
     await pause(); const campaign = required(store.campaigns, (item) => item.id === id, 'Campaign'); campaign.isActive = isActive; record('campaign.status_changed', 'campaign', id, { isActive, reason }); return campaign;
   },
+  async listCampaignCodes(id, params) {
+    await pause(); required(store.campaigns, (item) => item.id === id, 'Campaign');
+    const kind = params.kind ?? 'point_code';
+    const rows: CampaignCode[] = codes.filter((row) => row.campaignId === id && row.kind === kind);
+    return page(rows, { sort: 'created_at', order: 'DESC', ...params });
+  },
   async userAnalytics(id): Promise<UserAnalytics> {
     await pause(); const businesses = store.businesses.filter((business) => business.user?.id === id);
     const campaigns = store.campaigns.filter((campaign) => businesses.some((business) => business.id === campaign.business?.id));
+    const customers = store.customers.filter((customer) => campaigns.some((campaign) => campaign.id === customer.campaign?.id));
+    return { totalCampaigns: campaigns.length, activeCampaigns: campaigns.filter((campaign) => campaign.isActive).length, inactiveCampaigns: campaigns.filter((campaign) => !campaign.isActive).length, totalCustomers: customers.length, totalPointsIssued: customers.reduce((sum, customer) => sum + (customer.balance ?? 0), 0), totalRewardsRedeemed: store.redemptions.filter((redeem) => campaigns.some((campaign) => campaign.id === redeem.campaign?.id)).length };
+  },
+  async businessAnalytics(id): Promise<UserAnalytics> {
+    await pause(); required(store.businesses, (item) => item.id === id, 'Business');
+    const campaigns = store.campaigns.filter((campaign) => campaign.business?.id === id);
     const customers = store.customers.filter((customer) => campaigns.some((campaign) => campaign.id === customer.campaign?.id));
     return { totalCampaigns: campaigns.length, activeCampaigns: campaigns.filter((campaign) => campaign.isActive).length, inactiveCampaigns: campaigns.filter((campaign) => !campaign.isActive).length, totalCustomers: customers.length, totalPointsIssued: customers.reduce((sum, customer) => sum + (customer.balance ?? 0), 0), totalRewardsRedeemed: store.redemptions.filter((redeem) => campaigns.some((campaign) => campaign.id === redeem.campaign?.id)).length };
   },
@@ -188,10 +219,13 @@ export const mockApi: SuperAdminApi = {
     if (params.customerId) rows = rows.filter((entry) => entry.customer?.id === params.customerId);
     return page(rows, params);
   },
-  async revokeCode(id) { await pause(); record('code.revoked', 'code', id, null); return { success: true }; },
+  async revokeCode(id, reason) {
+    await pause(); const code = required(codes, (row) => row.id === id, 'Code'); codes = codes.filter((row) => row.id !== id);
+    record('code.revoked', 'code', id, { code: code.code, kind: code.kind, reason, note: reason ?? 'Code revoked' }); return { success: true };
+  },
   async listAuditLogs(params: AuditListParams) {
     await pause(); let rows = [...store.audit];
-    if (params.actorId) rows = rows.filter((entry) => entry.actor.id === params.actorId);
+    if (params.actorId) rows = rows.filter((entry) => entry.actor?.id === params.actorId);
     if (params.targetType) rows = rows.filter((entry) => entry.targetType === params.targetType);
     if (params.targetId) rows = rows.filter((entry) => entry.targetId === params.targetId);
     return page(rows, params);

@@ -18,7 +18,7 @@ export function AuditLogList() {
     {
       key: 'actor',
       label: 'Actor',
-      render: (row) => <span title={row.actor.email}>{row.actor.fullName}</span>,
+      render: (row) => (row.actor ? <span title={row.actor.email}>{row.actor.fullName}</span> : <span className="text-muted-foreground">Deleted account</span>),
     },
     { key: 'action', sortable: true, label: 'Action', render: (row) => row.action.replaceAll('.', ' ') },
     {

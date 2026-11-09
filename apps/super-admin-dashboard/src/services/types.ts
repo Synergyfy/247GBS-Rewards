@@ -59,7 +59,6 @@ export interface CustomerRow {
 export interface CustomerProfile extends CustomerRow { ledger: PointsLedgerEntry[]; redemptions: Redemption[]; }
 export interface PointsLedgerEntry extends Base { points: number; description: string; campaign?: Campaign; customer?: Customer; }
 export interface Redemption extends Base { description: string; uniqueCode: string; campaign?: Campaign; customer?: Customer; reward?: Reward; }
-export interface GeneratedCode extends Base { expiry: string; points: number; code: string; type: string; staff?: Staff | null; }
 export interface ActivityPoint { date: string; count: number; }
 export interface UserAnalytics {
   totalCampaigns: number; activeCampaigns: number; inactiveCampaigns: number;
@@ -82,7 +81,8 @@ export interface PlatformAnalytics {
   topBusinesses: { businessId: string; name: string; ownerName: string; customers: number; pointsIssued: number; }[];
 }
 export interface AuditLogEntry {
-  id: string; created_at: string; actor: Pick<User, 'id' | 'fullName' | 'email'>;
+  id: string; created_at: string; /** Null once the acting account has been deleted. */
+  actor: Pick<User, 'id' | 'fullName' | 'email'> | null;
   action: string; targetType: 'user' | 'business' | 'campaign' | 'staff' | 'customer' | 'code';
   targetId: string; payload: Record<string, unknown> | null; ip: string | null;
 }
@@ -91,9 +91,25 @@ export interface UserListParams extends ListParams {
   role?: Role; signupSource?: SignupSource; isActive?: boolean; createdFrom?: string; createdTo?: string;
 }
 export interface BusinessListParams extends ListParams { userId?: string; }
-export interface CampaignListParams extends ListParams { businessId?: string; type?: CampaignType; active?: boolean; }
+export interface CampaignListParams extends ListParams { businessId?: string; userId?: string; type?: CampaignType; active?: boolean; }
+export type CampaignCodeKind = 'point_code' | 'reward_code' | 'reward_number' | 'customer_number';
+export interface CampaignCodeListParams extends ListParams { kind?: CampaignCodeKind; }
+/** A code or number issued in a campaign; any row can be revoked with DELETE codes/:id. */
+export interface CampaignCode {
+  id: string; created_at: string; kind: CampaignCodeKind; code: string;
+  expiry: string | null; points: number | null;
+  staff: { id: string; label: string } | null;
+  customer: { id: string; label: string } | null;
+  reward: { id: string; label: string } | null;
+}
 export interface CustomerListParams extends ListParams { campaignId?: string; businessId?: string; }
 export interface RedemptionListParams extends ListParams { campaignId?: string; customerId?: string; from?: string; to?: string; }
 export interface AuditListParams extends ListParams { actorId?: string; targetType?: AuditLogEntry['targetType']; targetId?: string; from?: string; to?: string; }
 export interface BusinessCreateInput { name: string; email: string; phoneNumber: string; website?: string; logo?: string; address?: Partial<Address>; socials?: Partial<Socials>; links?: Array<Pick<Link, 'url' | 'text'>>; }
+export interface BusinessUpdateInput {
+  name?: string; email?: string; phoneNumber?: string; website?: string | null; logo?: string | null;
+  /** Sent whole: every address column is required once an address exists. */
+  address?: Pick<Address, 'street' | 'postalCode' | 'city' | 'state'>;
+}
+export type StaffUpdateInput = Partial<Pick<Staff, 'isActive' | 'name' | 'email'>>;
 export interface PointsAdjustmentInput { campaignId: string; points: number; reason: string; }

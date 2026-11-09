@@ -1,12 +1,5 @@
 import type { ApiError } from '@/services/types';
 
-export class NotImplementedError extends Error {
-  readonly status = 501;
-  constructor(message = 'This API section is not available yet. The backend endpoint is still being implemented.') {
-    super(message);
-    this.name = 'NotImplementedError';
-  }
-}
 export function normalizeApiError(value: unknown): ApiError {
   if (value && typeof value === 'object' && 'response' in value) {
     const response = (value as { response?: { status?: number; data?: unknown } }).response;
@@ -20,7 +13,4 @@ export function normalizeApiError(value: unknown): ApiError {
   }
   if (value instanceof Error) return { status: 0, message: value.message };
   return { status: 500, message: 'An unexpected error occurred.' };
-}
-export function isNotAvailable(error: unknown): boolean {
-  return error instanceof NotImplementedError || (error instanceof Error && error.name === 'NotImplementedError');
 }

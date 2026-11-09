@@ -7,10 +7,12 @@ export const queryKeys = {
   business: (id: string) => ['business', id] as const,
   campaigns: (params: unknown) => ['campaigns', params] as const,
   campaign: (id: string) => ['campaign', id] as const,
+  campaignCodes: (id: string, params: unknown) => ['campaign-codes', id, params] as const,
   customers: (params: unknown) => ['customers', params] as const,
   customer: (id: string) => ['customer', id] as const,
   redemptions: (params: unknown) => ['redemptions', params] as const,
   audit: (params: unknown) => ['audit', params] as const,
   adminAnalytics: (id: string) => ['user-analytics', id] as const,
+  businessAnalytics: (id: string) => ['business-analytics', id] as const,
   campaignAnalytics: (id: string) => ['campaign-analytics', id] as const,
 };

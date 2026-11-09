@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { ExternalLink, Power } from 'lucide-react';
+import { Ban, ExternalLink, Power, Search } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { PageHeader, KpiStrip } from '@/components/display/PageHeader';
 import { QueryState } from '@/components/display/QueryState';
@@ -10,11 +10,15 @@ import { Properties } from '@/components/display/Properties';
 import { DetailTabs } from '@/components/display/DetailTabs';
 import { DataTable, type Column } from '@/components/data/DataTable';
 import { Switch } from '@/components/ui/switch';
-import { useCampaign, useCampaignAnalytics, useCustomers, useRedemptions, useSetCampaignStatus } from '@/services/hooks';
+import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
+import { ConfirmActionDialog } from '@/components/dialogs/ConfirmActionDialog';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useCampaign, useCampaignAnalytics, useCampaignCodes, useCustomers, useRedemptions, useRevokeCode, useSetCampaignStatus } from '@/services/hooks';
 import { compact, shortDate } from '@/lib/format';
 import { appEnv } from '@/lib/env';
 import { useBreadcrumbs } from '@/lib/breadcrumb-context';
-import type { ActivityPoint, Campaign, CustomerRow, Redemption, Reward } from '@/services/types';
+import type { ActivityPoint, Campaign, CampaignCode, CampaignCodeKind, CustomerRow, Redemption, Reward } from '@/services/types';
 
 const rewardColumns: Column<Reward>[] = [
   { key: 'title', label: 'Reward', render: (row) => row.title },
@@ -147,6 +151,117 @@ function RedemptionsTab({ campaignId }: { campaignId: string }) {
   );
 }
 
+const CODE_KINDS: Array<{ value: CampaignCodeKind; label: string }> = [
+  { value: 'point_code', label: 'Point codes (staff)' },
+  { value: 'reward_code', label: 'Reward codes (staff)' },
+  { value: 'reward_number', label: 'Reward numbers (customer)' },
+  { value: 'customer_number', label: 'Customer numbers' },
+];
+
+/** Issued codes and numbers, one kind at a time; any of them can be revoked. */
+function CodesTab({ campaignId }: { campaignId: string }) {
+  const { page, limit, paging } = useCampaignPage();
+  const [kind, setKind] = useState<CampaignCodeKind>('point_code');
+  const [search, setSearch] = useState('');
+  const debounced = useDebouncedValue(search.trim());
+  const query = useCampaignCodes(campaignId, { kind, search: debounced || undefined, page, limit });
+  const revoke = useRevokeCode(campaignId);
+  const [pending, setPending] = useState<CampaignCode | null>(null);
+  const isCode = kind === 'point_code' || kind === 'reward_code';
+  const columns: Column<CampaignCode>[] = [
+    { key: 'code', label: 'Code', render: (row) => <span className="font-mono tabular-nums">{row.code}</span> },
+    ...(isCode
+      ? [
+          { key: 'staff', label: 'Issued by', render: (row: CampaignCode) => row.staff?.label ?? '—' },
+          kind === 'point_code'
+            ? { key: 'points', label: 'Points', render: (row: CampaignCode) => <span className="tabular-nums">{row.points ?? '—'}</span> }
+            : { key: 'reward', label: 'Reward', render: (row: CampaignCode) => row.reward?.label ?? '—' },
+          {
+            key: 'expiry',
+            label: 'Expires',
+            render: (row: CampaignCode) => {
+              if (!row.expiry) return '—';
+              const expired = new Date(row.expiry).getTime() < Date.now();
+              return <span className={expired ? 'text-muted-foreground' : undefined}>{shortDate(row.expiry)}{expired ? ' (expired)' : ''}</span>;
+            },
+          },
+        ]
+      : [
+          {
+            key: 'customer',
+            label: 'Customer',
+            render: (row: CampaignCode) =>
+              row.customer ? (
+                <Link className="cell-link" to={`/customers/${row.customer.id}`}>
+                  {row.customer.label}
+                </Link>
+              ) : (
+                '—'
+              ),
+          },
+        ]),
+    { key: 'created_at', label: 'Issued', render: (row) => shortDate(row.created_at) },
+  ];
+  return (
+    <>
+      <div className="toolbar" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="toolbar-left flex-wrap">
+          <NativeSelect
+            aria-label="Code type"
+            value={kind}
+            onChange={(event) => {
+              setKind(event.target.value as CampaignCodeKind);
+              paging.onPageChange(1);
+            }}
+          >
+            {CODE_KINDS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </NativeSelect>
+          <label className="relative">
+            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              aria-label="Search codes"
+              className="pl-8"
+              placeholder={isCode ? 'Search code…' : 'Search code or email…'}
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                paging.onPageChange(1);
+              }}
+            />
+          </label>
+        </div>
+      </div>
+      <QueryState loading={query.isLoading} error={query.error as Error | null} retry={() => void query.refetch()} section="codes">
+        <DataTable
+          columns={columns}
+          rows={query.data?.data ?? []}
+          rowId={(row) => row.id}
+          total={query.data?.total ?? 0}
+          emptyTitle="No codes of this type"
+          loading={query.isFetching}
+          rowActions={(row) => [{ label: 'Revoke', icon: <Ban />, destructive: true, onSelect: () => setPending(row) }]}
+          {...paging}
+        />
+      </QueryState>
+      <ConfirmActionDialog
+        open={Boolean(pending)}
+        onOpenChange={(open) => !open && setPending(null)}
+        title="Revoke code"
+        description={pending ? `“${pending.code}” stops working immediately and is removed. This cannot be undone.` : ''}
+        confirmLabel="Revoke code"
+        onConfirm={(reason) => {
+          if (pending) revoke.mutate({ id: pending.id, reason });
+          setPending(null);
+        }}
+      />
+    </>
+  );
+}
+
 /** §9B Settings: earn/redeem flags as a read-only 2×4 matrix of switches. */
 function SettingsMatrix({ campaign }: { campaign: Campaign }) {
   const rows: Array<[string, Array<[string, boolean]>]> = [
@@ -274,6 +389,7 @@ export function CampaignDetail() {
                   },
                   { value: 'customers', label: 'Customers', content: <CustomersTab campaignId={campaign.id} /> },
                   { value: 'redemptions', label: 'Redemptions', content: <RedemptionsTab campaignId={campaign.id} /> },
+                  { value: 'codes', label: 'Codes', content: <CodesTab campaignId={campaign.id} /> },
                   { value: 'settings', label: 'Settings', content: <SettingsMatrix campaign={campaign} /> },
                 ]}
               />
