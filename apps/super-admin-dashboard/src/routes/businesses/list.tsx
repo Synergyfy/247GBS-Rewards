@@ -1,4 +1,3 @@
-import { NativeSelect } from '@/components/ui/native-select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -13,7 +12,8 @@ import { QueryState } from '@/components/display/QueryState';
 import { useUrlState } from '@/hooks/useUrlState';
 import { shortDate } from '@/lib/format';
 import { superAdminApi } from '@/services';
-import { useAdmins, useBusinesses } from '@/services/hooks';
+import { useBusinesses } from '@/services/hooks';
+import { AdminPicker } from '@/components/features/admins/AdminPicker';
 import type { Business } from '@/services/types';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
@@ -23,7 +23,6 @@ export function BusinessesList() {
   const navigate = useNavigate();
   const ownerParam = state.params.get('ownerId') ?? '';
   const query = useBusinesses({ ...state.listParams, userId: ownerParam || undefined });
-  const admins = useAdmins({ page: 1, limit: 100 });
   const [createOpen, setCreateOpen] = useState(Boolean(ownerParam));
   const [ownerId, setOwnerId] = useState(ownerParam);
   const [busy, setBusy] = useState(false);
@@ -36,10 +35,13 @@ export function BusinessesList() {
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const selectedOwner = String(form.get('ownerId'));
+    if (!ownerId) {
+      toast.error('Select the admin who owns this business.');
+      return;
+    }
     setBusy(true);
     try {
-      const business = await superAdminApi.createBusiness(selectedOwner, {
+      const business = await superAdminApi.createBusiness(ownerId, {
         name: String(form.get('name')),
         email: String(form.get('email')),
         phoneNumber: String(form.get('phoneNumber')),
@@ -149,21 +151,7 @@ export function BusinessesList() {
           <form onSubmit={create}>
             <div className="form-field">
               <label htmlFor="business-owner">Owner admin</label>
-              <NativeSelect
-                id="business-owner"
-                name="ownerId"
-                
-                value={ownerId}
-                onChange={(event) => setOwnerId(event.target.value)}
-                required
-              >
-                <option value="">Select an admin</option>
-                {(admins.data?.data ?? []).map((admin) => (
-                  <option key={admin.id} value={admin.id}>
-                    {admin.fullName} · {admin.email}
-                  </option>
-                ))}
-              </NativeSelect>
+              <AdminPicker id="business-owner" value={ownerId} onChange={setOwnerId} />
             </div>
             <div className="form-field">
               <label htmlFor="business-name">Business name</label>
@@ -185,7 +173,7 @@ export function BusinessesList() {
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" variant="default" disabled={busy}>
+              <Button type="submit" variant="default" disabled={busy || !ownerId}>
                 {busy ? 'Creating…' : 'Create business'}
               </Button>
             </div>
