@@ -34,10 +34,12 @@ export function useUrlState() {
   }, [search, urlSearch, setParams]);
 
   const page = Math.max(1, Number(params.get('page') ?? 1) || 1);
-  const limit = Math.max(1, Number(params.get('limit') ?? 25) || 25);
+  // The API rejects limit > 100
+  const limit = Math.min(100, Math.max(1, Number(params.get('limit') ?? 25) || 25));
   const sortKey = params.get('sort') ?? undefined;
   const order: 'ASC' | 'DESC' = params.get('order') === 'DESC' ? 'DESC' : 'ASC';
-  const listParams: ListParams = { page, limit, search: urlSearch || undefined, sort: sortKey, order };
+  // Without a sort column, leave order to the API (newest first)
+  const listParams: ListParams = { page, limit, search: urlSearch || undefined, sort: sortKey, order: sortKey ? order : undefined };
 
   function setParam(key: string, value: string | undefined) {
     setParams((current) => {

@@ -19,7 +19,7 @@ VITE_WEB_APP_URL=http://localhost:8078
 VITE_USE_MOCKS=false
 ```
 
-For standalone mock development, use `VITE_USE_MOCKS=true`. The mock credential is `super@247gbs.test` / `password`; `admin@247gbs.test` / `password` is rejected. `VITE_MOCK_ERROR=403` or `500` can force the matching mock error state. `VITE_*` variables are compiled into the browser bundle: set production values at the hosting provider before building and do not place secrets in them.
+Mocks are opt-in: only `VITE_USE_MOCKS=true` enables them, and any other build talks to the real API and leaves the mock API and fixtures out of the bundle. For standalone mock development, use `VITE_USE_MOCKS=true`. The mock credential is `super@247gbs.test` / `password`; `admin@247gbs.test` / `password` is rejected. `VITE_MOCK_ERROR=403` or `500` can force the matching mock error state. `VITE_*` variables are compiled into the browser bundle: set production values at the hosting provider before building and do not place secrets in them.
 
 ## Backend prerequisites
 

@@ -262,11 +262,19 @@ export function BusinessDetail() {
             requiredText={business.name}
             confirmLabel="Delete business"
             onConfirm={(reason) =>
-              void superAdminApi.deleteBusiness(id, reason).then(async () => {
-                await client.invalidateQueries({ queryKey: ['businesses'] });
-                toast.success('Business and related records deleted');
-                navigate('/businesses');
-              })
+              void superAdminApi
+                .deleteBusiness(id, reason)
+                .then(async () => {
+                  await Promise.all([
+                    client.invalidateQueries({ queryKey: ['businesses'] }),
+                    client.invalidateQueries({ queryKey: ['campaigns'] }),
+                    client.invalidateQueries({ queryKey: ['customers'] }),
+                    client.invalidateQueries({ queryKey: ['user'] }),
+                  ]);
+                  toast.success('Business and related records deleted');
+                  navigate('/businesses');
+                })
+                .catch((error: unknown) => toast.error(error instanceof Error ? error.message : 'Could not delete business.'))
             }
           />
         </>

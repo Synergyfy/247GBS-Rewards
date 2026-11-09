@@ -13,6 +13,9 @@ export default defineConfig({
   preview: { host: '0.0.0.0', port: 8079, strictPort: true },
   build: {
     rollupOptions: {
+      // The mock API builds its fixtures at import time; marking it side-effect free lets real builds
+      // (VITE_USE_MOCKS unset or not 'true') drop it entirely instead of shipping fake data
+      treeshake: { moduleSideEffects: (id) => !/[\\/]src[\\/]services[\\/]mock[\\/]/.test(id) },
       output: {
         // Long-lived vendor chunks: cached across app deploys and kept out of the app entry chunk
         manualChunks(id) {

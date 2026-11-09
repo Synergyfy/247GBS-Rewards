@@ -27,7 +27,12 @@ export function LoginPage() {
       const next = params.get('next');
       navigate(next?.startsWith('/') && !next.startsWith('//') ? next : '/', { replace: true });
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Unable to sign in. Try again.');
+      // The API answers 400 (wrong password) or 404 (unknown email); don't reveal which accounts exist
+      const status = (cause as { status?: number } | null)?.status;
+      if (status === 400 || status === 401 || status === 404) setError('Invalid email or password.');
+      // 403: correct credentials on a deactivated account; the API message says so
+      else if (status === 403 && cause instanceof Error) setError(cause.message);
+      else setError('Unable to sign in. Try again.');
     } finally { setPending(false); }
   }
   return <main className="login-page"><section className="login-card"><div className="brand"><span className="brand-mark">247</span><span>247GBS Rewards<span className="brand-sub">SUPER ADMIN</span></span></div><h1>Sign in</h1><p>Use your super-admin account to continue.</p><form onSubmit={submit}>

@@ -4,6 +4,8 @@ import { superAdminApi } from './index';
 import { queryKeys } from './query-keys';
 import type { ListParams, UserListParams, BusinessListParams, CampaignListParams, CustomerListParams, RedemptionListParams, AuditListParams, PointsAdjustmentInput, CampaignCodeListParams, BusinessUpdateInput, StaffUpdateInput } from './types';
 
+const errorMessage = (error: unknown, fallback: string) => (error instanceof Error && error.message ? error.message : fallback);
+
 export const usePlatformAnalytics = (from?: string, to?: string) => useQuery({ queryKey: queryKeys.analytics(from, to), queryFn: () => superAdminApi.platformAnalytics(from, to) });
 export const useAdmins = (params: ListParams) => useQuery({ queryKey: queryKeys.admins(params), queryFn: () => superAdminApi.listAdmins(params), placeholderData: keepPreviousData });
 export const useUsers = (params: UserListParams) => useQuery({ queryKey: queryKeys.users(params), queryFn: () => superAdminApi.listUsers(params), placeholderData: keepPreviousData });
@@ -59,11 +61,12 @@ export function useAdjustPoints() {
   const client = useQueryClient();
   return useMutation({ mutationFn: ({ id, input }: { id: string; input: PointsAdjustmentInput }) => superAdminApi.adjustCustomerPoints(id, input), onSuccess: async () => { await Promise.all([client.invalidateQueries({ queryKey: ['customer'] }), client.invalidateQueries({ queryKey: ['customers'] })]); toast.success('Points adjustment recorded'); }, onError: () => toast.error('Could not adjust points.') });
 }
+/** A seasonal campaign is only effectively active inside its season, whatever its stored flag. */
+export const SEASON_WARNING = 'Saved, but the campaign stays inactive: seasonal campaigns only run during their season.';
 export function useSetCampaignStatus() {
   const client = useQueryClient();
-  return useMutation({ mutationFn: ({ id, active, reason }: { id: string; active: boolean; reason?: string }) => superAdminApi.setCampaignStatus(id, active, reason), onSuccess: async (_, variables) => { await Promise.all([client.invalidateQueries({ queryKey: ['campaigns'] }), client.invalidateQueries({ queryKey: queryKeys.campaign(variables.id) })]); toast.success('Campaign status updated'); }, onError: () => toast.error('Could not update campaign status.') });
+  return useMutation({ mutationFn: ({ id, active, reason }: { id: string; active: boolean; reason?: string }) => superAdminApi.setCampaignStatus(id, active, reason), onSuccess: async (campaign, variables) => { await Promise.all([client.invalidateQueries({ queryKey: ['campaigns'] }), client.invalidateQueries({ queryKey: queryKeys.campaign(variables.id) }), client.invalidateQueries({ queryKey: queryKeys.campaignAnalytics(variables.id) })]); if (variables.active && !campaign.isActive) toast.warning(SEASON_WARNING); else toast.success(variables.active ? 'Campaign activated' : 'Campaign deactivated'); }, onError: (error) => toast.error(errorMessage(error, 'Could not update campaign status.')) });
 }
-const errorMessage = (error: unknown, fallback: string) => (error instanceof Error && error.message ? error.message : fallback);
 export function useUpdateUser() {
   const client = useQueryClient();
   return useMutation({ mutationFn: ({ id, input }: { id: string; input: Parameters<typeof superAdminApi.updateUser>[1] }) => superAdminApi.updateUser(id, input), onSuccess: async (_, variables) => { await Promise.all([client.invalidateQueries({ queryKey: queryKeys.user(variables.id) }), client.invalidateQueries({ queryKey: ['admins'] }), client.invalidateQueries({ queryKey: ['users'] })]); toast.success('Admin details updated'); }, onError: (error) => toast.error(errorMessage(error, 'Could not update admin.')) });

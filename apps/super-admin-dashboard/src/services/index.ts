@@ -1,7 +1,7 @@
-import { appEnv } from '@/lib/env';
 import type { SuperAdminApi } from './api';
 import { realApi } from './client';
 import { mockApi } from './mock/mock-api';
 
 export type { SuperAdminApi } from './api';
-export const superAdminApi: SuperAdminApi = appEnv.USE_MOCKS ? mockApi : realApi;
+// Compared inline (not via appEnv) so Vite folds the condition and leaves the mock fixtures out of real builds
+export const superAdminApi: SuperAdminApi = import.meta.env.VITE_USE_MOCKS === 'true' ? mockApi : realApi;

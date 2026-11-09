@@ -69,8 +69,9 @@ export function useAdminActions({ afterDelete }: { afterDelete?: () => void } = 
           },
         },
       });
-    } catch {
-      toast.error('Could not update account status.');
+    } catch (error) {
+      // e.g. the API refuses to let a super admin deactivate their own account
+      toast.error(error instanceof Error && error.message ? error.message : 'Could not update account status.');
     }
   }
 
