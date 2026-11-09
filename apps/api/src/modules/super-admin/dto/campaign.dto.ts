@@ -14,6 +14,13 @@ export class CampaignListQueryDto extends PaginationQueryDto {
   @IsOptional()
   businessId?: string;
 
+  @ApiPropertyOptional({
+    description: 'Only campaigns of businesses owned by this user',
+  })
+  @IsUUID()
+  @IsOptional()
+  userId?: string;
+
   @ApiPropertyOptional({ enum: CampaignType })
   @IsEnum(CampaignType)
   @IsOptional()

@@ -55,6 +55,11 @@ import { RedemptionListQueryDto } from './dto/redemption-query.dto.js';
 import { AuditLogListQueryDto } from './dto/audit-log-query.dto.js';
 import { AnalyticsRangeQueryDto } from './dto/analytics-query.dto.js';
 import {
+  CampaignCodeListQueryDto,
+  PaginatedCampaignCodesResponseDto,
+  RevokeCodeDto,
+} from './dto/code-query.dto.js';
+import {
   CampaignAnalyticsResponseDto,
   CustomerProfileResponseDto,
   PaginatedAdminsResponseDto,
@@ -400,6 +405,21 @@ export class SuperAdminController {
     return this.superAdminService.getCampaign(params.id);
   }
 
+  @Get('campaigns/:id/codes')
+  @ApiOperation({
+    summary: 'List codes issued in a campaign',
+    description:
+      'One kind at a time: staff point codes, staff reward codes, reward numbers or customer numbers. Any row can be revoked with DELETE codes/:id.',
+  })
+  @ApiOkResponse({ type: PaginatedCampaignCodesResponseDto })
+  @ApiNotFoundResponse({ description: 'Campaign not found.' })
+  async listCampaignCodes(
+    @Param() params: IdParamDto,
+    @Query() query: CampaignCodeListQueryDto,
+  ): Promise<PaginatedCampaignCodesResponseDto> {
+    return this.superAdminService.listCampaignCodes(params.id, query);
+  }
+
   @Patch('campaigns/:id/status')
   @ApiOperation({
     summary: 'Activate or deactivate a campaign',
@@ -447,6 +467,20 @@ export class SuperAdminController {
     @Param() params: IdParamDto,
   ): Promise<UserAnalyticsResponseDto> {
     return this.superAdminService.getUserAnalytics(params.id);
+  }
+
+  @Get('analytics/business/:id')
+  @ApiOperation({
+    summary: 'Get analytics for one business',
+    description:
+      'Campaign, customer, points-issued and redemption totals across the business campaigns. Cached briefly.',
+  })
+  @ApiOkResponse({ type: UserAnalyticsResponseDto })
+  @ApiNotFoundResponse({ description: 'Business not found.' })
+  async getBusinessAnalytics(
+    @Param() params: IdParamDto,
+  ): Promise<UserAnalyticsResponseDto> {
+    return this.superAdminService.getBusinessAnalytics(params.id);
   }
 
   @Get('analytics/campaign/:id')
@@ -532,12 +566,14 @@ export class SuperAdminController {
   @ApiNotFoundResponse({ description: 'Code not found.' })
   async revokeCode(
     @Param() params: IdParamDto,
+    @Body() dto: RevokeCodeDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<{ success: true }> {
     return this.superAdminService.revokeCode(
       params.id,
       actorId(req),
       clientIp(req),
+      dto.reason,
     );
   }
 

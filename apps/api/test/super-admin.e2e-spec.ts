@@ -121,6 +121,8 @@ describe('Super Admin dashboard API (e2e)', () => {
         '/super-admin/customers/{id}/points-adjustment',
         '/super-admin/redemptions',
         '/super-admin/codes/{id}',
+        '/super-admin/campaigns/{id}/codes',
+        '/super-admin/analytics/business/{id}',
         '/super-admin/audit-logs',
       ];
       for (const path of expectedPaths) {
@@ -447,6 +449,23 @@ describe('Super Admin dashboard API (e2e)', () => {
       expect(ids).not.toContain(IDS.campaignSeasonalExpired);
     });
 
+    it('lists the campaigns of every business an admin owns', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`${base}/campaigns`)
+        .query({ userId: IDS.admin1 })
+        .set(auth(tokens.superAdmin))
+        .expect(200);
+
+      const ids = response.body.data.map((row: { id: string }) => row.id);
+      expect(ids).toEqual(
+        expect.arrayContaining([
+          IDS.campaignPreset,
+          IDS.campaignSeasonalActive,
+        ]),
+      );
+      expect(ids).not.toContain(IDS.campaignSeasonalExpired);
+    });
+
     it('gets a campaign with rewards and owner', async () => {
       const response = await request(app.getHttpServer())
         .get(`${base}/campaigns/${IDS.campaignPreset}`)
@@ -525,6 +544,27 @@ describe('Super Admin dashboard API (e2e)', () => {
       expect(response.body.totalCustomers).toBe(3);
       expect(response.body.totalPointsIssued).toBe(800);
       expect(response.body.totalRewardsRedeemed).toBe(1);
+    });
+
+    it('returns analytics for a business', async () => {
+      const [business, owner] = await Promise.all([
+        request(app.getHttpServer())
+          .get(`${base}/analytics/business/${IDS.business1}`)
+          .set(auth(tokens.superAdmin))
+          .expect(200),
+        request(app.getHttpServer())
+          .get(`${base}/analytics/user/${IDS.admin1}`)
+          .set(auth(tokens.superAdmin))
+          .expect(200),
+      ]);
+      // Maya owns exactly one business, so its footprint equals hers
+      expect(business.body).toEqual(owner.body);
+      expect(business.body.totalPointsIssued).toBeGreaterThan(0);
+
+      await request(app.getHttpServer())
+        .get(`${base}/analytics/business/${IDS.campaignPreset}`)
+        .set(auth(tokens.superAdmin))
+        .expect(404);
     });
 
     it('returns analytics for a campaign', async () => {
@@ -659,9 +699,64 @@ describe('Super Admin dashboard API (e2e)', () => {
       expect(response.body.data[0].customer.email).toBe('sam@test.local');
     });
 
+    it('lists the codes issued in a campaign, one kind at a time', async () => {
+      const expected: Array<[string, string]> = [
+        ['point_code', IDS.pointCode],
+        ['reward_code', IDS.rewardCode],
+        ['reward_number', IDS.rewardCustomerNumber],
+        ['customer_number', IDS.customerNumber],
+      ];
+      for (const [kind, id] of expected) {
+        const response = await request(app.getHttpServer())
+          .get(`${base}/campaigns/${IDS.campaignPreset}/codes`)
+          .query({ kind })
+          .set(auth(tokens.superAdmin))
+          .expect(200);
+        expect(response.body.total).toBe(1);
+        expect(response.body.data[0]).toMatchObject({ id, kind });
+      }
+
+      const pointCodes = await request(app.getHttpServer())
+        .get(`${base}/campaigns/${IDS.campaignPreset}/codes`)
+        .set(auth(tokens.superAdmin))
+        .expect(200);
+      expect(pointCodes.body.data[0].kind).toBe('point_code');
+      expect(pointCodes.body.data[0].staff.id).toBe(IDS.staff1);
+
+      const noMatch = await request(app.getHttpServer())
+        .get(`${base}/campaigns/${IDS.campaignPreset}/codes`)
+        .query({ search: 'does-not-exist' })
+        .set(auth(tokens.superAdmin))
+        .expect(200);
+      expect(noMatch.body.total).toBe(0);
+
+      await request(app.getHttpServer())
+        .get(`${base}/campaigns/${IDS.campaignPreset}/codes`)
+        .query({ kind: 'bogus' })
+        .set(auth(tokens.superAdmin))
+        .expect(400);
+      await request(app.getHttpServer())
+        .get(`${base}/campaigns/${IDS.business1}/codes`)
+        .set(auth(tokens.superAdmin))
+        .expect(404);
+    });
+
+    it('records the revoke reason in the audit log', async () => {
+      await request(app.getHttpServer())
+        .delete(`${base}/codes/${IDS.pointCode}`)
+        .send({ reason: 'Code leaked online' })
+        .set(auth(tokens.superAdmin))
+        .expect(200);
+      const audit = await request(app.getHttpServer())
+        .get(`${base}/audit-logs`)
+        .query({ targetId: IDS.pointCode })
+        .set(auth(tokens.superAdmin))
+        .expect(200);
+      expect(audit.body.data[0].payload.note).toBe('Code leaked online');
+    });
+
     it('revokes every supported code kind', async () => {
       for (const id of [
-        IDS.pointCode,
         IDS.rewardCode,
         IDS.customerNumber,
         IDS.rewardCustomerNumber,

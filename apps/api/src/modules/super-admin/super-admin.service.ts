@@ -57,6 +57,11 @@ import type {
 } from './dto/customer.dto.js';
 import type { RedemptionListQueryDto } from './dto/redemption-query.dto.js';
 import type { AuditLogListQueryDto } from './dto/audit-log-query.dto.js';
+import {
+  CampaignCodeKind,
+  type CampaignCodeListQueryDto,
+  type CampaignCodeRowDto,
+} from './dto/code-query.dto.js';
 import type {
   ActivityPointResponseDto,
   CampaignAnalyticsResponseDto,
@@ -924,6 +929,9 @@ export class SuperAdminService {
         businessId: query.businessId,
       });
     }
+    if (query.userId) {
+      queryBuilder.andWhere('owner.id = :userId', { userId: query.userId });
+    }
     if (query.type) {
       queryBuilder.andWhere('c.type = :type', { type: query.type });
     }
@@ -1196,44 +1204,63 @@ export class SuperAdminService {
         where: { business: { user: { id } } },
         relations: { season: true },
       });
-      const campaignIds = campaigns.map((campaign) => campaign.id);
-      const activeCampaigns = campaigns.filter((campaign) =>
-        this.isCampaignEffectivelyActive(campaign),
-      ).length;
-
-      let totalCustomers = 0;
-      let totalPointsIssued = 0;
-      let totalRewardsRedeemed = 0;
-
-      if (campaignIds.length) {
-        const [customerRows, issuedRows, redemptionRows] = await Promise.all([
-          this.customerRepository.query(
-            `SELECT COUNT(*)::int AS "count" FROM "Customers" WHERE "campaignId" = ANY($1::uuid[])`,
-            [campaignIds],
-          ),
-          this.customerPointRepository.query(
-            `SELECT COALESCE(SUM(points), 0)::int AS "total" FROM "Customer points" WHERE "campaignId" = ANY($1::uuid[]) AND points > 0`,
-            [campaignIds],
-          ),
-          this.customerRewardRepository.query(
-            `SELECT COUNT(*)::int AS "count" FROM "CustomersRewards" WHERE "campaignId" = ANY($1::uuid[])`,
-            [campaignIds],
-          ),
-        ]);
-        totalCustomers = asNumber(customerRows[0]?.count);
-        totalPointsIssued = asNumber(issuedRows[0]?.total);
-        totalRewardsRedeemed = asNumber(redemptionRows[0]?.count);
-      }
-
-      return {
-        totalCampaigns: campaigns.length,
-        activeCampaigns,
-        inactiveCampaigns: campaigns.length - activeCampaigns,
-        totalCustomers,
-        totalPointsIssued,
-        totalRewardsRedeemed,
-      };
+      return this.campaignFootprint(campaigns);
     });
+  }
+
+  async getBusinessAnalytics(id: string): Promise<UserAnalyticsResponseDto> {
+    const cacheKey = `${ANALYTICS_CACHE_PREFIX}business:${id}`;
+    return this.cache.getOrSet(cacheKey, DETAIL_ANALYTICS_TTL_MS, async () => {
+      await this.getOrThrowBusiness(id);
+      const campaigns = await this.campaignRepository.find({
+        where: { business: { id } },
+        relations: { season: true },
+      });
+      return this.campaignFootprint(campaigns);
+    });
+  }
+
+  /** Campaign, customer, points and redemption totals across a set of campaigns. */
+  private async campaignFootprint(
+    campaigns: Campaign[],
+  ): Promise<UserAnalyticsResponseDto> {
+    const campaignIds = campaigns.map((campaign) => campaign.id);
+    const activeCampaigns = campaigns.filter((campaign) =>
+      this.isCampaignEffectivelyActive(campaign),
+    ).length;
+
+    let totalCustomers = 0;
+    let totalPointsIssued = 0;
+    let totalRewardsRedeemed = 0;
+
+    if (campaignIds.length) {
+      const [customerRows, issuedRows, redemptionRows] = await Promise.all([
+        this.customerRepository.query(
+          `SELECT COUNT(*)::int AS "count" FROM "Customers" WHERE "campaignId" = ANY($1::uuid[])`,
+          [campaignIds],
+        ),
+        this.customerPointRepository.query(
+          `SELECT COALESCE(SUM(points), 0)::int AS "total" FROM "Customer points" WHERE "campaignId" = ANY($1::uuid[]) AND points > 0`,
+          [campaignIds],
+        ),
+        this.customerRewardRepository.query(
+          `SELECT COUNT(*)::int AS "count" FROM "CustomersRewards" WHERE "campaignId" = ANY($1::uuid[])`,
+          [campaignIds],
+        ),
+      ]);
+      totalCustomers = asNumber(customerRows[0]?.count);
+      totalPointsIssued = asNumber(issuedRows[0]?.total);
+      totalRewardsRedeemed = asNumber(redemptionRows[0]?.count);
+    }
+
+    return {
+      totalCampaigns: campaigns.length,
+      activeCampaigns,
+      inactiveCampaigns: campaigns.length - activeCampaigns,
+      totalCustomers,
+      totalPointsIssued,
+      totalRewardsRedeemed,
+    };
   }
 
   async getCampaignAnalytics(id: string): Promise<CampaignAnalyticsResponseDto> {
@@ -1638,11 +1665,140 @@ export class SuperAdminService {
     return { data, total, page, limit };
   }
 
+  /**
+   * Codes issued in one campaign, one kind at a time (each kind lives in its own table).
+   * Rows are normalised to CampaignCodeRowDto so the dashboard can revoke any of them
+   * through DELETE codes/:id.
+   */
+  async listCampaignCodes(
+    campaignId: string,
+    query: CampaignCodeListQueryDto,
+  ): Promise<Paginated<CampaignCodeRowDto>> {
+    await this.getOrThrowCampaign(campaignId);
+    const { page, limit, skip } = pagination(query);
+    const kind = query.kind ?? CampaignCodeKind.POINT_CODE;
+    const search = query.search ? `%${escapeLike(query.search)}%` : null;
+    const ascending = query.order === 'ASC' ? 'ASC' : 'DESC';
+    const orderBy = (alias: string) =>
+      query.sort === 'code' ? `${alias}.code` : `${alias}.created_at`;
+    const customerLabel = (customer?: Customer | null) =>
+      customer
+        ? {
+            id: customer.id,
+            label:
+              `${customer.firstName ?? ''} ${customer.lastName ?? ''}`.trim() ||
+              customer.email,
+          }
+        : null;
+    const staffLabel = (staff?: Staff | null) =>
+      staff ? { id: staff.id, label: staff.name } : null;
+    const base = {
+      expiry: null,
+      points: null,
+      staff: null,
+      customer: null,
+      reward: null,
+    };
+
+    switch (kind) {
+      case CampaignCodeKind.POINT_CODE: {
+        const qb = this.generatedStaffCodeRepository
+          .createQueryBuilder('code')
+          .leftJoinAndSelect('code.staff', 'staff')
+          .where('code.campaignId = :campaignId', { campaignId });
+        if (search) qb.andWhere('code.code ILIKE :search', { search });
+        qb.orderBy(orderBy('code'), ascending).skip(skip).take(limit);
+        const [rows, total] = await qb.getManyAndCount();
+        return {
+          data: rows.map((row) => ({
+            ...base,
+            id: row.id,
+            created_at: row.created_at,
+            kind,
+            code: row.code,
+            expiry: row.expiry,
+            points: row.points,
+            staff: staffLabel(row.staff),
+          })),
+          total,
+          page,
+          limit,
+        };
+      }
+      case CampaignCodeKind.REWARD_CODE: {
+        const qb = this.generatedRewardCodeRepository
+          .createQueryBuilder('code')
+          .leftJoinAndSelect('code.staff', 'staff')
+          .leftJoinAndSelect('code.reward', 'reward')
+          .where('code.campaignId = :campaignId', { campaignId });
+        if (search) qb.andWhere('code.code ILIKE :search', { search });
+        qb.orderBy(orderBy('code'), ascending).skip(skip).take(limit);
+        const [rows, total] = await qb.getManyAndCount();
+        return {
+          data: rows.map((row) => ({
+            ...base,
+            id: row.id,
+            created_at: row.created_at,
+            kind,
+            code: row.code,
+            expiry: row.expiry,
+            staff: staffLabel(row.staff),
+            reward: row.reward
+              ? { id: row.reward.id, label: row.reward.title }
+              : null,
+          })),
+          total,
+          page,
+          limit,
+        };
+      }
+      case CampaignCodeKind.REWARD_NUMBER:
+      case CampaignCodeKind.CUSTOMER_NUMBER: {
+        const repository =
+          kind === CampaignCodeKind.REWARD_NUMBER
+            ? this.rewardCustomerNumberRepository
+            : this.customerNumberRepository;
+        const qb = (
+          repository as Repository<RewardCustomerNumber | CustomerNumber>
+        )
+          .createQueryBuilder('code')
+          .leftJoinAndSelect('code.customer', 'customer')
+          .where('code.campaignId = :campaignId', { campaignId });
+        if (search) {
+          qb.andWhere(
+            new Brackets((where) => {
+              where
+                .where('code.code ILIKE :search', { search })
+                .orWhere('customer.email ILIKE :search', { search });
+            }),
+          );
+        }
+        qb.orderBy(orderBy('code'), ascending).skip(skip).take(limit);
+        const [rows, total] = await qb.getManyAndCount();
+        return {
+          data: rows.map((row) => ({
+            ...base,
+            id: row.id,
+            created_at: row.created_at,
+            kind,
+            code: row.code,
+            customer: customerLabel(row.customer),
+          })),
+          total,
+          page,
+          limit,
+        };
+      }
+    }
+  }
+
   async revokeCode(
     id: string,
     actorId?: string,
     ip?: string,
+    reason?: string,
   ): Promise<{ success: true }> {
+    const note = reason?.trim() || 'Code revoked';
     const staffCode = await this.generatedStaffCodeRepository.findOne({
       where: { id },
     });
@@ -1653,7 +1809,7 @@ export class SuperAdminService {
         'code.revoked',
         SuperAdminAuditTargetType.CODE,
         id,
-        { code: staffCode.code, kind: 'point_code', note: 'Code revoked' },
+        { code: staffCode.code, kind: 'point_code', reason: reason?.trim() || null, note },
         ip,
       );
       return { success: true };
@@ -1669,7 +1825,7 @@ export class SuperAdminService {
         'code.revoked',
         SuperAdminAuditTargetType.CODE,
         id,
-        { code: rewardCode.code, kind: 'reward_code', note: 'Code revoked' },
+        { code: rewardCode.code, kind: 'reward_code', reason: reason?.trim() || null, note },
         ip,
       );
       return { success: true };
@@ -1685,7 +1841,7 @@ export class SuperAdminService {
         'code.revoked',
         SuperAdminAuditTargetType.CODE,
         id,
-        { code: rewardNumber.code, kind: 'reward_number', note: 'Code revoked' },
+        { code: rewardNumber.code, kind: 'reward_number', reason: reason?.trim() || null, note },
         ip,
       );
       return { success: true };
@@ -1701,7 +1857,7 @@ export class SuperAdminService {
         'code.revoked',
         SuperAdminAuditTargetType.CODE,
         id,
-        { code: customerNumber.code, kind: 'customer_number', note: 'Code revoked' },
+        { code: customerNumber.code, kind: 'customer_number', reason: reason?.trim() || null, note },
         ip,
       );
       return { success: true };

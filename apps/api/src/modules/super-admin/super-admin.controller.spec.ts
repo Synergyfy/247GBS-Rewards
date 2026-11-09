@@ -44,6 +44,8 @@ describe('SuperAdminController', () => {
       adjustCustomerPoints: jest.fn(),
       listRedemptions: jest.fn(),
       revokeCode: jest.fn(),
+      listCampaignCodes: jest.fn(),
+      getBusinessAnalytics: jest.fn(),
       listAuditLogs: jest.fn(),
     };
 
@@ -290,12 +292,32 @@ describe('SuperAdminController', () => {
 
   it('revokes a code', async () => {
     service.revokeCode.mockResolvedValue({ success: true });
-    await controller.revokeCode({ id: 'code-1' }, request);
+    await controller.revokeCode(
+      { id: 'code-1' },
+      { reason: 'Leaked code' },
+      request,
+    );
     expect(service.revokeCode).toHaveBeenCalledWith(
       'code-1',
       'actor-id',
       '127.0.0.1',
+      'Leaked code',
     );
+  });
+
+  it('returns business analytics', async () => {
+    service.getBusinessAnalytics.mockResolvedValue({ totalCampaigns: 1 });
+    await expect(
+      controller.getBusinessAnalytics({ id: 'business-1' }),
+    ).resolves.toEqual({ totalCampaigns: 1 });
+    expect(service.getBusinessAnalytics).toHaveBeenCalledWith('business-1');
+  });
+
+  it('lists the codes issued in a campaign', async () => {
+    const query = { kind: 'reward_code', page: 1 };
+    service.listCampaignCodes.mockResolvedValue({ data: [], total: 0 });
+    await controller.listCampaignCodes({ id: 'campaign-1' }, query as any);
+    expect(service.listCampaignCodes).toHaveBeenCalledWith('campaign-1', query);
   });
 
   it('lists audit logs', async () => {
